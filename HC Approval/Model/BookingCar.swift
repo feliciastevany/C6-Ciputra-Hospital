@@ -1,0 +1,27 @@
+//
+//  BookingCar.swift
+//  HC Approval
+//
+//  Created by Euginia Gabrielle on 28/08/25.
+//
+
+import Foundation
+
+struct BookingCar: Codable, Identifiable {
+    let bc_id: Int
+    let user_id: Int
+    let driver_id: Int
+    let bc_date: Date
+    let bc_start: String
+    let bc_end: String
+    let bc_from: String
+    let bc_desc: String
+    let bc_people: Int
+    let bc_status: Bool
+    let bc_decline_reason: String
+    let carpool_req: Bool
+    let carpool_desc: String
+    let created_at: Date
+    
+    var id: Int{bc_id}
+}
