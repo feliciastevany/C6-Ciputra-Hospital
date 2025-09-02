@@ -16,7 +16,7 @@ struct ContentView: View {
                     Text("Approvals")
 //                    Label("Home", systemImage: "house.fill")
                 }
-            ApprovalsView()
+            MyBookings()
                 .tabItem {
                     Image(systemName: "text.page")
                     Text("Bookings")

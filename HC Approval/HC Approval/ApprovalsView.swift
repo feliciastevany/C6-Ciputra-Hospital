@@ -11,6 +11,7 @@ struct ApprovalsView: View {
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
+
     @State private var selectedStatus: BookingStatus = .pending
     @State private var selectedType: BookingType = .all
     
@@ -70,6 +71,7 @@ struct ApprovalsView: View {
                             .frame(width: 40, height: 40)
                             .foregroundColor(Color(.systemBlue))
                     }
+                                    .padding(.bottom, 3)
                 }
                 .padding(.top)
                 
@@ -194,6 +196,13 @@ struct ApprovalsView: View {
                 )
             )
         }
+        
+        .padding(14)
+        //    .frame(width: 365)
+        .background(Color(.systemBackground))
+        .cornerRadius(10)
+        //    .shadow(radius: 5, x: 3, y: 3)
+        .padding(.horizontal, 20)
     }
 }
 
