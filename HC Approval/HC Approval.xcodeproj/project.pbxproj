@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2A442ADB2E6089B600314464 /* BookingCarJoined.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A442ADA2E6089AA00314464 /* BookingCarJoined.swift */; };
+		2A442ADD2E6089CA00314464 /* BookingRoomJoined.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */; };
 		BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249B02E5F604D00F92305 /* SupabaseManager.swift */; };
 		BEC249C32E5F614C00F92305 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C22E5F614C00F92305 /* Auth */; };
 		BEC249C52E5F614C00F92305 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C42E5F614C00F92305 /* Functions */; };
@@ -45,6 +47,8 @@
 		2A1D75872E5DC68000414DC8 /* HC Approval.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HC Approval.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A1D75942E5DC68100414DC8 /* HC ApprovalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "HC ApprovalTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A1D759E2E5DC68100414DC8 /* HC ApprovalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "HC ApprovalUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A442ADA2E6089AA00314464 /* BookingCarJoined.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingCarJoined.swift; sourceTree = "<group>"; };
+		2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingRoomJoined.swift; sourceTree = "<group>"; };
 		BEC249B02E5F604D00F92305 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		BEC249DF2E5FF66A00F92305 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		BEC249E12E5FF7AB00F92305 /* Property.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
@@ -142,9 +146,11 @@
 				BEC249E72E602C7F00F92305 /* BookingRoomDetail.swift */,
 				BEC249E52E602B3B00F92305 /* BookingRoom.swift */,
 				BEC249E32E5FF82700F92305 /* Driver.swift */,
+				2A442ADA2E6089AA00314464 /* BookingCarJoined.swift */,
 				BEC249E12E5FF7AB00F92305 /* Property.swift */,
 				BEC249DF2E5FF66A00F92305 /* Room.swift */,
 				BEC249B02E5F604D00F92305 /* SupabaseManager.swift */,
+				2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */,
 				BEE6AFC32E5F53EA00BE084D /* User.swift */,
 			);
 			path = Model;
@@ -303,12 +309,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A442ADD2E6089CA00314464 /* BookingRoomJoined.swift in Sources */,
 				BEC249E82E602C8600F92305 /* BookingRoomDetail.swift in Sources */,
 				BEC249EC2E602F9D00F92305 /* Destination.swift in Sources */,
 				BEC249E62E602B4E00F92305 /* BookingRoom.swift in Sources */,
 				BEC249E02E5FF66C00F92305 /* Room.swift in Sources */,
 				BEC249EA2E602E3100F92305 /* BookingCar.swift in Sources */,
 				BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */,
+				2A442ADB2E6089B600314464 /* BookingCarJoined.swift in Sources */,
 				BEC249E42E5FF82800F92305 /* Driver.swift in Sources */,
 				BEC249E22E5FF7AE00F92305 /* Property.swift in Sources */,
 				BEE6AFC72E5F5A3F00BE084D /* User.swift in Sources */,

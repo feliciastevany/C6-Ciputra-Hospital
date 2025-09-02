@@ -1,13 +1,13 @@
 //
-//  BookingRoom.swift
+//  BookingRoomJoined.swift
 //  HC Approval
 //
-//  Created by Euginia Gabrielle on 28/08/25.
+//  Created by Felicia Stevany Lewa on 28/08/25.
 //
 
 import Foundation
 
-struct BookingRoom: Codable, Identifiable {
+struct BookingRoomJoined: Codable, Identifiable {
     let br_id: Int
     let room_id: Int
     let br_event: String
@@ -19,5 +19,8 @@ struct BookingRoom: Codable, Identifiable {
     let br_decline_reason: String
     let created_at: Date
     
-    var id: Int{br_id}
+    let room: Room?
+    let user: User?
+    
+    var id: Int { br_id }
 }

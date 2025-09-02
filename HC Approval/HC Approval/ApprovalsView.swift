@@ -8,277 +8,230 @@
 import SwiftUI
 
 struct ApprovalsView: View {
-    @State private var selectedStatusIndex = 0
-    @State private var selectedChooseIndex = 0
-    let statuses: [String] = ["Pending", "Approved", "Declined", "Cancelled"]
-    let choose: [String] = ["All", "Rooms", "Cars"]
+    @State var bookingRoom: [BookingRoomJoined] = []
+    @State var bookingCar: [BookingCarJoined] = []
+    
+    @State private var selectedStatus: BookingStatus = .pending
+    @State private var selectedType: BookingType = .all
+    
+    // MARK: - Filtered Data by type & status
+    var filteredRooms: [BookingRoomJoined] {
+        bookingRoom
+            .filter { room in
+                selectedType == .all || selectedType == .rooms
+            }
+            .filter { room in
+                // filter status
+                switch selectedStatus {
+                case .pending:   return room.br_status == "Pending"
+                case .approved:  return room.br_status == "Approved"
+                case .declined:  return room.br_status == "Declined"
+                case .cancelled: return room.br_status == "Cancelled"
+                }
+            }
+    }
+    
+    var filteredCars: [BookingCarJoined] {
+        bookingCar
+            .filter { car in
+                selectedType == .all || selectedType == .cars
+            }
+            .filter { car in
+                switch selectedStatus {
+                case .pending:   return car.bc_status == "Pending"
+                case .approved:  return car.bc_status == "Approved"
+                case .declined:  return car.bc_status == "Declined"
+                case .cancelled: return car.bc_status == "Cancelled"
+                }
+            }
+    }
+    
+    // MARK: - Sort room and car merged data by createdAt
+    var mergedBookings: [any AnyBooking] {
+        let rooms: [any AnyBooking] = filteredRooms
+        let cars: [any AnyBooking] = filteredCars
+        return (rooms + cars).sorted { $0.createdAt < $1.createdAt }
+    }
     
     var body: some View {
         VStack {
-            HStack {
-                Text("Booking Request")
-                    .font(.title.bold())
-                    .foregroundColor(.black)
-                
-                Spacer()
-                
-                Button(action: {
-                    print("Profile tapped")
-                }) {
-                    Image(systemName: "person.crop.circle")
-                        .resizable()
-                        .frame(width: 45, height: 45) // lebih besar biar seimbang
-                        .foregroundColor(.blue)
-                    //                        .padding(.horizontal)
-                }
-            }
-            .padding(.top)
-            //            .padding(.horizontal)
-            
-            Picker("Status", selection: $selectedStatusIndex) {
-                ForEach(0..<statuses.count, id: \.self) { index in
-                    Text(statuses[index]).tag(index)
-//                        .font(.subheadline)
-                }
-            }
-            .pickerStyle(.segmented)
-            //            .padding(.horizontal)
-            .padding(.top)
-            //            .cornerRadius(50)
-            
-            HStack(spacing: 0) {
-                ForEach(statuses.indices, id: \.self) { index in
-                    Text(statuses[index])
-                        .font(.subheadline)
-                        .foregroundColor(selectedStatusIndex == index ? .black : .black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 30) // Ubah radius disini
-                                .fill(selectedStatusIndex == index ? Color.white : Color.clear)
-                        )
-                        .onTapGesture {
-                            withAnimation {
-                                selectedStatusIndex = index
-                            }
-                        }
-                }
-            }
-            .padding(4)
-            .background(
-                RoundedRectangle(cornerRadius: 30) // Background segmented
-//                    .stroke(Color.blue, lineWidth: 1)
-                    .fill(Color(.systemGray5))
+            VStack {
+                HStack {
+                    Text("Booking Request")
+                        .font(.title.bold())
                     
+                    Spacer()
+                    
+                    Button(action: {
+                        print("Profile tapped")
+                    }) {
+                        Image(systemName: "person.crop.circle")
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(Color(.systemBlue))
+                    }
+                }
+                .padding(.top)
+                
+                HStack {
+                    Spacer()
+                    Picker("ChooseType", selection: $selectedType) {
+                        ForEach(BookingType.allCases, id: \.self) { type in
+                            Text(type.rawValue).tag(type)
+                        }
+                    }
+                }
+                .padding(.bottom, 3)
+                
+                Picker("StatusRequest", selection: $selectedStatus) {
+                    ForEach(BookingStatus.allCases, id: \.self) { status in
+                        Text(status.rawValue).tag(status)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.bottom, 3)
+                
+            }
+            .padding(.horizontal)
+            
+            ScrollView {
+                VStack (spacing: 10) {
+                    ForEach(mergedBookings, id: \.bookId) { booking in
+                        bookingView(
+                            title: booking.title,
+                            event: booking.type == .rooms
+                            ? (booking as! BookingRoomJoined).br_event
+                            : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
+                            date: booking is BookingRoomJoined
+                            ? (booking as! BookingRoomJoined).br_date
+                            : (booking as! BookingCarJoined).bc_date,
+                            startTime: booking is BookingRoomJoined
+                            ? toHourMinute((booking as! BookingRoomJoined).br_start)
+                            : toHourMinute((booking as! BookingCarJoined).bc_start),
+                            endTime: booking is BookingRoomJoined
+                            ? toHourMinute((booking as! BookingRoomJoined).br_end)
+                            : toHourMinute((booking as! BookingCarJoined).bc_end),
+                            status: booking.status,
+                            bookings: booking
+                        )
+                    }
+                }
+                .padding()
+                .task {
+                    await fetchAllBookings()
+                }
+            }
+        }
+        .background(Color(.systemGray6))
+    }
+    
+    func fetchAllBookings() async {
+        do {
+            let responseRooms = try await SupabaseManager.shared.client
+                .from("bookings_room")
+                .select("""
+                        *, room:rooms(*), user: users(*)
+                        """)
+                .execute()
+            
+            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+                [BookingRoomJoined].self,
+                from: responseRooms.data
             )
             
-            HStack {
-                Spacer()
-                Picker("Choose", selection: $selectedChooseIndex) {
-                    ForEach(0..<choose.count, id: \.self) { index in
-                        Text(choose[index]).tag(index)
-                    }
-                }
-//                .padding(.horizontal)
+            let responseCars = try await SupabaseManager.shared.client
+                .from("bookings_car")
+                .select("""
+                        *, destination:destinations(*), driver:drivers(*), user: users(*)
+                        """)
+                .execute()
+            
+            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+                [BookingCarJoined].self,
+                from: responseCars.data
+            )
+            
+            DispatchQueue.main.async {
+                self.bookingRoom = rooms
+                self.bookingCar = cars
             }
+            print("respones: ", rooms, cars)
+        } catch {
+            print("Error fetch bookings:", error)
         }
-        .padding(.horizontal)
-        
-        ScrollView {
-            VStack {
-                if selectedStatusIndex == 0 {
-                    if selectedChooseIndex == 0 {
-                        PendingView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB")
-                    } else if selectedChooseIndex == 1 {
-                        PendingView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB")
-                    } else if selectedChooseIndex == 2 {
-                        PendingView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB")
-                        //                    VStack (alignment: .leading){
-                        //                        Text("Room 1 - Budi (Human Capital)")
-                        //                            .font(.title3.bold())
-                        //
-                        //                        Text("Rapat Keuangan 1")
-                        //                            .font(.headline.bold())
-                        //
-                        //                        Text("Thu, 21 Agustus 2025")
-                        //                            .font(.subheadline)
-                        //
-                        //                        Text("10:00 - 11:00 WIB")
-                        //                            .font(.title3.bold())
-                        //
-                        //                        HStack {
-                        //                            Button(action: {
-                        //                                print("button clicked")
-                        //                            })  {
-                        //                                Text("Decline")
-                        //                                    .font(.headline.bold())
-                        //                                    .padding(.vertical, 10)
-                        //                                    .padding(.horizontal, 50)
-                        //                                    .background(Color.red)
-                        //                                    .foregroundColor(.white)
-                        //                                    .cornerRadius(20)
-                        //                            }
-                        //
-                        //                            Button(action: {
-                        //                                print("button clicked")
-                        //                            })  {
-                        //                                Text("Approve")
-                        //                                    .font(.headline.bold())
-                        //                                    .padding(.vertical, 10)
-                        //                                    .padding(.horizontal, 50)
-                        //                                    .background(Color.green)
-                        //                                    .foregroundColor(.white)
-                        //                                    .cornerRadius(20)
-                        //                            }
-                        //                        }
-                        //                    }
-                        //                    .padding()
-                        //                    .background(Color(.white))
-                        //                    .cornerRadius(15)
-                        //                    .shadow(radius: 4)
+    }
+    func bookingView(title: String, event: String, date: Date, startTime: String, endTime: String, status: String, bookings: any AnyBooking) -> some View {
+        if status == "Pending" {
+            return AnyView(
+                PendingView(
+                    title: title,
+                    event: event,
+                    date: date,
+                    startTime: startTime,
+                    endTime: endTime,
+                    onApprove: {
+                        Task {
+                            try? await SupabaseManager.shared.updateBookingStatus(booking: bookings, status: "Approved")
+                            await fetchAllBookings()
+                        }
+                    },
+                    onDecline: {
+                        Task {
+                            try? await SupabaseManager.shared.updateBookingStatus(booking: bookings, status: "Declined")
+                            await fetchAllBookings()
+                        }
                     }
-                }
-                if selectedStatusIndex == 1 {
-                    if selectedChooseIndex == 0 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    if selectedChooseIndex == 1 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    if selectedChooseIndex == 2 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    
-                }
-                
-                if selectedStatusIndex == 2 {
-                    if selectedChooseIndex == 0 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    if selectedChooseIndex == 1 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    if selectedChooseIndex == 2 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    
-                }
-                
-                if selectedStatusIndex == 3 {
-                    if selectedChooseIndex == 0 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    if selectedChooseIndex == 1 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    if selectedChooseIndex == 2 {
-                        StatusView(room: "Room 2 - Budi (Human Capital)", event: "Rapat Keuangan 1", date: "Thu, 21 Agustus 2025", time: "10:00 - 11:00 WIB", status: statuses[selectedStatusIndex])
-                    }
-                    
-                }
-                
-                //                    Spacer()
-            }
-            .padding()
+                )
+            )
+        } else {
+            return AnyView(
+                StatusView(
+                    title: title,
+                    event: event,
+                    date: date,
+                    startTime: startTime,
+                    endTime: endTime
+                )
+            )
         }
-        
     }
 }
 
-func PendingView(room: String, event: String, date: String, time: String) -> some View {
+func toHourMinute(_ timeString: String) -> String {
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.dateFormat = "HH:mm:ss"
     
-    VStack (alignment: .leading){
-        HStack {
-            VStack (alignment: .leading){
-                Text(room)
-                    .font(.title3.bold())
-                
-                //        Text("\(event)\n\(date)\n\(time)")
-                //            .font(.headline.bold())
-                
-                Text(date)
-                    .font(.subheadline)
-                
-                Text(time)
-                    .font(.title3.bold())
-            }
-            Spacer ()
-        }
-        
-        HStack {
-            Button(action: {
-                print("button clicked")
-            })  {
-                Text("Decline")
-                    .font(.headline.bold())
-                    .padding(.vertical, 10)
-//                    .padding(.horizontal, 50)
-                    .frame(width: 160)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(20)
-            }
-            Spacer()
-            Button(action: {
-                print("button clicked")
-            })  {
-                Text("Approve")
-                    .font(.headline.bold())
-                    .padding(.vertical, 10)
-//                    .padding(.horizontal, 50)
-                    .frame(width: 160)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(20)
-            }
-        }
+    if let date = formatter.date(from: timeString) {
+        let outFormatter = DateFormatter()
+        outFormatter.dateFormat = "HH:mm"
+        return outFormatter.string(from: date)
     }
-    .padding()
-    .frame(width: 365)
-    .background(Color(.white))
-    .cornerRadius(15)
-    .shadow(radius: 4)
-
+    return timeString
 }
 
-func StatusView(room: String, event: String, date: String, time: String, status: String) -> some View {
-    VStack (alignment: .leading){
-        Text(room)
-            .font(.title3.bold())
-        
-        Text(event)
-            .font(.headline.bold())
-        
-        Text(date)
-            .font(.subheadline)
+extension SupabaseManager {
+    func updateBookingStatus(booking: any AnyBooking, status: String) async throws {
+        if let roomBooking = booking as? BookingRoomJoined {
+            try await client
+                .from("bookings_room")
+                .update(["br_status": status])
+                .eq("br_id", value: roomBooking.br_id)
+                .execute()
+            print(status)
             
-        HStack {
-            Text(time)
-                .font(.title3.bold())
-            Spacer()
+        } else if let carBooking = booking as? BookingCarJoined {
+            try await client
+                .from("bookings_car")
+                .update(["bc_status": status])
+                .eq("bc_id", value: carBooking.bc_id)
+                .execute()
             
-            if status == "Approved" {
-                Text(status)
-                    .font(.title3.bold())
-                    .foregroundColor(Color.green)
-            } else if status == "Declined" {
-                Text(status)
-                    .font(.title3.bold())
-                    .foregroundColor(Color.red)
-            } else {
-                Text(status)
-                    .font(.title3.bold())
-                    .foregroundColor(Color.orange)
-            }
+            print(status)
         }
-        .padding(.top, 1)
     }
-    .padding()
-    .frame(width: 365)
-    .background(Color(.white))
-    .cornerRadius(15)
-    .shadow(radius: 4)
 }
+
 
 #Preview {
     ApprovalsView()
