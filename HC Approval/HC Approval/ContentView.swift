@@ -14,6 +14,7 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "checkmark.square")
                     Text("Approvals")
+                    
 //                    Label("Home", systemImage: "house.fill")
                 }
             ApprovalsView()

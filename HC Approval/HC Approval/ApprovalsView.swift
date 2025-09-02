@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ApprovalsView: View {
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToProfil = false
+    
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
@@ -64,14 +67,17 @@ struct ApprovalsView: View {
                     
                     Button(action: {
                         print("Profile tapped")
+                        goToProfil = true
                     }) {
                         Image(systemName: "person.crop.circle")
                             .resizable()
                             .frame(width: 40, height: 40)
                             .foregroundColor(Color(.systemBlue))
+                    }.navigationDestination(isPresented: $goToProfil) {
+                        ProfilView(userId: loggedInUserId)
                     }
+                    .padding(.top)
                 }
-                .padding(.top)
                 
                 HStack {
                     Spacer()
@@ -93,6 +99,7 @@ struct ApprovalsView: View {
                 
             }
             .padding(.horizontal)
+            
             
             ScrollView {
                 VStack (spacing: 10) {
@@ -124,7 +131,6 @@ struct ApprovalsView: View {
         }
         .background(Color(.systemGray6))
     }
-    
     func fetchAllBookings() async {
         do {
             let responseRooms = try await SupabaseManager.shared.client
@@ -197,6 +203,7 @@ struct ApprovalsView: View {
     }
 }
 
+    
 func toHourMinute(_ timeString: String) -> String {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -209,7 +216,7 @@ func toHourMinute(_ timeString: String) -> String {
     }
     return timeString
 }
-
+    
 extension SupabaseManager {
     func updateBookingStatus(booking: any AnyBooking, status: String) async throws {
         if let roomBooking = booking as? BookingRoomJoined {
