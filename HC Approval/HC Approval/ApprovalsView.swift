@@ -97,7 +97,7 @@ struct ApprovalsView: View {
             .padding(.horizontal)
             
             ScrollView {
-                VStack (spacing: 10) {
+                VStack (spacing: 15) {
                     ForEach(mergedBookings, id: \.bookId) { booking in
                         bookingView(
                             title: booking.title,
@@ -197,12 +197,12 @@ struct ApprovalsView: View {
             )
         }
         
-        .padding(14)
-        //    .frame(width: 365)
-        .background(Color(.systemBackground))
-        .cornerRadius(10)
-        //    .shadow(radius: 5, x: 3, y: 3)
-        .padding(.horizontal, 20)
+//        .padding(14)
+//        //    .frame(width: 365)
+//        .background(Color(.systemBackground))
+//        .cornerRadius(10)
+//        //    .shadow(radius: 5, x: 3, y: 3)
+//        .padding(.horizontal, 20)
     }
 }
 

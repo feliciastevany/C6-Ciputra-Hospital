@@ -156,6 +156,10 @@ struct Cars: View {
         Bookings(title: "Car 2", start: "08:00", stop: "09:00", event: "Rapat Keuangan 2",  /*position: "Mentor"*/ date: "Fri, 22 Aug 2025", status: "Pending")
     ]
     
+    let item: [Carpool] = [
+        Carpool(id: "0", car: "Car 1", depart: "10:00", arrive: "12:00", location: "📍 Universitas Ciputra", date: "Thu, 21 Aug 2025")
+    ]
+    
     @State var segmentedControl = 0
     var body: some View {
         
@@ -165,26 +169,36 @@ struct Cars: View {
                 //            Color.blue.edgesIgnoringSafeArea(.all)
                 VStack(spacing: 20) {
                     
-                    VStack (alignment: .leading) {
-                        VStack (alignment: . leading) {
-                            
-                        }
-                    }
+//                    VStack (alignment: .leading) {
+//                        VStack (alignment: . leading) {
+//                            
+//                        }
+//                    }
+                    Text("Carpool Request")
+                        .font(.title3.bold())
+                        .foregroundStyle(.secondary)
+                        .padding(.trailing, 200)
                     
-                    ForEach(data) { item in
+                    ForEach(item) { item in
                         VStack (alignment: .leading) {
                 //            HStack {
                                 VStack (alignment: .leading){
-                                    Text("\(item.title)")
-                                        .font(.title3.bold())
+                                    HStack {
+                                        Text(item.car)
+                                            .font(.title3.bold())
+                                        Spacer()
+                                        Text(item.date)
+                                            .font(.footnote)
+                                            .foregroundStyle(.secondary)
+                                    }
                                     
                                     //        Text("\(event)\n\(date)\n\(time)")
                                     //            .font(.headline.bold())
                                     
-                                    Text("\(item.start)-\(item.stop)")
+                                    Text("\(item.depart)-\(item.arrive)")
                                         .font(.title3.bold())
                                     
-                                    Text("\(item.status)")
+                                    Text(item.location)
                                         .font(.footnote)
                                     
                                     //                Text(date)
@@ -207,7 +221,7 @@ struct Cars: View {
                                     }
                                     .padding(.vertical, 10)
                                     //                    .padding(.horizontal, 50)
-                                    .frame(width: 155)
+                                    .frame(width: 160)
                                     .background(Color(.systemRed))
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
@@ -225,7 +239,7 @@ struct Cars: View {
                                     }
                                     .padding(.vertical, 10)
                                     //                    .padding(.horizontal, 50)
-                                    .frame(maxWidth: .infinity)
+                                    .frame(width: 160)
                                     .background(Color(.systemBlue))
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
