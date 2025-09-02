@@ -10,6 +10,7 @@ import Foundation
 struct BookingRoom: Codable, Identifiable {
     let br_id: Int
     let room_id: Int
+    let br_event: String
     let br_date: Date
     let br_start: String
     let br_end: String

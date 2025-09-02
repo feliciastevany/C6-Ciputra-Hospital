@@ -17,7 +17,7 @@ struct BookingCar: Codable, Identifiable {
     let bc_from: String
     let bc_desc: String
     let bc_people: Int
-    let bc_status: Bool
+    let bc_status: String
     let bc_decline_reason: String
     let carpool_req: Bool
     let carpool_desc: String

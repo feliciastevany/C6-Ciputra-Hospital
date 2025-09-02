@@ -16,24 +16,23 @@ struct StatusView: View {
     
     var body: some View {
         VStack (alignment: .leading) {
-            Text(date.toEnglishFormat())
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            
-            VStack (alignment: .leading){
+            VStack (alignment: .leading, spacing: 3){
                 HStack {
-                    VStack (alignment: .leading){
-                        Text(title)
-                            .font(.title3.bold())
-                        
-                        Text("\(startTime) - \(endTime) WIB")
-                            .font(.title3.bold())
-                        
-                        Text(event)
-                            .font(.footnote.bold())
-                    }
+                    Text(title)
+                        .font(.title3.bold())
+                    
                     Spacer()
+                    
+                    Text(date.toEnglishFormat())
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
+                
+                Text("\(startTime) - \(endTime) WIB")
+                    .font(.title3.bold())
+                
+                Text(event)
+                    .font(.subheadline)
             }
             .padding(14)
             .background(Color(.systemBackground))

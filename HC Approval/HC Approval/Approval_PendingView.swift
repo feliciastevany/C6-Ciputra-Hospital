@@ -14,24 +14,32 @@ struct PendingView: View {
     var startTime: String
     var endTime: String
     
+    var onApprove: () -> Void
+    var onDecline: () -> Void
+    
     var body: some View {
-        VStack (alignment: .leading){
-            Text(title)
-                .font(.title3.bold())
-            
-            Text(date.toEnglishFormat())
-                .font(.subheadline)
+        VStack (alignment: .leading, spacing: 3){
+            HStack {
+                Text(title)
+                    .font(.title3.bold())
+                
+                Spacer()
+                
+                Text(date.toEnglishFormat())
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
             
             Text("\(startTime) - \(endTime) WIB")
-                .font(.subheadline.bold())
+                .font(.title3.bold())
             
             Text(event)
-                .font(.footnote.bold())
-            
+                .font(.subheadline)
             
             HStack {
                 Button(action: {
-                    print("button clicked")
+                    onDecline()
+                    print("button declined")
                 })  {
                     HStack {
                         Spacer ()
@@ -50,7 +58,8 @@ struct PendingView: View {
                 Spacer()
                 
                 Button(action: {
-                    print("button clicked")
+                    onApprove()
+                    print("button approved")
                 })  {
                     HStack {
                         Spacer ()
@@ -67,7 +76,7 @@ struct PendingView: View {
                     .cornerRadius(10)
                 }
             }
-            
+            .padding(.top, 10)
         }
         .padding(14)
         .background(Color(.systemBackground))
