@@ -41,6 +41,10 @@ struct MeetingRoomView: View {
                 }
                 .padding()
                 
+                BookingFilterView()
+                    .padding(.top, -15)
+                    .padding(.bottom, 10)
+                
                 WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
                     .frame(height: 120)
                     .padding(.horizontal, -2)
@@ -132,7 +136,7 @@ struct MeetingRoomView: View {
             return [selectedRoom]
         }
     }
-
+    
     func fetchBookRooms(for date: Date) async {
         do {
             let formatter = DateFormatter()
