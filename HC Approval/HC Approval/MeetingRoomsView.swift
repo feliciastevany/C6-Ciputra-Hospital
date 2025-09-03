@@ -155,6 +155,8 @@ struct AvailableRoomsView: View {
 }
 
 struct RoomDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    
     var room: Room
     var slot: TimeSlot
     var date: String
@@ -171,6 +173,8 @@ struct RoomDetailView: View {
     
     @State private var selectedProperties: [SelectedProperty] = []
     @State private var showPropertyPicker = false
+    
+    @State private var showSuccess = false
     
     private var availableTimeOptions: [String] {
         BookingTimeHelper.availableStartTimes(bookings: bookings)
@@ -205,11 +209,6 @@ struct RoomDetailView: View {
                         Text(time).tag(time)
                     }
                 }.disabled(startTime.isEmpty)
-                
-                Button("Confirm Booking") {
-                    validateBooking()
-                }
-                .buttonStyle(.borderedProminent)
             }
             
             Section {
@@ -291,8 +290,21 @@ struct RoomDetailView: View {
                     }
                 }
             }
+            
+            Button("Booking") {
+                Task {
+                    await addBooking()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle("Booking Details")
+        .alert("Booking berhasil!", isPresented: $showSuccess) {
+            Button("OK") {
+                dismiss()
+            }
+        }
         .onAppear {
             if startTime.isEmpty {
                 startTime = slot.start // dari slot yg dipilih
@@ -309,36 +321,38 @@ struct RoomDetailView: View {
         }
     }
     
-    private func validateBooking() {
-        guard !startTime.isEmpty, !endTime.isEmpty else { return }
-        guard !eventName.isEmpty else {
-            print("Event name required")
-            return
-        }
+    let bookingService = BookingService()
 
-//        if startTime < endTime {
-//            Task {
-//                do {
-//                    let booking = try await BookingService.createBooking(
-//                        room: room,
-//                        date: date, // pastikan sudah yyyy-MM-dd
-//                        startTime: startTime,
-//                        endTime: endTime,
-//                        eventName: eventName,
-//                        eventDesc: eventDesc,
-//                        userId: 1, // TODO: ganti dengan user login aktif
-//                        participants: selectedUsers,
-//                        properties: selectedProperties
-//                    )
-//                    print("Booking berhasil: \(booking)")
-//                } catch {
-//                    print("Gagal insert booking: \(error)")
-//                }
-//            }
-//        } else {
-//            print("End time harus lebih besar dari start time")
-//            goToSchedule = true
-//        }
+    func addBooking() async {
+        do {
+            let booking = BookingInsert(
+                room_id: room.room_id,
+                user_id: 1,
+                br_event: eventName,
+                br_date: date,
+                br_start: startTime,
+                br_end: endTime,
+                br_desc: eventDesc,
+                br_status: "Pending"
+            )
+            
+            guard let created = try await BookingService.shared.createBooking(booking) else { return }
+            
+            try await BookingService.shared.addParticipants(
+                selectedUsers.map { Participant(user_id: $0.user_id, br_id: created.br_id, pic: false) }
+            )
+            
+            try await BookingService.shared.addProperties(
+                selectedProperties.map { BookingRoomDetail(properties_id: $0.property.properties_id, br_id: created.br_id, qty: $0.quantity) }
+            )
+            
+            await MainActor.run {
+                showSuccess = true
+            }
+            
+        } catch {
+            print("Error: \(error)")
+        }
     }
 }
 
