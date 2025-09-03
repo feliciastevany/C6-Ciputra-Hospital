@@ -25,10 +25,7 @@ struct MeetingRoomView: View {
                     Text("Meeting Rooms")
                         .font(.title)
                         .bold()
-                    Button(action: {}) {
-                        Image(systemName: "plus.circle")
-                            .font(.title.bold())
-                    }
+                    
                     Spacer()
                     Button(action: {
                         print("Profile tapped")
@@ -44,6 +41,14 @@ struct MeetingRoomView: View {
                 BookingFilterView()
                     .padding(.top, -15)
                     .padding(.bottom, 10)
+                
+                HStack {
+                    Text("Schedule")
+                        .font(.title3)
+                        .bold()
+                    Spacer()
+                }
+                .padding()
                 
                 WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
                     .frame(height: 120)
