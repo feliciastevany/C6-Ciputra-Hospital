@@ -12,14 +12,6 @@ struct MeetingRoomsView: View {
     @State private var capacity: Int = 1
     @State private var goToAvailable = false
     
-    @State private var brName: String = ""
-    @State private var brDate: Date = Date()
-    @State private var brRoom: Int?
-    @State private var brStart: String = "07:30"
-    @State private var brEnd: String = "08:00"
-    @State private var brDesc: String = ""
-    @State private var brStatus: String = "Pending"
-    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -35,7 +27,7 @@ struct MeetingRoomsView: View {
                 }
                 
                 NavigationLink(
-                    destination: AvailableRoomsView(date: formatDate(date),capacity: Int(capacity) ?? 1),
+                    destination: AvailableRoomsView(date: DateHelper.toBackendFormat(date),capacity: Int(capacity) ?? 1),
                     isActive: $goToAvailable) {
                         EmptyView()
                     }
@@ -88,7 +80,7 @@ struct AvailableRoomsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 
-                Text(DateHelper.formatDate(date))
+                Text(DateHelper.toDisplayFormat(date))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 ForEach(vm.availableRooms) { roomAvail in
@@ -143,7 +135,7 @@ struct AvailableRoomsView: View {
         }
         .navigationTitle("Available Rooms")
         .task {
-            await vm.search(date: date, capacity: capacity)
+            await vm.searchRoom(date: date, capacity: capacity)
         }
         .alert(item: Binding(
             get: { vm.errorMessage.map { ErrorWrapper(message: $0) } },
@@ -195,7 +187,7 @@ struct RoomDetailView: View {
                 HStack {
                     Text("Date")
                     Spacer()
-                    Text(DateHelper.formatDate(date))
+                    Text(DateHelper.toDisplayFormat(date))
                 }.frame(maxWidth: .infinity)
                 
                 Picker("Start Time", selection: $startTime) {
@@ -325,7 +317,7 @@ struct RoomDetailView: View {
 
     func addBooking() async {
         do {
-            let booking = BookingInsert(
+            let booking = BookingRoomInsert(
                 room_id: room.room_id,
                 user_id: 1,
                 br_event: eventName,
@@ -336,7 +328,7 @@ struct RoomDetailView: View {
                 br_status: "Pending"
             )
             
-            guard let created = try await BookingService.shared.createBooking(booking) else { return }
+            guard let created = try await BookingService.shared.createBookingRoom(booking) else { return }
             
             try await BookingService.shared.addParticipants(
                 selectedUsers.map { Participant(user_id: $0.user_id, br_id: created.br_id, pic: false) }
@@ -374,29 +366,6 @@ struct RoomScheduleView: View {
         }
         .navigationTitle("\(room.room_name) Schedule")
     }
-}
-
-func generateHalfHourTimes(start: String, end: String) -> [String] {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    guard let startDate = formatter.date(from: start),
-          let endDate = formatter.date(from: end) else {
-        return []
-    }
-    
-    var times: [String] = []
-    var current = startDate
-    while current <= endDate {
-        times.append(formatter.string(from: current))
-        current = current.addingTimeInterval(30 * 60) // 30 menit
-    }
-    return times
-}
-
-func formatDate(_ date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd"
-    return formatter.string(from: date)
 }
 
 #Preview {

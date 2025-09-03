@@ -8,7 +8,7 @@
 import Foundation
 import Supabase
 
-struct BookingInsert: Codable {
+struct BookingRoomInsert: Codable {
     let room_id: Int
     let user_id: Int
     let br_event: String
@@ -17,6 +17,27 @@ struct BookingInsert: Codable {
     let br_end: String    // HH:mm
     let br_desc: String
     let br_status: String
+}
+
+struct BookingCarInsert: Codable {
+    var user_id: Int
+    var driver_id: Int
+    var bc_date: String    // yyyy-MM-dd
+    var bc_start: String   // HH:mm
+    var bc_end: String     // HH:mm
+    var bc_from: String
+    var bc_desc: String
+    var bc_people: Int
+    var bc_status: String
+    var bc_decline_reason: String?
+    var carpool_req: Bool
+    var carpool_desc: String?
+    var carpool_status: String?
+}
+
+struct DestinationInsert: Codable {
+    var destination_name: String
+    var bc_id: Int
 }
 
 //struct BookingUpdate: Codable {
@@ -33,9 +54,9 @@ class BookingService {
     static let shared = BookingService()
     private let client = SupabaseManager.shared.client
     
-    // MARK: - Booking
+    // MARK: - Booking Room
     
-    func createBooking(_ booking: BookingInsert) async throws -> BookingRoom? {
+    func createBookingRoom(_ booking: BookingRoomInsert) async throws -> BookingRoom? {
         let response: [BookingRoom] = try await client
             .from("bookings_room")
             .insert(booking)
@@ -59,14 +80,14 @@ class BookingService {
     
     func addParticipants(_ participants: [Participant]) async throws {
         try await client
-            .from("participants")
+            .from("participants_br")
             .insert(participants)
             .execute()
     }
     
     func fetchParticipants(brId: Int) async throws -> [Participant] {
         try await client
-            .from("participants")
+            .from("participants_br")
             .select()
             .eq("br_id", value: brId)
             .execute()
@@ -90,4 +111,44 @@ class BookingService {
             .execute()
             .value
     }
+    
+    // MARK: - Booking Car
+    func createBookingCar(_ booking: BookingCarInsert) async throws -> BookingCar? {
+        let response: [BookingCar] = try await client
+            .from("bookings_car")
+            .insert(booking)
+            .select()
+            .execute()
+            .value
+        return response.first
+    }
+
+    func fetchBookingsCar(date: String) async throws -> [BookingCar] {
+        try await client
+            .from("bookings_car")
+            .select()
+            .eq("bc_date", value: date)
+            .execute()
+            .value
+    }
+    
+    func fetchDrivers() async throws -> [Driver] {
+        try await client
+            .from("drivers")
+            .select()
+            .eq("driver_active", value: true)
+            .execute()
+            .value
+    }
+    
+    func addDestinations(_ destinations: [DestinationInsert]) async throws -> [Destination] {
+        let response: [Destination] = try await client
+            .from("destinations")
+            .insert(destinations)
+            .select()
+            .execute()
+            .value
+        return response
+    }
+
 }
