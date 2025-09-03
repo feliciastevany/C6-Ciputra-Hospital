@@ -8,9 +8,9 @@
 import Foundation
 
 struct BookingRoomDetail: Codable, Identifiable {
-    let properties_id: Int
-    let br_id: Int
-    let qty: Int
+    var properties_id: Int
+    var br_id: Int
+    var qty: Int
     
-    var id: Int{br_id}
+    var id: String{"\(br_id)-\(properties_id)"}
 }

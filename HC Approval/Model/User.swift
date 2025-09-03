@@ -7,14 +7,22 @@
 import Foundation
 
 struct User: Codable, Identifiable {
-    let user_id: Int
-    let user_name: String
-    let user_pass: String
-    let user_dept: String
-    let user_email: String
-    let user_phone: String
-    let user_active: Bool
+    var user_id: Int
+    var user_name: String
+    var user_pass: String
+    var user_dept: String
+    var user_email: String
+    var user_phone: String
+    var user_active: Bool
     
     // biar cocok sama Identifiablenya, jadi id refer ke user_id
     var id: Int {user_id}
+}
+
+extension String {
+    var initials: String {
+        let words = self.split(separator: " ")
+        let firstLetters = words.prefix(2).compactMap { $0.first }
+        return firstLetters.map { String($0) }.joined().uppercased()
+    }
 }
