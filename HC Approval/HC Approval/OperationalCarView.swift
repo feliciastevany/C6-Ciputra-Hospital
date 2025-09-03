@@ -1,5 +1,5 @@
 //
-//  MeetingRoomView.swift
+//  OperationalCarView.swift
 //  HC Approval
 //
 //  Created by Wilbert Bryan on 31/08/25.
@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct MeetingRoomView: View {
+struct OperationalCarView: View {
     @State private var selectedDate = Date()
     @State private var currentMonth = Date()
-    @State private var rooms: [BookingRoom] = []
-    @State private var events: [roomEvent] = []
-    @State private var selectedRoom = "All"
+    @State private var cars: [BookingCar] = []
+    @State private var events: [carEvent] = []
+    @State private var selectedCar = "All"
     let hours = Array(8...22) // jam 08.00 - 22.00
     let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
     
@@ -22,7 +22,7 @@ struct MeetingRoomView: View {
             VStack(spacing: 0) {
                 // Header
                 HStack {
-                    Text("Meeting Rooms")
+                    Text("Operational Car")
                         .font(.title)
                         .bold()
                     Button(action: {}) {
@@ -41,7 +41,7 @@ struct MeetingRoomView: View {
                 }
                 .padding()
                 
-                WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
+                WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .car(selectedCar: $selectedCar))
                     .frame(height: 120)
                     .padding(.horizontal, -2)
                 
@@ -73,8 +73,8 @@ struct MeetingRoomView: View {
                         }
                     }
                     
-                    // Grid tiap Room
-                    ForEach(filteredRooms, id: \.self) { room in
+                    // Grid tiap Car (anggap analogi room → car slot)
+                    ForEach(filteredCars, id: \.self) { car in
                         VStack(spacing: 0) {
                             ZStack(alignment: .topLeading) {
                                 // Background grid
@@ -92,14 +92,15 @@ struct MeetingRoomView: View {
                                 }
                                 
                                 // Events
-                                ForEach(events.filter { event in
-                                    (selectedRoom == "All" || event.room == selectedRoom) && event.room == room
-                                }) { event in
-                                    ScheduleBlock(
-                                        room: event.room,
+                                ForEach(events.filter { $0.driver == car }) { event in
+                                    ScheduleBlockCar(
+                                        driver: event.driver,
+                                        from: event.from,
+                                        destination: event.destination,
+                                        participant: event.participant,
                                         name: event.name,
                                         dept: event.dept,
-                                        color: event.color,
+                                        color: colorForCar(event.driver),
                                         startHour: event.startHour,
                                         startMinute: event.startMinute,
                                         endHour: event.endHour,
@@ -109,8 +110,9 @@ struct MeetingRoomView: View {
                                 }
                             }
                         }
-                        .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 90)
+                        .frame(width: filteredCars.count == 1 ? UIScreen.main.bounds.width - 60 : 150)
                     }
+
                 }
                 .padding()
             }
@@ -118,87 +120,97 @@ struct MeetingRoomView: View {
         // setiap kali selectedDate berubah → fetch ulang
         .onChange(of: selectedDate) { _ in
             Task {
-                await fetchBookRooms(for: selectedDate)
+                await fetchBookCars(for: selectedDate)
             }
         }
         .task {
-            await fetchBookRooms(for: selectedDate) // pertama kali load
+            await fetchBookCars(for: selectedDate) // pertama kali load
         }
+        
     }
-    private var filteredRooms: [String] {
-        if selectedRoom == "All" {
-            return ["Room 1", "Room 2", "Room 3", "Hall", "Auditorium"]
+    
+    private var filteredCars: [String] {
+        let result: [String]
+        if selectedCar == "All" {
+            result = cars.map { String($0.driver_id) }
+        } else if selectedCar == "Car 1" {
+            result = ["1"]
         } else {
-            return [selectedRoom]
+            result = ["2"]
         }
+        print("🚗 Filtered Cars: \(result)")
+        return result
     }
 
-    func fetchBookRooms(for date: Date) async {
+
+    
+    
+    func fetchBookCars(for date: Date) async {
         do {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             formatter.locale = Locale(identifier: "en_US_POSIX")
-            let dateString = formatter.string(from: date)
+            let todayString = formatter.string(from: date)
             
-            print("🗓️ Query date: \(dateString)")
+            print("🗓️ Query date: \(todayString)")
             
-            let response: [BookingRoom] = try await SupabaseManager.shared.client
-                .from("bookings_room")
+            let response: [BookingCar] = try await SupabaseManager.shared.client
+                .from("bookings_car")
                 .select("""
                     *,
                     user:user_id(*),
-                    room:room_id(*)
+                    driver:driver_id(*),
+                    destination:bc_id(*)
                 """)
-                .eq("br_date", value: dateString)
-                .eq("br_status", value: "Approved")
+                .eq("bc_date", value: todayString)
                 .execute()
                 .value
             
             print("✅ Response count: \(response.count)")
             print("✅ Response detail: \(response)")
             
-            // 🟢 Konversi BookingRoom → Event
-            let newEvents: [roomEvent] = response.compactMap { booking in
+            // 🟢 Konversi BookingCar → Event
+            let newEvents: [carEvent] = response.compactMap { booking in
                 guard
                     let user = booking.user,
-                    let room = booking.room
+                    let driver = booking.driver
                 else { return nil }
                 
                 // parse start/end time
-                let startParts = booking.br_start.split(separator: ":").compactMap { Int($0) }
-                let endParts = booking.br_end.split(separator: ":").compactMap { Int($0) }
+                let startParts = booking.bc_start.split(separator: ":").compactMap { Int($0) }
+                let endParts = booking.bc_end.split(separator: ":").compactMap { Int($0) }
                 
                 guard startParts.count >= 2, endParts.count >= 2 else { return nil }
                 
-                return roomEvent(
-                    room: room.room_name,
+                return carEvent(
+                    driver: String(driver.driver_id),  // atau driver.name kalau ada
+                    from: booking.bc_from,
+                    destination: booking.destination?.map { $0.destination_name }.joined(separator: ", ") ?? "-",
+                    participant: "\(booking.bc_people)",
                     name: user.user_name,
                     dept: user.user_dept,
-                    color: colorForRoom(room.room_name),
                     startHour: startParts[0],
                     startMinute: startParts[1],
                     endHour: endParts[0],
                     endMinute: endParts[1]
                 )
-                
             }
-            
             DispatchQueue.main.async {
-                self.events = newEvents
-                print("📌 Events count: \(newEvents.count)")
-                for e in newEvents {
-                    print("➡️ \(e.room) | \(e.name) | \(e.dept) | \(e.startHour):\(String(format: "%02d", e.startMinute)) - \(e.endHour):\(String(format: "%02d", e.endMinute))")
-                }
+                cars = response
+                events = newEvents
             }
-            
+
         } catch {
-            print("❌ Error fetch bookings:", error)
+            print("❌ Error fetch cars:", error)
         }
     }
 }
 
-struct ScheduleBlock: View {
-    var room: String
+struct ScheduleBlockCar: View {
+    var driver: String
+    var from: String
+    var destination: String
+    var participant: String
     var name: String
     var dept: String
     var color: Color
@@ -211,18 +223,21 @@ struct ScheduleBlock: View {
     let baseHour = 8 // timeline mulai 08:00
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(room)
+        VStack(alignment: .leading, spacing: 2) {
+           
+            Text("\(Image(systemName: "mappin.and.ellipse")) \(from)")
                 .bold()
                 .font(.caption)
-            Text(name)
+            Text("\(Image(systemName: "location")) \(destination)")
+                .bold()
+                .font(.caption)
+            Text("\(Image(systemName:"person.fill")) \(participant)/7")
                 .font(.caption2)
-            Text(dept)
+            Text("\(name) - \(dept)")
                 .font(.caption2)
-                .lineLimit(2)
         }
         .padding(6)
-        .frame(width: 90, height: blockHeight(), alignment: .topLeading)
+        .frame(width: 150, height: blockHeight(), alignment: .topLeading)
         .background(color.opacity(0.20))
         .overlay(alignment: .leading) {
             Rectangle().fill(color).frame(width: 3)   // accent bar kiri
@@ -249,31 +264,29 @@ struct ScheduleBlock: View {
     }
 }
 
-struct roomEvent: Identifiable {
+struct carEvent: Identifiable {
     let id = UUID()
-    let room: String
+    let driver: String
+    let from: String
+    let destination: String
+    let participant: String
     let name: String
     let dept: String
-    let color: Color
     let startHour: Int
     let startMinute: Int
     let endHour: Int
     let endMinute: Int
 }
-
-func colorForRoom(_ roomName: String) -> Color {
-    switch roomName.lowercased() {
-    case "room 1": return .red
-    case "room 2": return .orange
-    case "room 3": return .yellow
-    case "hall": return .purple
-    case "auditorium": return .green
+func colorForCar(_ driver: String) -> Color {
+    switch driver {
+    case "1": return .red
+    case "2": return .green
     default: return .gray
     }
 }
 
-struct MeetingRoomView_Previews: PreviewProvider {
+struct OperationalCarView_Previews: PreviewProvider {
     static var previews: some View {
-        MeetingRoomView()
+        OperationalCarView()
     }
 }
