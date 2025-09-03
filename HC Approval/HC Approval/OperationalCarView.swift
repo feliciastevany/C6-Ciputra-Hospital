@@ -132,7 +132,7 @@ struct OperationalCarView: View {
     private var filteredCars: [String] {
         let result: [String]
         if selectedCar == "All" {
-            result = cars.map { String($0.driver_id) }
+            result = ["1", "2"]
         } else if selectedCar == "Car 1" {
             result = ["1"]
         } else {
@@ -160,7 +160,7 @@ struct OperationalCarView: View {
                     *,
                     user:user_id(*),
                     driver:driver_id(*),
-                    destination:bc_id(*)
+                    destination:destinations!destinations_bc_id_fkey(*)
                 """)
                 .eq("bc_date", value: todayString)
                 .execute()
