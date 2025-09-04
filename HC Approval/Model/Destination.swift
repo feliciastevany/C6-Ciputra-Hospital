@@ -8,9 +8,9 @@
 import Foundation
 
 struct Destination: Codable, Identifiable {
-    let destination_id: Int
-    let destination_name: String
-    let bc_id: Int
+    var destination_id: Int
+    var destination_name: String
+    var bc_id: Int
     
     var id: Int{destination_id}
 }

@@ -8,10 +8,10 @@
 import Foundation
 
 struct Driver: Codable, Identifiable {
-    let driver_id: Int
-    let driver_name: String
-    let driver_phone: String
-    let driver_active: Bool
+    var driver_id: Int
+    var driver_name: String
+    var driver_phone: String
+    var driver_active: Bool
     
     var id: Int{driver_id}
 }
