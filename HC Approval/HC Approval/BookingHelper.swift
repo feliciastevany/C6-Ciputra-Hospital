@@ -7,6 +7,21 @@
 
 import Foundation
 
+protocol Bookable {
+    var startTime: String { get }
+    var endTime: String { get }
+}
+
+extension BookingRoom: Bookable {
+    var startTime: String { br_start }
+    var endTime: String { br_end }
+}
+
+extension BookingCar: Bookable {
+    var startTime: String { bc_start }
+    var endTime: String { bc_end }
+}
+
 struct BookingTimeHelper {
     static func timeToDate(_ time: String) -> Date? {
         let formatter = DateFormatter()
@@ -19,12 +34,12 @@ struct BookingTimeHelper {
         return formatter.date(from: time)
     }
     
-    static func isBooked(time: String, bookings: [BookingRoom], forStart: Bool = true) -> Bool {
+    static func isBooked<T: Bookable>(time: String, bookings: [T], forStart: Bool = true) -> Bool {
         guard let t = timeToDate(time) else { return false }
         
         for booking in bookings {
-            guard let start = timeToDate(booking.br_start),
-                  let end = timeToDate(booking.br_end) else { continue }
+            guard let start = timeToDate(booking.startTime),
+                  let end = timeToDate(booking.endTime) else { continue }
             
             if forStart {
                 if t >= start && t < end {
@@ -58,16 +73,16 @@ struct BookingTimeHelper {
         return times
     }
     
-    static func availableStartTimes(bookings: [BookingRoom]) -> [String] {
+    static func availableStartTimes<T: Bookable>(bookings: [T]) -> [String] {
         let all = generateHalfHourTimes(start: "07:30", end: "21:00")
         return all.filter { !isBooked(time: $0, bookings: bookings, forStart: true) }
     }
     
-    static func validEndTimes(startTime: String, bookings: [BookingRoom]) -> [String] {
+    static func validEndTimes<T: Bookable>(startTime: String, bookings: [T]) -> [String] {
         guard let start = timeToDate(startTime) else { return [] }
         
         let nextBookingStart = bookings
-            .compactMap { timeToDate($0.br_start) }
+            .compactMap { timeToDate($0.startTime) }
             .filter { $0 > start }
             .min()
         
@@ -86,19 +101,28 @@ struct BookingTimeHelper {
 }
 
 struct DateHelper {
-    static func formatDate(_ dateString: String) -> String {
+    /// Format Date → "yyyy-MM-dd" (buat backend)
+    static func toBackendFormat(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+    
+    /// Format "yyyy-MM-dd" → "d MMMM yyyy" (buat UI)
+    static func toDisplayFormat(_ dateString: String, locale: String = "en_US") -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd" // sesuaikan dengan format dari backend
+        formatter.dateFormat = "yyyy-MM-dd"
         
         guard let date = formatter.date(from: dateString) else {
             return dateString
         }
         
         let displayFormatter = DateFormatter()
-        displayFormatter.locale = Locale(identifier: "en_US") // atau "id_ID" kalau mau bahasa Indonesia
-        displayFormatter.dateFormat = "d MMMM yyyy" // contoh: 1 August 2025
+        displayFormatter.locale = Locale(identifier: locale)
+        displayFormatter.dateFormat = "d MMMM yyyy"
         
         return displayFormatter.string(from: date)
     }
 }
+

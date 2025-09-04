@@ -14,6 +14,7 @@ struct ApprovalsView: View {
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
+
     @State private var selectedStatus: BookingStatus = .pending
     @State private var selectedType: BookingType = .all
     
@@ -76,8 +77,8 @@ struct ApprovalsView: View {
                     }.navigationDestination(isPresented: $goToProfil) {
                         ProfilView(userId: loggedInUserId)
                     }
-                    .padding(.top)
                 }
+                .padding(.top)
                 
                 HStack {
                     Spacer()
@@ -102,7 +103,7 @@ struct ApprovalsView: View {
             
             
             ScrollView {
-                VStack (spacing: 10) {
+                VStack (spacing: 15) {
                     ForEach(mergedBookings, id: \.bookId) { booking in
                         bookingView(
                             title: booking.title,
@@ -131,39 +132,51 @@ struct ApprovalsView: View {
         }
         .background(Color(.systemGray6))
     }
+//    func fetchAllBookings() async {
+//        do {
+//            let responseRooms = try await SupabaseManager.shared.client
+//                .from("bookings_room")
+//                .select("""
+//                        *, room:rooms(*), user: users(*)
+//                        """)
+//                .execute()
+//            
+//            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+//                [BookingRoomJoined].self,
+//                from: responseRooms.data
+//            )
+//            
+//            let responseCars = try await SupabaseManager.shared.client
+//                .from("bookings_car")
+//                .select("""
+//                        *, destination:destinations(*), driver:drivers(*), user: users(*)
+//                        """)
+//                .execute()
+//            
+//            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+//                [BookingCarJoined].self,
+//                from: responseCars.data
+//            )
+//            
+//            DispatchQueue.main.async {
+//                self.bookingRoom = rooms
+//                self.bookingCar = cars
+//            }
+//            print("respones: ", rooms, cars)
+//        } catch {
+//            print("Error fetch bookings:", error)
+//        }
+//    }
     func fetchAllBookings() async {
         do {
-            let responseRooms = try await SupabaseManager.shared.client
-                .from("bookings_room")
-                .select("""
-                        *, room:rooms(*), user: users(*)
-                        """)
-                .execute()
-            
-            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
-                [BookingRoomJoined].self,
-                from: responseRooms.data
-            )
-            
-            let responseCars = try await SupabaseManager.shared.client
-                .from("bookings_car")
-                .select("""
-                        *, destination:destinations(*), driver:drivers(*), user: users(*)
-                        """)
-                .execute()
-            
-            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
-                [BookingCarJoined].self,
-                from: responseCars.data
-            )
-            
+            let (rooms, cars) = try await SupabaseManager.shared.fetchBookings()
             DispatchQueue.main.async {
                 self.bookingRoom = rooms
                 self.bookingCar = cars
             }
             print("respones: ", rooms, cars)
         } catch {
-            print("Error fetch bookings:", error)
+            print("Error fetch my bookings:", error)
         }
     }
     func bookingView(title: String, event: String, date: Date, startTime: String, endTime: String, status: String, bookings: any AnyBooking) -> some View {
