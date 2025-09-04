@@ -42,10 +42,10 @@ struct ContentView: View {
             } catch {
                 print("Error fetching user: \(error)")
             }
-        .task {
-            do {
-                currentUser = try await UserService().fetchUser(byId: loggedInUserId)
-            } catch {
-                print("Error fetching user: \(error)")
-            }
         }
+    }
+}
+
+#Preview {
+    ContentView()
+}
