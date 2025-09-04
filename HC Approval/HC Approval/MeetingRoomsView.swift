@@ -189,10 +189,10 @@ struct RoomDetailView: View {
                 HStack {
                     Text("Date")
                     Spacer()
-                    Text(DateHelper.formatDate(date))
-                }
-//                    Text(DateHelper.toDisplayFormat(date))
-//                }.frame(maxWidth: .infinity)
+//                    Text(DateHelper.formatDate(date))
+//                }
+                    Text(DateHelper.toDisplayFormat(date))
+                }.frame(maxWidth: .infinity)
                 
                 Picker("Start Time", selection: $startTime) {
                     ForEach(availableTimeOptions, id: \.self) { time in

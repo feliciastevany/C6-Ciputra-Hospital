@@ -12,7 +12,7 @@ struct BookingRoomDetailView: View {
     var brId: Int
     @State private var bookingDetail: BookingRoom?
     @State private var rooms: [Room] = []
-    @State private var participants: [Participant] = []
+    @State private var participants: [ParticipantBr] = []
     @State private var properties: [Property] = []
     
     var body: some View {
