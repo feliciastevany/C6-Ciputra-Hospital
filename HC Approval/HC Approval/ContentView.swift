@@ -8,32 +8,40 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var currentUser: UserResponse?
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    
     var body: some View {
         TabView {
-            ApprovalsView()
-                .tabItem {
-                    Image(systemName: "checkmark.square")
-                    Text("Approvals")
-//                    Label("Home", systemImage: "house.fill")
-                }
-            ApprovalsView()
+            if currentUser?.user_dept == "Human Capital" {
+                ApprovalsView()
+                    .tabItem {
+                        Image(systemName: "checkmark.square")
+                        Text("Approvals")
+                    }
+            }
+            MyBookings()
                 .tabItem {
                     Image(systemName: "text.page")
                     Text("Bookings")
-//                    Label("Home", systemImage: "house.fill")
                 }
             ApprovalsView()
                 .tabItem {
                     Image(systemName: "person.3")
                     Text("Meeting Room")
-//                    Label("Home", systemImage: "house.fill")
                 }
             ApprovalsView()
                 .tabItem {
                     Image(systemName: "car")
                     Text("Operational Car")
-//                    Label("Home", systemImage: "house.fill")
                 }
+        }
+        .task {
+            do {
+                currentUser = try await UserService().fetchUser(byId: loggedInUserId)
+            } catch {
+                print("Error fetching user: \(error)")
+            }
         }
     }
 }
