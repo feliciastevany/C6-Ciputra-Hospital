@@ -10,7 +10,7 @@ import SwiftUI
 struct MeetingRoomView: View {
     @State private var selectedDate = Date()
     @State private var currentMonth = Date()
-    @State private var rooms: [BookingRoom] = []
+    @State private var rooms: [BookingRoomJoined] = []
     @State private var events: [roomEvent] = []
     @State private var selectedRoom = "All"
     let hours = Array(8...22) // jam 08.00 - 22.00
@@ -144,66 +144,72 @@ struct MeetingRoomView: View {
     
     func fetchBookRooms(for date: Date) async {
         do {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            let dateString = formatter.string(from: date)
-            
-            print("🗓️ Query date: \(dateString)")
-            
-            let response: [BookingRoom] = try await SupabaseManager.shared.client
+            // Siapkan "yyyy-MM-dd" utk kolom br_date tipe DATE
+            let dayFormatter = DateFormatter()
+            dayFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dayFormatter.dateFormat = "yyyy-MM-dd"
+            let dateOnly = dayFormatter.string(from: date)
+
+            print("🗓️ Query date: \(dateOnly)")
+
+            let raw = try await SupabaseManager.shared.client
                 .from("bookings_room")
                 .select("""
                     *,
                     user:user_id(*),
                     room:room_id(*)
                 """)
-                .eq("br_date", value: dateString)
+                .eq("br_date", value: dateOnly)
                 .eq("br_status", value: "Approved")
                 .execute()
-                .value
-            
-            print("✅ Response count: \(response.count)")
-            print("✅ Response detail: \(response)")
-            
-            // 🟢 Konversi BookingRoom → Event
-            let newEvents: [roomEvent] = response.compactMap { booking in
+
+            let rows: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+                [BookingRoomJoined].self,
+                from: raw.data
+            )
+
+            print("✅ Response count: \(rows.count)")
+
+            // Mapping → roomEvent
+            let newEvents: [roomEvent] = rows.compactMap { booking in
+                guard let user = booking.user, let room = booking.room else { return nil }
+
+                func parseHHmm(_ s: String) -> (h: Int, m: Int)? {
+                    let p = s.split(separator: ":").compactMap { Int($0) }
+                    guard p.count >= 2 else { return nil }
+                    return (p[0], p[1])
+                }
+
                 guard
-                    let user = booking.user,
-                    let room = booking.room
+                    let s = parseHHmm(booking.br_start),
+                    let e = parseHHmm(booking.br_end)
                 else { return nil }
-                
-                // parse start/end time
-                let startParts = booking.br_start.split(separator: ":").compactMap { Int($0) }
-                let endParts = booking.br_end.split(separator: ":").compactMap { Int($0) }
-                
-                guard startParts.count >= 2, endParts.count >= 2 else { return nil }
-                
+
                 return roomEvent(
                     room: room.room_name,
                     name: user.user_name,
                     dept: user.user_dept,
                     color: colorForRoom(room.room_name),
-                    startHour: startParts[0],
-                    startMinute: startParts[1],
-                    endHour: endParts[0],
-                    endMinute: endParts[1]
+                    startHour: s.h,
+                    startMinute: s.m,
+                    endHour: e.h,
+                    endMinute: e.m
                 )
-                
             }
-            
-            DispatchQueue.main.async {
+
+            await MainActor.run {
                 self.events = newEvents
                 print("📌 Events count: \(newEvents.count)")
                 for e in newEvents {
                     print("➡️ \(e.room) | \(e.name) | \(e.dept) | \(e.startHour):\(String(format: "%02d", e.startMinute)) - \(e.endHour):\(String(format: "%02d", e.endMinute))")
                 }
             }
-            
+
         } catch {
             print("❌ Error fetch bookings:", error)
         }
     }
+
 }
 
 struct ScheduleBlock: View {

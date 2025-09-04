@@ -10,7 +10,7 @@ import SwiftUI
 struct OperationalCarView: View {
     @State private var selectedDate = Date()
     @State private var currentMonth = Date()
-    @State private var cars: [BookingCar] = []
+    @State private var cars: [BookingCarJoined] = []
     @State private var events: [carEvent] = []
     @State private var selectedCar = "All"
     let hours = Array(8...22) // jam 08.00 - 22.00
@@ -147,14 +147,16 @@ struct OperationalCarView: View {
     
     func fetchBookCars(for date: Date) async {
         do {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            let todayString = formatter.string(from: date)
-            
-            print("🗓️ Query date: \(todayString)")
-            
-            let response: [BookingCar] = try await SupabaseManager.shared.client
+            // "yyyy-MM-dd" untuk kolom DATE
+            let dayFormatter = DateFormatter()
+            dayFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dayFormatter.dateFormat = "yyyy-MM-dd"
+            let dateOnly = dayFormatter.string(from: date)
+
+            print("🗓️ Query date: \(dateOnly)")
+
+            // Query → execute → decode pakai JSONDecoder.bookingDecoder
+            let raw = try await SupabaseManager.shared.client
                 .from("bookings_car")
                 .select("""
                     *,
@@ -162,42 +164,52 @@ struct OperationalCarView: View {
                     driver:driver_id(*),
                     destination:destinations!destinations_bc_id_fkey(*)
                 """)
-                .eq("bc_date", value: todayString)
+                .eq("bc_date", value: dateOnly)
+                .order("bc_start", ascending: true)
                 .execute()
-                .value
-            
-            print("✅ Response count: \(response.count)")
-            print("✅ Response detail: \(response)")
-            
-            // 🟢 Konversi BookingCar → Event
-            let newEvents: [carEvent] = response.compactMap { booking in
+
+            let rows: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+                [BookingCarJoined].self,
+                from: raw.data
+            )
+
+            print("✅ Response count: \(rows.count)")
+            // print("✅ Detail: \(rows)")
+
+            // Mapping → carEvent
+            let newEvents: [carEvent] = rows.compactMap { booking in
+                guard let user = booking.user, let driver = booking.driver else { return nil }
+
+                func parseHHmm(_ s: String) -> (h: Int, m: Int)? {
+                    let p = s.split(separator: ":").compactMap { Int($0) }
+                    guard p.count >= 2 else { return nil }
+                    return (p[0], p[1])
+                }
+
                 guard
-                    let user = booking.user,
-                    let driver = booking.driver
+                    let s = parseHHmm(booking.bc_start),
+                    let e = parseHHmm(booking.bc_end)
                 else { return nil }
-                
-                // parse start/end time
-                let startParts = booking.bc_start.split(separator: ":").compactMap { Int($0) }
-                let endParts = booking.bc_end.split(separator: ":").compactMap { Int($0) }
-                
-                guard startParts.count >= 2, endParts.count >= 2 else { return nil }
-                
+
+                let destText = (booking.destination?.map { $0.destination_name }.joined(separator: ", ")) ?? "-"
+
                 return carEvent(
-                    driver: String(driver.driver_id),  // atau driver.name kalau ada
+                    driver: String(driver.driver_id),        // ganti ke driver_name kalau ada
                     from: booking.bc_from,
-                    destination: booking.destination?.map { $0.destination_name }.joined(separator: ", ") ?? "-",
+                    destination: destText,
                     participant: "\(booking.bc_people)",
                     name: user.user_name,
                     dept: user.user_dept,
-                    startHour: startParts[0],
-                    startMinute: startParts[1],
-                    endHour: endParts[0],
-                    endMinute: endParts[1]
+                    startHour: s.h,
+                    startMinute: s.m,
+                    endHour: e.h,
+                    endMinute: e.m
                 )
             }
-            DispatchQueue.main.async {
-                cars = response
-                events = newEvents
+
+            await MainActor.run {
+                self.cars = rows
+                self.events = newEvents
             }
 
         } catch {

@@ -1,13 +1,13 @@
 //
-//  BookingCar.swift
+//  BookingCarJoined.swift
 //  HC Approval
 //
-//  Created by Euginia Gabrielle on 28/08/25.
+//  Created by Felicia Stevany Lewa on 28/08/25.
 //
 
 import Foundation
 
-struct BookingCar: Codable, Identifiable {
+struct BookingCarJoined: Codable, Identifiable {
     let bc_id: Int
     let user_id: Int
     let driver_id: Int
@@ -20,9 +20,12 @@ struct BookingCar: Codable, Identifiable {
     let bc_status: String
     let bc_decline_reason: String
     let carpool_req: Bool
-    let carpool_status: String
     let carpool_desc: String
     let created_at: Date
     
-    var id: Int{bc_id}
+    let driver: Driver?
+    let destination: [Destination]?
+    let user: User?
+    
+    var id: Int { bc_id }
 }
