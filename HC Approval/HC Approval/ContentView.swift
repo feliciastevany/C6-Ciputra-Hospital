@@ -30,7 +30,7 @@ struct ContentView: View {
                     Image(systemName: "person.3")
                     Text("Meeting Room")
                 }
-            ApprovalsView()
+            OperationalCarView()
                 .tabItem {
                     Image(systemName: "car")
                     Text("Operational Car")

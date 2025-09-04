@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MeetingRoomView: View {
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToProfil = false
+    
     @State private var selectedDate = Date()
     @State private var currentMonth = Date()
     @State private var rooms: [BookingRoomJoined] = []
@@ -17,50 +20,49 @@ struct MeetingRoomView: View {
     let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header + Month + Date Selector
-            NavigationStack{
+        NavigationStack{
+            VStack(spacing: 0) {
+                // Header + Month + Date Selector
+                
                 //Header
                 HStack {
                     Text("Meeting Rooms")
                         .font(.title)
                         .bold()
-
+                    
                     Spacer()
                     Button(action: {
                         print("Profile tapped")
                     }) {
                         Image(systemName: "person.crop.circle")
                             .resizable()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 32, height: 32)
                             .foregroundColor(.blue)
+                    }.navigationDestination(isPresented: $goToProfil) {
+                        ProfilView(userId: loggedInUserId)
                     }
                 }
-                .padding()
+                .padding(.top)
+                .padding(.horizontal)
                 
+                MeetingRoomsView()
                 
-                VStack
-                {
-                    MeetingRoomsView()
-//                        .padding(.top, -15)
-//                        .padding(.bottom, 10)
-                    
-//                    Spacer()
+                VStack {
                     HStack {
                         Text("Schedule")
                             .font(.title3)
                             .bold()
                         Spacer()
                     }
-                    .padding()
+                    .padding(.top, 5)
+                    .padding(.horizontal)
                     
                     WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
                         .frame(height: 120)
                         .padding(.horizontal, -2)
                     
+                    Divider()
                 }
-                
-//                Divider()
                 
                 // Timeline + Schedule
                 ScrollView([.horizontal, .vertical]) {
@@ -124,21 +126,20 @@ struct MeetingRoomView: View {
                             .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 90)
                         }
                     }
-                    .padding()
+                    .padding(.horizontal)
                 }
-
+                .background(Color(.systemBackground))
             }
             .background(Color(.systemGray6))
-            
-        }
-        // setiap kali selectedDate berubah → fetch ulang
-        .onChange(of: selectedDate) { _ in
-            Task {
-                await fetchBookRooms(for: selectedDate)
+            // setiap kali selectedDate berubah → fetch ulang
+            .onChange(of: selectedDate) { _ in
+                Task {
+                    await fetchBookRooms(for: selectedDate)
+                }
             }
-        }
-        .task {
-            await fetchBookRooms(for: selectedDate) // pertama kali load
+            .task {
+                await fetchBookRooms(for: selectedDate) // pertama kali load
+            }
         }
     }
     private var filteredRooms: [String] {

@@ -17,10 +17,8 @@ struct BookingCard: View {
     
     var body: some View {
         VStack (alignment: .leading, spacing: 3){
-//            HStack {
-                Text(title)
-                    .font(.title3.bold())
-                
+            Text(title)
+                .font(.title3.bold())
 //                Spacer()
 //                
 //                Text(date.toEnglishFormat())
