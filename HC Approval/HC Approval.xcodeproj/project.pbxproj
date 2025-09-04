@@ -12,13 +12,20 @@
 		2A85FB132E68259500A63BC4 /* ParticipantBr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB122E68257D00A63BC4 /* ParticipantBr.swift */; };
 		2A85FB152E68268400A63BC4 /* ParticipantBc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB142E68268400A63BC4 /* ParticipantBc.swift */; };
 		BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249B02E5F604D00F92305 /* SupabaseManager.swift */; };
-    
 		BEC249C32E5F614C00F92305 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C22E5F614C00F92305 /* Auth */; };
 		BEC249C52E5F614C00F92305 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C42E5F614C00F92305 /* Functions */; };
 		BEC249C72E5F614C00F92305 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C62E5F614C00F92305 /* PostgREST */; };
 		BEC249C92E5F614C00F92305 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C82E5F614C00F92305 /* Realtime */; };
 		BEC249CB2E5F614C00F92305 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249CA2E5F614C00F92305 /* Storage */; };
 		BEC249CE2E5F625800F92305 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249CD2E5F625800F92305 /* Supabase */; };
+		BEC249E02E5FF66C00F92305 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249DF2E5FF66A00F92305 /* Room.swift */; };
+		BEC249E22E5FF7AE00F92305 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249E12E5FF7AB00F92305 /* Property.swift */; };
+		BEC249E42E5FF82800F92305 /* Driver.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249E32E5FF82700F92305 /* Driver.swift */; };
+		BEC249E62E602B4E00F92305 /* BookingRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249E52E602B3B00F92305 /* BookingRoom.swift */; };
+		BEC249E82E602C8600F92305 /* BookingRoomDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249E72E602C7F00F92305 /* BookingRoomDetail.swift */; };
+		BEC249EA2E602E3100F92305 /* BookingCar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249E92E602E2D00F92305 /* BookingCar.swift */; };
+		BEC249EC2E602F9D00F92305 /* Destination.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249EB2E602F9B00F92305 /* Destination.swift */; };
+		BEE6AFC72E5F5A3F00BE084D /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE6AFC32E5F53EA00BE084D /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,7 +49,6 @@
 		2A1D75872E5DC68000414DC8 /* HC Approval.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HC Approval.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A1D75942E5DC68100414DC8 /* HC ApprovalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "HC ApprovalTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A1D759E2E5DC68100414DC8 /* HC ApprovalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "HC ApprovalUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-
 		2A442ADA2E6089AA00314464 /* BookingCarJoined.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingCarJoined.swift; sourceTree = "<group>"; };
 		2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingRoomJoined.swift; sourceTree = "<group>"; };
 		2A85FB122E68257D00A63BC4 /* ParticipantBr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantBr.swift; sourceTree = "<group>"; };
@@ -56,7 +62,6 @@
 		BEC249E92E602E2D00F92305 /* BookingCar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingCar.swift; sourceTree = "<group>"; };
 		BEC249EB2E602F9B00F92305 /* Destination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Destination.swift; sourceTree = "<group>"; };
 		BEE6AFC32E5F53EA00BE084D /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -73,11 +78,6 @@
 		2A1D75A12E5DC68100414DC8 /* HC ApprovalUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "HC ApprovalUITests";
-			sourceTree = "<group>";
-		};
-		BEC24A902E66FD1900F92305 /* Model */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -116,7 +116,7 @@
 		2A1D757E2E5DC68000414DC8 = {
 			isa = PBXGroup;
 			children = (
-				BEC24A902E66FD1900F92305 /* Model */,
+				BEE6AFC02E5F52EF00BE084D /* Model */,
 				2A1D75892E5DC68000414DC8 /* HC Approval */,
 				2A1D75972E5DC68100414DC8 /* HC ApprovalTests */,
 				2A1D75A12E5DC68100414DC8 /* HC ApprovalUITests */,
@@ -142,7 +142,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-
 		BEE6AFC02E5F52EF00BE084D /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -163,7 +162,6 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
-
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -181,7 +179,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				2A1D75892E5DC68000414DC8 /* HC Approval */,
-				BEC24A902E66FD1900F92305 /* Model */,
 			);
 			name = "HC Approval";
 			packageProductDependencies = (
