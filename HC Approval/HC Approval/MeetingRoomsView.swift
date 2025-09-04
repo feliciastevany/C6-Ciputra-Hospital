@@ -15,8 +15,10 @@ struct MeetingRoomsView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            VStack (spacing: 10){
                 DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
+                
+                Divider()
                 
                 HStack {
                     Text("Capacity")
@@ -66,7 +68,7 @@ struct MeetingRoomsView: View {
                 //                .listStyle(PlainListStyle())
             }
             .padding()
-            .navigationTitle("Meeting Rooms")
+            //.navigationTitle("Meeting Rooms")
         }
     }
 }

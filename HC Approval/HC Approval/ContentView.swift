@@ -25,7 +25,7 @@ struct ContentView: View {
                     Image(systemName: "text.page")
                     Text("Bookings")
                 }
-            MeetingRoomsView()
+            MeetingRoomView()
                 .tabItem {
                     Image(systemName: "person.3")
                     Text("Meeting Room")
