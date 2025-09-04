@@ -72,7 +72,7 @@ struct ApprovalsView: View {
                     }) {
                         Image(systemName: "person.crop.circle")
                             .resizable()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 32, height: 32)
                             .foregroundColor(Color(.systemBlue))
                     }.navigationDestination(isPresented: $goToProfil) {
                         ProfilView(userId: loggedInUserId)

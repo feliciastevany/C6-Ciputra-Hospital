@@ -17,23 +17,14 @@ struct BookingCard: View {
     
     var body: some View {
         VStack (alignment: .leading, spacing: 3){
-//            HStack {
-                Text(title)
-                    .font(.title3.bold())
-                
-//                Spacer()
-//                
-//                Text(date.toEnglishFormat())
-//                    .font(.subheadline)
-//                    .foregroundStyle(.secondary)
-//            }
-            
+            Text(title)
+                .font(.headline)
             Text("\(startTime) - \(endTime) WIB")
-                .font(.title3.bold())
+                .font(.headline)
             
             HStack {
                 Text(event)
-                    .font(.subheadline)
+                    .font(.footnote)
                 
                 Spacer()
                 
@@ -51,27 +42,27 @@ struct BookingCard: View {
         switch status {
         case "Pending":
             Image(systemName: "clock")
-                .foregroundColor(Color(.systemOrange))
+                .foregroundColor(Color(.systemGray2))
             Text(status)
-                .font(.headline.bold())
-                .foregroundColor(Color(.systemOrange))
+                .font(.subheadline.bold())
+                .foregroundColor(Color(.systemGray2))
         case "Approved":
             Image(systemName: "checkmark")
-                .foregroundColor(Color(.systemGreen))
+                .foregroundColor(Color(.systemBlue))
             Text(status)
-                .font(.headline.bold())
-                .foregroundColor(Color(.systemGreen))
+                .font(.subheadline.bold())
+                .foregroundColor(Color(.systemBlue))
         case "Declined":
             Image(systemName: "xmark")
                 .foregroundColor(Color(.systemRed))
             Text(status)
-                .font(.headline.bold())
+                .font(.subheadline.bold())
                 .foregroundColor(Color(.systemRed))
         default:
             Image(systemName: "minus")
                 .foregroundColor(Color(.systemOrange))
             Text(status)
-                .font(.headline.bold())
+                .font(.subheadline.bold())
                 .foregroundColor(Color(.systemOrange))
         }
     }

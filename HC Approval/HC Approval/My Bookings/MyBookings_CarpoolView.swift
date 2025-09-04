@@ -29,8 +29,12 @@ struct CarpoolCard: View {
                     HStack (spacing: 4){
                         VStack (spacing: 3) {
                             Image(systemName: "person.crop.circle")
+                                .scaledToFit()
+                                .frame(width: 13, height: 13)
                             
-                            Image(systemName: "mappin")
+                            Image(systemName: "location")
+                                .scaledToFit()
+                                .frame(width: 13, height: 13)
                         }
                         
                         VStack (alignment: .leading, spacing: 3){
@@ -52,13 +56,13 @@ struct CarpoolCard: View {
                     })  {
                         HStack {
                             Image(systemName: "xmark")
-                                .font(.footnote.bold())
+                                .font(.caption2.bold())
                             
                             Text("Decline")
-                                .font(.footnote.bold())
+                                .font(.caption2.bold())
                         }
                         .padding(.vertical, 10)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 6)
                         .background(Color(.systemRed))
                         .foregroundColor(.white)
                         .cornerRadius(10)
@@ -70,13 +74,13 @@ struct CarpoolCard: View {
                     })  {
                         HStack {
                             Image(systemName: "checkmark")
-                                .font(.footnote.bold())
+                                .font(.caption2.bold())
                             
                             Text("Approve")
-                                .font(.footnote.bold())
+                                .font(.caption2.bold())
                         }
                         .padding(.vertical, 10)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 6)
                         .background(Color(.systemBlue))
                         .foregroundColor(.white)
                         .cornerRadius(10)
@@ -86,26 +90,26 @@ struct CarpoolCard: View {
             Divider()
             
             VStack (alignment: .leading){
-//                HStack {
+                HStack {
                     Text(title)
-                        .font(.title3.bold())
+                        .font(.headline)
                     
-//                    Spacer()
-//                    
-//                    Text(date.toEnglishFormat())
-//                        .font(.subheadline)
-//                        .foregroundStyle(.secondary)
-//                    
-//                }
+                    Spacer()
+                    
+                    Text(date.toEnglishFormat())
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    
+                }
                 
                 Text("\(startTime) - \(endTime) WIB")
-                    .font(.title3.bold())
+                    .font(.headline)
                 
                 HStack {
-                    Image(systemName: "mappin")
+                    Image(systemName: "location")
                     
                     Text(event)
-                        .font(.subheadline)
+                        .font(.footnote)
                     
                     Spacer()
                     
@@ -113,7 +117,11 @@ struct CarpoolCard: View {
 //                        pressed = true
                     }) {
                         Text("See Details")
-                            .font(.caption)
+                            .font(.footnote)
+                            .foregroundStyle(Color(.systemBlue))
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.footnote)
                             .foregroundStyle(Color(.systemBlue))
                     }
                 }

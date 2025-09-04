@@ -19,7 +19,7 @@ struct StatusView: View {
             VStack (alignment: .leading, spacing: 3){
                 HStack {
                     Text(title)
-                        .font(.title3.bold())
+                        .font(.headline)
                     
                     Spacer()
                     
@@ -29,10 +29,10 @@ struct StatusView: View {
                 }
                 
                 Text("\(startTime) - \(endTime) WIB")
-                    .font(.title3.bold())
+                    .font(.headline)
                 
                 Text(event)
-                    .font(.subheadline)
+                    .font(.footnote)
             }
             .padding(14)
             .background(Color(.systemBackground))
