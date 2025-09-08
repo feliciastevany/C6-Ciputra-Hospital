@@ -1,9 +1,3 @@
-//
-//  My Bookings.swift
-//  HC Approval
-//
-//  Created by Graciella Michelle Siswoyo on 28/08/25.
-//
 import SwiftUI
 
 struct MyBookings : View {

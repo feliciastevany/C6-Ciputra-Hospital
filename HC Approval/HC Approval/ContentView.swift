@@ -20,7 +20,7 @@ struct ContentView: View {
                         Text("Approvals")
                     }
             }
-            MyBookings()
+            ApprovalsView()
                 .tabItem {
                     Image(systemName: "text.page")
                     Text("Bookings")
