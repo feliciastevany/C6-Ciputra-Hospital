@@ -76,6 +76,7 @@ struct ApprovalsView: View {
                             .frame(width: 32, height: 32)
                             .foregroundColor(Color(.systemBlue))
                             .accessibilityLabel("My Profile")
+
                     }.navigationDestination(isPresented: $goToProfil) {
                         ProfilView(userId: loggedInUserId)
                     }

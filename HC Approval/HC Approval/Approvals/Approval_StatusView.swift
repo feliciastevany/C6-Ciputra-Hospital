@@ -38,6 +38,7 @@ struct StatusView: View {
                 Text(event)
                     .font(.footnote)
                     .accessibilityLabel("Booking Event: \(event)")
+
             }
             .padding(14)
             .background(Color(.systemBackground))

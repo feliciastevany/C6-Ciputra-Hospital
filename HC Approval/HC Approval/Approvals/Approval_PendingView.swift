@@ -40,6 +40,7 @@ struct PendingView: View {
             Text(event)
                 .font(.footnote)
                 .accessibilityLabel("Booking Event: \(event)")
+
             
             HStack {
                 Button(action: {

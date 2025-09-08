@@ -59,6 +59,7 @@ struct MyBookings : View {
                 .accessibilityHint("Switch between rooms and cars")
 
                 
+
                 
                 ScrollView {
                     VStack (spacing: 15) {
@@ -70,6 +71,7 @@ struct MyBookings : View {
                                         .foregroundStyle(.secondary)
                                         .accessibilityLabel("")
                                         .accessibilityHint("Bookings on \(date.toEnglishFormat())")
+
                                     
                                     ForEach(groupedRooms[date] ?? [], id: \.bookId) { booking in
                                         BookingCard(

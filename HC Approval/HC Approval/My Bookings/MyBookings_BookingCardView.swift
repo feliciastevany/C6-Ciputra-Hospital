@@ -24,6 +24,7 @@ struct BookingCard: View {
             Text("\(startTime) - \(endTime) WIB")
                 .font(.headline)
                 .accessibilityLabel("From: \(startTime) to: \(endTime) WIB")
+
             
             HStack {
                 Text(event)
@@ -33,6 +34,7 @@ struct BookingCard: View {
                 
                 statusView(status: status)
                     .accessibilityLabel("Booking Status: \(status)")
+
             }
         }
         .padding(14)
