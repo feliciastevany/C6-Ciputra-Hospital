@@ -16,12 +16,12 @@ struct ContentView: View {
                     Text("Approvals")
 //                    Label("Home", systemImage: "house.fill")
                 }
-            MyBookings()
-                .tabItem {
-                    Image(systemName: "text.page")
-                    Text("Bookings")
-//                    Label("Home", systemImage: "house.fill")
-                }
+//            MyBookings()
+//                .tabItem {
+//                    Image(systemName: "text.page")
+//                    Text("Bookings")
+////                    Label("Home", systemImage: "house.fill")
+//                }
             ApprovalsView()
                 .tabItem {
                     Image(systemName: "person.3")
