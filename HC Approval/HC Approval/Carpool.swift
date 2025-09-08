@@ -13,4 +13,6 @@ struct Carpool: Identifiable {
     var arrive: String
     var location: String
     var date: String
+    var requestor: String
+    var to: String
 }

@@ -21,7 +21,7 @@ struct PendingView: View {
         VStack (alignment: .leading, spacing: 3){
             HStack {
                 Text(title)
-                    .font(.title3.bold())
+                    .font(.headline.bold())
                 
                 Spacer()
                 
@@ -31,10 +31,10 @@ struct PendingView: View {
             }
             
             Text("\(startTime) - \(endTime) WIB")
-                .font(.title3.bold())
+                .font(.headline.bold())
             
             Text(event)
-                .font(.subheadline)
+                .font(.footnote)
             
             HStack {
                 Button(action: {
@@ -82,4 +82,8 @@ struct PendingView: View {
         .background(Color(.systemBackground))
         .cornerRadius(10)
     }
+}
+
+#Preview {
+    ApprovalsView()
 }
