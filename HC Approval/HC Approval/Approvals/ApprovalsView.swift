@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ApprovalsView: View {
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToProfil = false
+    
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
@@ -65,13 +68,15 @@ struct ApprovalsView: View {
                     
                     Button(action: {
                         print("Profile tapped")
+                        goToProfil = true
                     }) {
                         Image(systemName: "person.crop.circle")
                             .resizable()
                             .frame(width: 32, height: 32)
                             .foregroundColor(Color(.systemBlue))
+                    }.navigationDestination(isPresented: $goToProfil) {
+                        ProfilView(userId: loggedInUserId)
                     }
-                                    .padding(.bottom, 3)
                 }
                 .padding(.top)
                 
@@ -95,6 +100,7 @@ struct ApprovalsView: View {
                 
             }
             .padding(.horizontal)
+            
             
             ScrollView {
                 VStack (spacing: 15) {
@@ -126,40 +132,51 @@ struct ApprovalsView: View {
         }
         .background(Color(.systemGray6))
     }
-    
+//    func fetchAllBookings() async {
+//        do {
+//            let responseRooms = try await SupabaseManager.shared.client
+//                .from("bookings_room")
+//                .select("""
+//                        *, room:rooms(*), user: users(*)
+//                        """)
+//                .execute()
+//            
+//            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+//                [BookingRoomJoined].self,
+//                from: responseRooms.data
+//            )
+//            
+//            let responseCars = try await SupabaseManager.shared.client
+//                .from("bookings_car")
+//                .select("""
+//                        *, destination:destinations(*), driver:drivers(*), user: users(*)
+//                        """)
+//                .execute()
+//            
+//            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+//                [BookingCarJoined].self,
+//                from: responseCars.data
+//            )
+//            
+//            DispatchQueue.main.async {
+//                self.bookingRoom = rooms
+//                self.bookingCar = cars
+//            }
+//            print("respones: ", rooms, cars)
+//        } catch {
+//            print("Error fetch bookings:", error)
+//        }
+//    }
     func fetchAllBookings() async {
         do {
-            let responseRooms = try await SupabaseManager.shared.client
-                .from("bookings_room")
-                .select("""
-                        *, room:rooms(*), user: users(*)
-                        """)
-                .execute()
-            
-            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
-                [BookingRoomJoined].self,
-                from: responseRooms.data
-            )
-            
-            let responseCars = try await SupabaseManager.shared.client
-                .from("bookings_car")
-                .select("""
-                        *, destination:destinations(*), driver:drivers(*), user: users(*)
-                        """)
-                .execute()
-            
-            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
-                [BookingCarJoined].self,
-                from: responseCars.data
-            )
-            
+            let (rooms, cars) = try await SupabaseManager.shared.fetchBookings()
             DispatchQueue.main.async {
                 self.bookingRoom = rooms
                 self.bookingCar = cars
             }
             print("respones: ", rooms, cars)
         } catch {
-            print("Error fetch bookings:", error)
+            print("Error fetch my bookings:", error)
         }
     }
     func bookingView(title: String, event: String, date: Date, startTime: String, endTime: String, status: String, bookings: any AnyBooking) -> some View {
@@ -196,16 +213,10 @@ struct ApprovalsView: View {
                 )
             )
         }
-        
-//        .padding(14)
-//        //    .frame(width: 365)
-//        .background(Color(.systemBackground))
-//        .cornerRadius(10)
-//        //    .shadow(radius: 5, x: 3, y: 3)
-//        .padding(.horizontal, 20)
     }
 }
 
+    
 func toHourMinute(_ timeString: String) -> String {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -218,7 +229,7 @@ func toHourMinute(_ timeString: String) -> String {
     }
     return timeString
 }
-
+    
 extension SupabaseManager {
     func updateBookingStatus(booking: any AnyBooking, status: String) async throws {
         if let roomBooking = booking as? BookingRoomJoined {
