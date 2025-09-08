@@ -38,7 +38,7 @@ struct OperationalCarView: View {
                     }) {
                         Image(systemName: "person.crop.circle")
                             .resizable()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 32, height: 32)
                             .foregroundColor(.blue)
                     }.navigationDestination(isPresented: $goToProfil) {
                         ProfilView(userId: loggedInUserId)
@@ -56,7 +56,7 @@ struct OperationalCarView: View {
             Divider()
             
             // Timeline + Schedule
-            ScrollView([.horizontal, .vertical]) {
+            ScrollView([.horizontal, .vertical], showsIndicators: false) {
                 HStack(alignment: .top, spacing: 0) {
                     // Kolom jam di sisi kiri
                     VStack(spacing: 0) {
