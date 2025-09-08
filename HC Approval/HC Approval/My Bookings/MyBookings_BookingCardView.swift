@@ -19,52 +19,56 @@ struct BookingCard: View {
         VStack (alignment: .leading, spacing: 3){
             Text(title)
                 .font(.headline)
+                .accessibilityLabel("Booking for: \(title)")
+                                    
             Text("\(startTime) - \(endTime) WIB")
                 .font(.headline)
+                .accessibilityLabel("From: \(startTime) to: \(endTime) WIB")
             
             HStack {
                 Text(event)
                     .font(.footnote)
-                
+                    .accessibilityLabel("Booking event: \(event)")
                 Spacer()
                 
                 statusView(status: status)
+                    .accessibilityLabel("Booking Status: \(status)")
             }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.systemBackground))
         .cornerRadius(10)
+        
     }
     
-    @ViewBuilder
+    
     private func statusView(status: String) -> some View {
+        let color: Color
+        let systemImage: String
+
         switch status {
         case "Pending":
-            Image(systemName: "clock")
-                .foregroundColor(Color(.systemGray2))
-            Text(status)
-                .font(.subheadline.bold())
-                .foregroundColor(Color(.systemGray2))
+            color = Color(.systemGray2)
+            systemImage = "clock"
         case "Approved":
-            Image(systemName: "checkmark")
-                .foregroundColor(Color(.systemBlue))
-            Text(status)
-                .font(.subheadline.bold())
-                .foregroundColor(Color(.systemBlue))
+            color = Color(.systemBlue)
+            systemImage = "checkmark"
         case "Declined":
-            Image(systemName: "xmark")
-                .foregroundColor(Color(.systemRed))
-            Text(status)
-                .font(.subheadline.bold())
-                .foregroundColor(Color(.systemRed))
+            color = Color(.systemRed)
+            systemImage = "xmark"
         default:
-            Image(systemName: "minus")
-                .foregroundColor(Color(.systemOrange))
-            Text(status)
-                .font(.subheadline.bold())
-                .foregroundColor(Color(.systemOrange))
+            color = Color(.systemOrange)
+            systemImage = "minus"
         }
+
+        return Label(status, systemImage: systemImage)
+            .font(.subheadline.bold())
+            .foregroundColor(color)
+            .accessibilityLabel(status)
     }
 }
 
+#Preview {
+    BookingCard(title: "Meeting Room 1", date: Date(), event: "Rapat Keuangan 1", startTime: "08.00", endTime: "10.00", status: "Approved")
+}

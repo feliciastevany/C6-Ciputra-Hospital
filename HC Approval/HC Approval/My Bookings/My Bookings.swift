@@ -49,14 +49,16 @@ struct MyBookings : View {
                 }
                 .padding(.top)
                 
-                Picker("", selection: $segmentedControl){
+                Picker("Booking type", selection: $segmentedControl) {
                     Text("Rooms").tag(0)
-                        .accessibilityHint("Segmented control Rooms")
                     Text("Cars").tag(1)
-                        .accessibilityHint("Segmented control Cars")
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.bottom, 15)
+                .accessibilityLabel("Booking type")
+                .accessibilityHint("Switch between rooms and cars")
+
+                
                 
                 ScrollView {
                     VStack (spacing: 15) {
@@ -66,6 +68,8 @@ struct MyBookings : View {
                                     Text("\(date.toEnglishFormat())")
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
+                                        .accessibilityLabel("")
+                                        .accessibilityHint("Bookings on \(date.toEnglishFormat())")
                                     
                                     ForEach(groupedRooms[date] ?? [], id: \.bookId) { booking in
                                         BookingCard(

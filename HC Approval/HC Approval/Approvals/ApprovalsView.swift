@@ -63,6 +63,7 @@ struct ApprovalsView: View {
                 HStack {
                     Text("Booking Request")
                         .font(.title.bold())
+                        .accessibilityLabel("My Booking Requests")
                     
                     Spacer()
                     
@@ -74,6 +75,7 @@ struct ApprovalsView: View {
                             .resizable()
                             .frame(width: 32, height: 32)
                             .foregroundColor(Color(.systemBlue))
+                            .accessibilityLabel("My Profile")
                     }.navigationDestination(isPresented: $goToProfil) {
                         ProfilView(userId: loggedInUserId)
                     }

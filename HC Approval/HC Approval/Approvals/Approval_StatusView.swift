@@ -20,19 +20,24 @@ struct StatusView: View {
                 HStack {
                     Text(title)
                         .font(.headline)
+                        .accessibilityLabel("Booking for: \(title)")
                     
                     Spacer()
                     
                     Text(date.toEnglishFormat())
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("")
+                        .accessibilityHint("On: \(date.toEnglishFormat())")
                 }
                 
                 Text("\(startTime) - \(endTime) WIB")
                     .font(.headline)
+                    .accessibilityLabel("From \(startTime) to \(endTime) WIB")
                 
                 Text(event)
                     .font(.footnote)
+                    .accessibilityLabel("Booking Event: \(event)")
             }
             .padding(14)
             .background(Color(.systemBackground))
