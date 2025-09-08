@@ -176,62 +176,62 @@ struct ApprovalsView: View {
                         await fetchAllBookings()
                     }
                 }
+            }
+            .background(Color(.systemGray6))
+            
+            if showDeclineSheet {
+                Color.black.opacity(0.3).ignoresSafeArea()
                 
-                
-                if showDeclineSheet {
-                    Color.black.opacity(0.3).ignoresSafeArea()
+                VStack(spacing: 16) {
+                    Text("Decline Reason")
+                        .font(.title3.bold())
                     
-                    VStack(spacing: 16) {
-                        Text("Decline Reason")
-                            .font(.title3.bold())
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $declineReason)
+                            .frame(height: 110)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color(.systemGray), lineWidth: 1)
+                            )
                         
-                        ZStack(alignment: .topLeading) {
-                            TextEditor(text: $declineReason)
-                                .frame(height: 110)
-                                .padding(.vertical, 5)
-                                .padding(.horizontal, 10)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color(.systemGray), lineWidth: 1)
-                                )
-                            
-                            if declineReason.isEmpty {
-                                Text("Enter reason...")
-                                    .foregroundColor(Color(.systemGray3))
-                                    .padding(.top, 14)
-                                    .padding(.leading, 15)
-                            }
-                        }
-                        
-                        HStack {
-                            Button("Cancel") { showDeclineSheet = false }
-                            Spacer()
-                            Button("Submit") {
-                                print("Reason: \(declineReason)")
-                                Task {
-                                    if let booking = selectedBooking {
-                                        try? await SupabaseManager.shared.updateBookingStatus(
-                                            booking: booking,
-                                            status: "Declined",
-                                            dec_reason: declineReason
-                                        )
-                                        await fetchAllBookings()
-                                    }
-                                    showDeclineSheet = false
-                                    declineReason = ""
-                                }
-                                
-                            }
-                            .disabled(declineReason.isEmpty)
+                        if declineReason.isEmpty {
+                            Text("Enter reason...")
+                                .foregroundColor(Color(.systemGray3))
+                                .padding(.top, 14)
+                                .padding(.leading, 15)
                         }
                     }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(radius: 8)
-                    .padding(40)
+                    
+                    HStack {
+                        Button("Cancel") { showDeclineSheet = false }
+                        Spacer()
+                        Button("Submit") {
+                            print("Reason: \(declineReason)")
+                            Task {
+                                if let booking = selectedBooking {
+                                    try? await SupabaseManager.shared.updateBookingStatus(
+                                        booking: booking,
+                                        status: "Declined",
+                                        dec_reason: declineReason
+                                    )
+                                    await fetchAllBookings()
+                                }
+                                showDeclineSheet = false
+                                declineReason = ""
+                            }
+                            
+                        }
+                        .disabled(declineReason.isEmpty)
+                    }
                 }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(radius: 8)
+                .padding(40)
             }
         }
     }
