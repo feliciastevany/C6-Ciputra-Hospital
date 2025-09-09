@@ -90,7 +90,9 @@ struct AvailableDriversView: View {
                                 .font(.headline)
                         }
                         
-                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: driverAvail.bookings)
+//                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: driverAvail.bookings)
+                        
+                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
                         
                         if availableSlots.isEmpty {
                             Text("Tidak ada slot tersedia")
@@ -121,6 +123,37 @@ struct AvailableDriversView: View {
                                 }
                             }
                         }
+                        
+//                        if driverAvail.availableSlots.isEmpty {
+//                            Text("Tidak ada slot tersedia")
+//                                .foregroundColor(.secondary)
+//                                .padding(.vertical, 8)
+//                        } else {
+//                            // Horizontal scroll of slots
+//                            ScrollView(.horizontal, showsIndicators: false) {
+//                                HStack(spacing: 8) {
+//                                    ForEach(driverAvail.availableSlots) { slot in
+//                                        NavigationLink(
+//                                            destination: CarDetailView(
+//                                                driver: driverAvail.driver,
+//                                                slot: slot,
+//                                                date: date,
+//                                                passengers: passengers,
+//                                                bookings: driverAvail.bookings
+//                                            )
+//                                        ) {
+//                                            Text(slot.start)
+//                                                .padding(.vertical, 8)
+//                                                .padding(.horizontal, 12)
+//                                                .background(Color.blue)
+//                                                .foregroundColor(.white)
+//                                                .cornerRadius(8)
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+                        
                     }
                     .padding()
                     .background(Color(.systemBackground))
@@ -359,9 +392,10 @@ struct CarDetailView: View {
     
     @State private var startTime: String = ""
     @State private var endTime: String = ""
-    @State private var goToSchedule = false
+//    @State private var goToSchedule = false
     @State private var outingDesc = ""
     
+    @State private var from: String = ""
     @State private var destinations: [String] = [""]
     @State private var showSuccess = false
     
@@ -398,6 +432,10 @@ struct CarDetailView: View {
                         Text(time).tag(time)
                     }
                 }.disabled(startTime.isEmpty)
+            }
+            
+            Section(header: Text("From")) {
+                TextField("From", text: $from)
             }
             
             Section(header: Text("Destinations")) {
@@ -461,7 +499,7 @@ struct CarDetailView: View {
                 bc_date: date,
                 bc_start: startTime,
                 bc_end: endTime,
-                bc_from: destinations.first ?? "",
+                bc_from: from,
                 bc_desc: outingDesc,
                 bc_people: passengers,
                 bc_status: "Pending",

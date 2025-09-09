@@ -42,6 +42,31 @@ struct trialdb: View {
     }
 }
 
+class ViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        Task {
+            do {
+                // Ambil semua driver aktif
+                let drivers = try await SupabaseManager.shared.fetchDrivers()
+//                print("Drivers:", drivers)
+                
+                // Kalau mau ambil booking driver pertama di tanggal tertentu
+                if let firstDriver = drivers.first {
+                    let bookings = try await SupabaseManager.shared.findAvailableDrivers(
+                        date: "2025-09-08"
+                    )
+                    print("Bookings for driver \(firstDriver.driver_name):", bookings)
+                }
+            } catch {
+                print("Error fetching data:", error)
+            }
+        }
+    }
+}
+
+
 #Preview {
-    trialdb()
+    ViewController()
 }

@@ -31,16 +31,16 @@ struct RoomAvailability: Identifiable {
     let availableSlots: [TimeSlot]
 }
 
-struct ErrorWrapper: Identifiable {
-    let id = UUID()
-    let message: String
-}
-
 struct DriverAvailability: Identifiable {
     let id = UUID()
     let driver: Driver
     let bookings: [BookingCar]
     let availableSlots: [TimeSlot]
+}
+
+struct ErrorWrapper: Identifiable {
+    let id = UUID()
+    let message: String
 }
 
 class SupabaseManager {
@@ -87,21 +87,21 @@ class SupabaseManager {
         return result
     }
     
-    func fetchBookingsCar(driverId: Int, date: String) async throws -> [BookingCar] {
-        try await client
-            .from("bookings_car")
-            .select()
-            .eq("driver_id", value: driverId)
-            .eq("bc_date", value: date)        
-            .execute()
-            .value
-    }
-    
     func fetchDrivers() async throws -> [Driver] {
         try await client
             .from("drivers")
             .select()
             .eq("driver_active", value: true)
+            .execute()
+            .value
+    }
+    
+    func fetchBookingsCar(driverId: Int, date: String) async throws -> [BookingCar] {
+        try await client
+            .from("bookings_car")
+            .select()
+            .eq("driver_id", value: driverId)
+            .eq("bc_date", value: date)
             .execute()
             .value
     }
@@ -119,13 +119,55 @@ class SupabaseManager {
         return result
     }
     
+    //    private func calculateAvailableRoomSlots(for bookings: [BookingRoom]) -> [TimeSlot] {
+    //        var slots: [TimeSlot] = []
+    //        let dayStart = "07:30"
+    //        let dayEnd = "21:00"
+    //
+    //        var currentStart = dayStart
+    //        for booking in bookings {
+    //            if currentStart < booking.br_start {
+    //                slots.append(TimeSlot(start: currentStart, end: booking.br_start))
+    //            }
+    //            currentStart = max(currentStart, booking.br_end)
+    //        }
+    //        if currentStart < dayEnd {
+    //            slots.append(TimeSlot(start: currentStart, end: dayEnd))
+    //        }
+    //        return slots
+    //    }
+    //
+    //    private func calculateAvailableDriverSlots(for bookings: [BookingCar]) -> [TimeSlot] {
+    //        var slots: [TimeSlot] = []
+    //        let dayStart = "07:30"
+    //        let dayEnd = "21:00"
+    //
+    //        var currentStart = dayStart
+    //        for booking in bookings {
+    //            if currentStart < booking.bc_start {
+    //                slots.append(TimeSlot(start: currentStart, end: booking.bc_start))
+    //            }
+    //            currentStart = max(currentStart, booking.bc_end)
+    //        }
+    //        if currentStart < dayEnd {
+    //            slots.append(TimeSlot(start: currentStart, end: dayEnd))
+    //        }
+    //        return slots
+    //    }
+    
     private func calculateAvailableRoomSlots(for bookings: [BookingRoom]) -> [TimeSlot] {
         var slots: [TimeSlot] = []
         let dayStart = "07:30"
         let dayEnd = "21:00"
         
+        // hanya booking aktif yang dipakai
+        let activeBookings = bookings.filter {
+            let status = $0.br_status.lowercased()
+            return status != "cancelled" && status != "declined"
+        }.sorted { $0.br_start < $1.br_start }
+        
         var currentStart = dayStart
-        for booking in bookings {
+        for booking in activeBookings {
             if currentStart < booking.br_start {
                 slots.append(TimeSlot(start: currentStart, end: booking.br_start))
             }
@@ -136,14 +178,20 @@ class SupabaseManager {
         }
         return slots
     }
-    
+
     private func calculateAvailableDriverSlots(for bookings: [BookingCar]) -> [TimeSlot] {
         var slots: [TimeSlot] = []
         let dayStart = "07:30"
         let dayEnd = "21:00"
         
+        // hanya booking aktif yang dipakai
+        let activeBookings = bookings.filter {
+            let status = $0.bc_status.lowercased()
+            return status != "cancelled" && status != "declined"
+        }.sorted { $0.bc_start < $1.bc_start }
+        
         var currentStart = dayStart
-        for booking in bookings {
+        for booking in activeBookings {
             if currentStart < booking.bc_start {
                 slots.append(TimeSlot(start: currentStart, end: booking.bc_start))
             }

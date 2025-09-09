@@ -11,7 +11,7 @@ struct BookingCar: Codable, Identifiable {
     var bc_id: Int
     var user_id: Int
     var driver_id: Int
-    var bc_date: Date
+    var bc_date: String
     var bc_start: String
     var bc_end: String
     var bc_from: String
