@@ -23,31 +23,41 @@ struct MyBookings : View {
     var filteredRooms: [BookingRoomJoined] {
         let today = Calendar.current.startOfDay(for: Date())
         let baseFilter = bookingRoom.filter { $0.br_date >= today }
-    
-        if searchText.isEmpty { return bookingRoom }
-        return baseFilter.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.br_event.localizedCaseInsensitiveContains(searchText)
-        }
+        
+        let filtered = searchText.isEmpty
+            ? baseFilter
+            : baseFilter.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.br_event.localizedCaseInsensitiveContains(searchText)
+            }
+        
+        return filtered.sorted { $0.br_date < $1.br_date }
     }
 
     var filteredCars: [BookingCarJoined] {
         let today = Calendar.current.startOfDay(for: Date())
         let baseFilter = bookingCar.filter { $0.bc_date >= today }
+        
+        let filtered = searchText.isEmpty
+            ? baseFilter
+            : baseFilter.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                ($0.destination?.last?.destination_name.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        
+        return filtered.sorted { $0.bc_date < $1.bc_date }
+    }
     
-        if searchText.isEmpty { return bookingCar }
-        return baseFilter.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            ($0.destination?.last?.destination_name.localizedCaseInsensitiveContains(searchText) ?? false)
-        }
-    }
-
-    var groupedRooms: [Date: [BookingRoomJoined]] {
+    var groupedRooms: [(date: Date, bookings: [BookingRoomJoined])] {
         Dictionary(grouping: filteredRooms, by: { $0.br_date })
+            .sorted { $0.key < $1.key }   // urut ascending
+            .map { ($0.key, $0.value) }
     }
 
-    var groupedCars: [Date: [BookingCarJoined]] {
+    var groupedCars: [(date: Date, bookings: [BookingCarJoined])] {
         Dictionary(grouping: filteredCars, by: { $0.bc_date })
+            .sorted { $0.key < $1.key }
+            .map { ($0.key, $0.value) }
     }
     
     var body: some View {
@@ -106,24 +116,22 @@ struct MyBookings : View {
                     Text("Cars").tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
-                .padding(.bottom, 10)
-//                .padding(.top, 5)
                 .accessibilityLabel("Booking type")
                 .accessibilityHint("Switch between rooms and cars")
                 
                 ScrollView {
                     VStack (spacing: 15) {
                         if segmentedControl == 0 {
-                            ForEach(groupedRooms.keys.sorted(by: { $0 > $1 }), id: \.self) { date in
+                            ForEach(groupedRooms, id: \.date) { group in
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("\(date.toEnglishFormat())")
+                                    Text("\(group.date.toEnglishFormat())")
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                         .accessibilityLabel("")
-                                        .accessibilityHint("Bookings on \(date.toEnglishFormat())")
+                                        .accessibilityHint("Bookings on \(group.date.toEnglishFormat())")
                                     
                                     
-                                    ForEach(groupedRooms[date] ?? [], id: \.bookId) { booking in
+                                    ForEach(group.bookings, id: \.bookId) { booking in
                                         BookingCard(
                                             title: booking.title,
                                             joinName: "",
@@ -171,7 +179,7 @@ struct MyBookings : View {
                                 by: { $0.bc_date }
                             )
                             
-                            ForEach(nonPendingGroupedCars.keys.sorted(by: { $0 > $1 }), id: \.self) { date in
+                            ForEach(nonPendingGroupedCars.keys.sorted(by: { $1 > $0 }), id: \.self) { date in
                                 
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("\(date.toEnglishFormat())")
@@ -190,7 +198,6 @@ struct MyBookings : View {
                                 }
                             }
                         }
-                        
                     }
                     .padding(.top, 10)
                     .task {
@@ -200,7 +207,6 @@ struct MyBookings : View {
             }
             .padding(.horizontal)
             .background(Color(.systemGray6))
-            
             .sheet(item: $selectedBookingCar) { car in
                 BookingCarDetailView(booking: car)
             }
@@ -246,7 +252,6 @@ struct MyBookings : View {
         }
     }
 }
-
 
 extension SupabaseManager {
     func approveCarpool(booking: any AnyBooking) async throws {
