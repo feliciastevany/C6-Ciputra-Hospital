@@ -33,7 +33,7 @@ extension SupabaseManager {
                     participant:participants_bc(*, user:users(*))
                 """)
         if let userId {
-            carQuery = carQuery.eq("user_id", value: userId)
+            carQuery = carQuery.or("user_id.eq.\(userId),carpool_req_id.eq.\(userId)")
         }
         
         let responseCars = try await carQuery.execute()
