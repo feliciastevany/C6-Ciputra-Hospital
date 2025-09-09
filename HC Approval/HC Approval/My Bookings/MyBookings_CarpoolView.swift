@@ -20,32 +20,22 @@ struct CarpoolCard: View {
     var onApprove: () -> Void = { }
     var onDecline: () -> Void = { }
     
-    var pressed: Bool = false
+    var onDetails: () -> Void = { }
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 3) {
             HStack {
-                VStack (alignment: .leading){
-                    HStack (spacing: 4){
-                        VStack (spacing: 3) {
-                            Image(systemName: "person.crop.circle")
-                                .scaledToFit()
-                                .frame(width: 13, height: 13)
-                            
-                            Image(systemName: "location")
-                                .scaledToFit()
-                                .frame(width: 13, height: 13)
-                        }
-                        
-                        VStack (alignment: .leading, spacing: 3){
-                            Text(carpool_req_name)
-                                .font(.footnote)
-                            
-                            Text(carpool_desc)
-                                .font(.footnote)
-                        }
-                    }
+                HStack {
+                    Image(systemName: "person.crop.circle")
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                        .foregroundStyle(Color(.systemBlue))
+                    
+                    Text(carpool_req_name)
+                        .font(.subheadline)
+                    
                 }
+                .lineLimit(1)
                 
                 Spacer()
                 
@@ -54,52 +44,54 @@ struct CarpoolCard: View {
                         onDecline()
                         print("button declined")
                     })  {
-                        HStack {
+                        HStack(spacing: 3) {
                             Image(systemName: "xmark")
                                 .font(.caption2.bold())
                             
                             Text("Decline")
                                 .font(.caption2.bold())
                         }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 6)
+                        .frame(width: 70)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 5)
                         .background(Color(.systemRed))
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(6)
                     }
                     
                     Button(action: {
                         onApprove()
                         print("button approved")
                     })  {
-                        HStack {
+                        HStack(spacing: 3) {
                             Image(systemName: "checkmark")
                                 .font(.caption2.bold())
                             
                             Text("Approve")
                                 .font(.caption2.bold())
                         }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 6)
+                        .frame(width: 70)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 5)
                         .background(Color(.systemBlue))
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(6)
                     }
                 }
             }
+            .padding(.bottom, 7)
             Divider()
             
-            VStack (alignment: .leading){
+            VStack (alignment: .leading, spacing: 3){
                 HStack {
                     Text(title)
                         .font(.headline)
                     
                     Spacer()
                     
-                    Text(date.toEnglishFormat())
-                        .font(.subheadline)
+                    Text("\(date.toEnglishFormat())")
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
-                    
                 }
                 
                 Text("\(startTime) - \(endTime) WIB")
@@ -107,6 +99,10 @@ struct CarpoolCard: View {
                 
                 HStack {
                     Image(systemName: "location")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.accentColor)
+                        .frame(width: 13, height: 13)
                     
                     Text(event)
                         .font(.footnote)
@@ -114,7 +110,7 @@ struct CarpoolCard: View {
                     Spacer()
                     
                     Button(action: {
-//                        pressed = true
+                        onDetails()
                     }) {
                         Text("See Details")
                             .font(.footnote)
@@ -126,9 +122,51 @@ struct CarpoolCard: View {
                     }
                 }
             }
+            .padding(.top, 7)
         }
         .padding(14)
         .background(Color(.systemBackground))
         .cornerRadius(10)
     }
+}
+
+struct BookingCarDetailView: View {
+    let booking: BookingCarJoined
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Carpool Details")
+                        .font(.title2.bold())
+                    
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("Done")
+                            .foregroundStyle(Color(.systemBlue))
+                    }
+                }
+                .padding(.vertical, 10)
+                
+                Text(booking.carpool_desc)
+                    .font(.body)
+                
+                Spacer()
+            }
+            .padding()
+        }
+    }
+}
+
+#Preview {
+    CarpoolCard(title: "Purbo", date: Date(), event: "Ciputra World", startTime: "09.30", endTime: "20.00", status: "Pending", carpool_req_name: "Angel", carpool_desc: "UC", onApprove: {
+        print("Approved")
+    }, onDecline: {
+        print("Declined")
+    }, onDetails: {
+        print("Details")
+    })
 }

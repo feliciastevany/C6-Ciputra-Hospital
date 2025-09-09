@@ -13,7 +13,6 @@ struct ApprovalsView: View {
     
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
-    
 
     @State private var selectedStatus: BookingStatus = .pending
     @State private var selectedType: BookingType = .all

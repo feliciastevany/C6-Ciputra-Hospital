@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BookingCard: View {
     let title: String
+    let joinName: String
     let date: Date
     let event: String
     let startTime: String
@@ -17,15 +18,23 @@ struct BookingCard: View {
     
     var body: some View {
         VStack (alignment: .leading, spacing: 3){
-            Text(title)
-                .font(.headline)
-                .accessibilityLabel("Booking for: \(title)")
+            HStack {
+                Text(title)
+                    .font(.headline)
+                    .accessibilityLabel("Booking for: \(title)")
+                
+                Spacer()
+                
+                Text(joinName)
+                    .font(.subheadline.italic())
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("Join With: \(joinName)")
+            }
                                     
             Text("\(startTime) - \(endTime) WIB")
                 .font(.headline)
                 .accessibilityLabel("From: \(startTime) to: \(endTime) WIB")
 
-            
             HStack {
                 Text(event)
                     .font(.footnote)
@@ -72,5 +81,5 @@ struct BookingCard: View {
 }
 
 #Preview {
-    BookingCard(title: "Meeting Room 1", date: Date(), event: "Rapat Keuangan 1", startTime: "08.00", endTime: "10.00", status: "Approved")
+    BookingCard(title: "Meeting Room 1", joinName: "Diana",date: Date(), event: "Rapat Keuangan 1", startTime: "08.00", endTime: "10.00", status: "Approved")
 }
