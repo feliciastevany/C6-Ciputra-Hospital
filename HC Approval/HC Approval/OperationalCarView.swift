@@ -20,8 +20,7 @@ struct OperationalCarView: View {
     let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header + Month + Date Selector
+        NavigationStack{
             VStack(spacing: 0) {
                 // Header
                 HStack {
@@ -46,99 +45,113 @@ struct OperationalCarView: View {
                 }
                 .padding()
                 
-                WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .car(selectedCar: $selectedCar))
-                    .frame(height: 120)
-                    .padding(.horizontal, -2)
+                // INI GANTI
+                MeetingRoomsView()
                 
-            }
-            .background(Color(.systemGray6))
-            
-            Divider()
-            
-            // Timeline + Schedule
-            ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                HStack(alignment: .top, spacing: 0) {
-                    // Kolom jam di sisi kiri
-                    VStack(spacing: 0) {
-                        ForEach(hours, id: \.self) { hour in
-                            HStack {
+                VStack {
+                    HStack {
+                        Text("Schedule")
+                            .font(.title3)
+                            .bold()
+                        Spacer()
+                    }
+                    .padding(.top, 5)
+                    .padding(.horizontal)
+                    
+                    WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .car(selectedCar: $selectedCar))
+                        .frame(height: 120)
+                        .padding(.horizontal, -2)
+                    
+                    Divider()
+                }
+                
+                // Timeline + Schedule
+                ScrollView([.horizontal, .vertical], showsIndicators: false) {
+                    HStack(alignment: .top, spacing: 0) {
+                        // Kolom jam di sisi kiri
+                        VStack(spacing: 0) {
+                            ForEach(hours, id: \.self) { hour in
                                 HStack {
-                                    Text("\(String(format: "%02d.00", hour))")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                    Spacer()
+                                    HStack {
+                                        Text("\(String(format: "%02d.00", hour))")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                        Spacer()
+                                    }
+                                    .frame(height: hourHeight)
+                                    .frame(width: 50, alignment: .leading)
+                                    
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(height: 1)
                                 }
-                                .frame(height: hourHeight)
-                                .frame(width: 50, alignment: .leading)
-                                
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 1)
                             }
                         }
-                    }
-                    
-                    // Grid tiap Car (anggap analogi room → car slot)
-                    ForEach(filteredCars, id: \.self) { car in
-                        VStack(spacing: 0) {
-                            ZStack(alignment: .topLeading) {
-                                // Background grid
-                                VStack(spacing: 0) {
-                                    ForEach(hours, id: \.self) { hour in
-                                        ZStack {
-                                            Rectangle()
-                                                .fill(Color.gray.opacity(0.3))
-                                                .frame(height: 1)
-                                            Rectangle()
-                                                .fill(Color.clear)
-                                                .frame(height: hourHeight)
+                        
+                        // Grid tiap Car (anggap analogi room → car slot)
+                        ForEach(filteredCars, id: \.self) { car in
+                            VStack(spacing: 0) {
+                                ZStack(alignment: .topLeading) {
+                                    // Background grid
+                                    VStack(spacing: 0) {
+                                        ForEach(hours, id: \.self) { hour in
+                                            ZStack {
+                                                Rectangle()
+                                                    .fill(Color.gray.opacity(0.3))
+                                                    .frame(height: 1)
+                                                Rectangle()
+                                                    .fill(Color.clear)
+                                                    .frame(height: hourHeight)
+                                            }
                                         }
                                     }
-                                }
-                                
-                                // Events
-                                ForEach(events.filter { $0.driver == car }) { event in
-                                    ScheduleBlockCar(
-                                        driver: event.driver,
-                                        from: event.from,
-                                        destination: event.destination,
-                                        participant: event.participant,
-                                        name: event.name,
-                                        dept: event.dept,
-                                        color: colorForCar(event.driver),
-                                        startHour: event.startHour,
-                                        startMinute: event.startMinute,
-                                        endHour: event.endHour,
-                                        endMinute: event.endMinute,
-                                        hourHeight: hourHeight
-                                    )
+                                    
+                                    // Events
+                                    ForEach(events.filter { $0.driver == car }) { event in
+                                        ScheduleBlockCar(
+                                            driver: event.driver,
+                                            from: event.from,
+                                            destination: event.destination,
+                                            participant: event.participant,
+                                            name: event.name,
+                                            dept: event.dept,
+                                            color: colorForCar(event.driver),
+                                            startHour: event.startHour,
+                                            startMinute: event.startMinute,
+                                            endHour: event.endHour,
+                                            endMinute: event.endMinute,
+                                            hourHeight: hourHeight,
+                                            carpoolStatus: event.carpoolStatus
+                                        )
+                                    }
                                 }
                             }
+                            .frame(width: filteredCars.count == 1 ? UIScreen.main.bounds.width - 60 : 150)
                         }
-                        .frame(width: filteredCars.count == 1 ? UIScreen.main.bounds.width - 60 : 150)
+                        
                     }
-
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+                .background(Color(.systemBackground))
+            }
+            .background(Color(.systemGray6))
+            // setiap kali selectedDate berubah → fetch ulang
+            .onChange(of: selectedDate) { _ in
+                Task {
+                    await fetchBookCars(for: selectedDate)
+                }
+            }
+            .task {
+                await fetchBookCars(for: selectedDate) // pertama kali load
             }
         }
-        // setiap kali selectedDate berubah → fetch ulang
-        .onChange(of: selectedDate) { _ in
-            Task {
-                await fetchBookCars(for: selectedDate)
-            }
-        }
-        .task {
-            await fetchBookCars(for: selectedDate) // pertama kali load
-        }
-        
     }
     
     private var filteredCars: [String] {
         let result: [String]
         if selectedCar == "All" {
             result = ["1", "2"]
-        } else if selectedCar == "Car 1" {
+        } else if selectedCar == "Purbo" {
             result = ["1"]
         } else {
             result = ["2"]
@@ -146,8 +159,8 @@ struct OperationalCarView: View {
         print("🚗 Filtered Cars: \(result)")
         return result
     }
-
-
+    
+    
     
     
     func fetchBookCars(for date: Date) async {
@@ -157,9 +170,9 @@ struct OperationalCarView: View {
             dayFormatter.locale = Locale(identifier: "en_US_POSIX")
             dayFormatter.dateFormat = "yyyy-MM-dd"
             let dateOnly = dayFormatter.string(from: date)
-
+            
             print("🗓️ Query date: \(dateOnly)")
-
+            
             // Query → execute → decode pakai JSONDecoder.bookingDecoder
             let raw = try await SupabaseManager.shared.client
                 .from("bookings_car")
@@ -170,34 +183,35 @@ struct OperationalCarView: View {
                     destination:destinations!destinations_bc_id_fkey(*)
                 """)
                 .eq("bc_date", value: dateOnly)
+                .eq("bc_status", value: "Approved")
                 .order("bc_start", ascending: true)
                 .execute()
-
+            
             let rows: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
                 [BookingCarJoined].self,
                 from: raw.data
             )
-
+            
             print("✅ Response count: \(rows.count)")
             // print("✅ Detail: \(rows)")
-
+            
             // Mapping → carEvent
             let newEvents: [carEvent] = rows.compactMap { booking in
                 guard let user = booking.user, let driver = booking.driver else { return nil }
-
+                
                 func parseHHmm(_ s: String) -> (h: Int, m: Int)? {
                     let p = s.split(separator: ":").compactMap { Int($0) }
                     guard p.count >= 2 else { return nil }
                     return (p[0], p[1])
                 }
-
+                
                 guard
                     let s = parseHHmm(booking.bc_start),
                     let e = parseHHmm(booking.bc_end)
                 else { return nil }
-
+                
                 let destText = (booking.destination?.map { $0.destination_name }.joined(separator: ", ")) ?? "-"
-
+                
                 return carEvent(
                     driver: String(driver.driver_id),        // ganti ke driver_name kalau ada
                     from: booking.bc_from,
@@ -208,15 +222,16 @@ struct OperationalCarView: View {
                     startHour: s.h,
                     startMinute: s.m,
                     endHour: e.h,
-                    endMinute: e.m
+                    endMinute: e.m,
+                    carpoolStatus: booking.carpool_status
                 )
             }
-
+            
             await MainActor.run {
                 self.cars = rows
                 self.events = newEvents
             }
-
+            
         } catch {
             print("❌ Error fetch cars:", error)
         }
@@ -236,20 +251,29 @@ struct ScheduleBlockCar: View {
     var endHour: Int
     var endMinute: Int
     var hourHeight: CGFloat
-    
+    var carpoolStatus: String
     let baseHour = 8 // timeline mulai 08:00
     
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-           
+            
             Text("\(Image(systemName: "mappin.and.ellipse")) \(from)")
                 .bold()
                 .font(.caption)
             Text("\(Image(systemName: "location")) \(destination)")
                 .bold()
                 .font(.caption)
-            Text("\(Image(systemName:"person.fill")) \(participant)/7")
-                .font(.caption2)
+            
+            if carpoolStatus == "Approved"{
+                Text("Full booked")
+                    .bold()
+                    .font(.caption)
+            }
+            else{
+                Text("\(Image(systemName:"person.fill")) \(participant)/7")
+                    .font(.caption2)
+            }
+            
             Text("\(name) - \(dept)")
                 .font(.caption2)
         }
@@ -293,6 +317,7 @@ struct carEvent: Identifiable {
     let startMinute: Int
     let endHour: Int
     let endMinute: Int
+    let carpoolStatus: String
 }
 func colorForCar(_ driver: String) -> Color {
     switch driver {

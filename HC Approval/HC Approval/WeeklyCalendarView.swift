@@ -25,7 +25,7 @@ struct WeeklyCalendarView: View {
     @State private var internalSelectedCar: String = "All"
 
     let rooms = ["All", "Room 1", "Room 2", "Room 3", "Hall", "Auditorium"]
-    let cars = ["All", "Car 1", "Car 2"]
+    let cars = ["All", "Purbo", "Sahrul"]
     
     var pickerMode: PickerMode
     var body: some View {
