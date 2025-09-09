@@ -30,9 +30,10 @@ struct CarpoolCard: View {
                         .scaledToFit()
                         .frame(width: 18, height: 18)
                         .foregroundStyle(Color(.systemBlue))
-                    
+                        .accessibilityHidden(true)
                     Text(carpool_req_name)
                         .font(.subheadline)
+                        .accessibilityLabel("Carpool request from \(carpool_req_name)")
                     
                 }
                 .lineLimit(1)
@@ -47,9 +48,12 @@ struct CarpoolCard: View {
                         HStack(spacing: 3) {
                             Image(systemName: "xmark")
                                 .font(.caption2.bold())
+                                .accessibilityHidden(true)
                             
                             Text("Decline")
                                 .font(.caption2.bold())
+                                .accessibilityLabel("Decline carpool request")
+
                         }
                         .frame(width: 70)
                         .padding(.vertical, 8)
@@ -66,9 +70,11 @@ struct CarpoolCard: View {
                         HStack(spacing: 3) {
                             Image(systemName: "checkmark")
                                 .font(.caption2.bold())
+                                .accessibilityHidden(true)
                             
                             Text("Approve")
                                 .font(.caption2.bold())
+                                .accessibilityLabel("Approve carpool request")
                         }
                         .frame(width: 70)
                         .padding(.vertical, 8)
@@ -86,16 +92,19 @@ struct CarpoolCard: View {
                 HStack {
                     Text(title)
                         .font(.headline)
+                        .accessibilityLabel("Booking for: \(title)")
                     
                     Spacer()
                     
                     Text("\(date.toEnglishFormat())")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("On: \(date.toEnglishFormat())")
                 }
                 
                 Text("\(startTime) - \(endTime) WIB")
                     .font(.headline)
+                    .accessibilityLabel("From: \(startTime) - To: \(endTime)")
                 
                 HStack {
                     Image(systemName: "location")
@@ -103,9 +112,11 @@ struct CarpoolCard: View {
                         .scaledToFit()
                         .foregroundColor(.accentColor)
                         .frame(width: 13, height: 13)
-                    
+                        .accessibilityHidden(true)
                     Text(event)
                         .font(.footnote)
+                        .accessibilityLabel("Booking Event: \(event)")
+
                     
                     Spacer()
                     
@@ -115,10 +126,12 @@ struct CarpoolCard: View {
                         Text("See Details")
                             .font(.footnote)
                             .foregroundStyle(Color(.systemBlue))
+                            .accessibilityLabel("See carpool details")
                         
                         Image(systemName: "chevron.right")
                             .font(.footnote)
                             .foregroundStyle(Color(.systemBlue))
+                            .accessibilityHidden(true)
                     }
                 }
             }

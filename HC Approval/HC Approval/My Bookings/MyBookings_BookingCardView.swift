@@ -28,7 +28,7 @@ struct BookingCard: View {
                 Text(joinName)
                     .font(.subheadline.italic())
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("Join With: \(joinName)")
+                    .accessibilityLabel("Carpool information: \(joinName)")
             }
                                     
             Text("\(startTime) - \(endTime) WIB")

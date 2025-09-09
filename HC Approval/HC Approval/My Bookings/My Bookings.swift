@@ -78,6 +78,7 @@ struct MyBookings : View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
                     TextField("Search bookings", text: $searchText)
 
                 }
