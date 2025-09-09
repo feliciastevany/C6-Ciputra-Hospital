@@ -20,6 +20,8 @@ struct BookingCar: Codable, Identifiable {
     let bc_status: String
     let bc_decline_reason: String
     let carpool_req: Bool
+    let carpool_req_id: Int
+    let carpool_status: String
     let carpool_desc: String
     let created_at: Date
     

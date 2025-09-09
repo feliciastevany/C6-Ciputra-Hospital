@@ -20,12 +20,16 @@ struct BookingCarJoined: Codable, Identifiable {
     let bc_status: String
     let bc_decline_reason: String
     let carpool_req: Bool
+    let carpool_req_id: Int?
+    let carpool_status: String
     let carpool_desc: String
     let created_at: Date
     
     let driver: Driver?
     let destination: [Destination]?
     let user: User?
+    let carpool_user: User?
+    let participant: [ParticipantBc]?
     
     var id: Int { bc_id }
 }
