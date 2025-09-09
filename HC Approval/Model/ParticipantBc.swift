@@ -12,5 +12,7 @@ struct ParticipantBc: Codable, Identifiable {
     let bc_id: Int
     let pic: Bool
     
+    let user: User?
+    
     var id: String{"\(user_id)-\(bc_id)"}
 }
