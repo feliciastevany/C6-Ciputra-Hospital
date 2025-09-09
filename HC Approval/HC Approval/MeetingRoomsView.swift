@@ -349,8 +349,13 @@ struct RoomDetailView: View {
             
             guard let created = try await BookingService.shared.createBookingRoom(booking) else { return }
             
+//            try await BookingService.shared.addParticipants(
+//                selectedUsers.map { ParticipantBr(user_id: $0.user_id, br_id: created.br_id, pic: false) }
+//            )
+            
             try await BookingService.shared.addParticipants(
                 selectedUsers.map { ParticipantBr(user_id: $0.user_id, br_id: created.br_id, pic: false) }
+                + [ParticipantBr(user_id: userId, br_id: created.br_id, pic: true)]
             )
             
             try await BookingService.shared.addProperties(

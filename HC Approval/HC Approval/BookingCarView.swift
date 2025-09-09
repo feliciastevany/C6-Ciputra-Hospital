@@ -147,6 +147,7 @@ struct AvailableDriversView: View {
 
 struct CarDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
     
     var driver: Driver
     var slot: TimeSlot
@@ -255,10 +256,11 @@ struct CarDetailView: View {
     let bookingService = BookingService()
 
     func addBooking() async {
+        let userId = loggedInUserId
         do {
             // 1. Insert Booking Car
             let booking = BookingCarInsert(
-                user_id: 1,
+                user_id: userId,
                 driver_id: driver.driver_id,
                 bc_date: date,
                 bc_start: startTime,
@@ -281,6 +283,10 @@ struct CarDetailView: View {
                 _ = try await BookingService.shared.addDestinations(validDestinations)
             }
             
+            try await BookingService.shared.addCarParticipants(
+                [ParticipantBc(user_id: userId, bc_id: created.bc_id, pic: true)]
+            )
+            
             await MainActor.run {
                 showSuccess = true
             }
@@ -290,7 +296,6 @@ struct CarDetailView: View {
         }
     }
 }
-
 
 //struct CarScheduleView: View {
 //    var room: Room
