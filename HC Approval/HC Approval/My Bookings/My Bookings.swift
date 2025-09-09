@@ -74,18 +74,32 @@ struct MyBookings : View {
                     }
                 }
                 .padding(.top)
-                
+
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                         .accessibilityHidden(true)
-                    TextField("Search bookings", text: $searchText)
-
+                    
+                    TextField("Search bookings...", text: $searchText)
+                    
+                    if !searchText.isEmpty {
+                        Button(action: { searchText = "" }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(Color(.systemGray))
+                        }
+                    }
                 }
-                .padding(8)
-                .background(Color(.systemBackground))
-                .cornerRadius(10)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(.systemGray)))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.systemBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color(.systemGray), lineWidth: 1)
+                        )
+                )
                 
                 Picker("Booking type", selection: $segmentedControl) {
                     Text("Rooms").tag(0)
