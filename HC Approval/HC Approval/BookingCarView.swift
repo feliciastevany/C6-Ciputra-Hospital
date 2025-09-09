@@ -164,11 +164,11 @@ struct CarDetailView: View {
     @State private var showSuccess = false
     
     private var availableTimeOptions: [String] {
-        BookingTimeHelper.availableStartTimes(bookings: bookings)
+        BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: bookings)
     }
     
     private var validEndOptions: [String] {
-        BookingTimeHelper.validEndTimes(startTime: startTime, bookings: bookings)
+        BookingTimeHelper.validEndTimesIgnoringCancelled(startTime: startTime, bookings: bookings)
     }
     
     var body: some View {

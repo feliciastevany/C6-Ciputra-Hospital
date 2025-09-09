@@ -120,6 +120,14 @@ struct BookingTimeHelper {
             return true
         }
     }
+    
+    static func validEndTimesIgnoringCancelled<T: Bookable & HasStatus>(startTime: String, bookings: [T]) -> [String] {
+        let activeBookings = bookings.filter {
+            let status = $0.status.lowercased()
+            return status != "cancel" && status != "cancelled" && status != "declined"
+        }
+        return validEndTimes(startTime: startTime, bookings: activeBookings)
+    }
 }
 
 
