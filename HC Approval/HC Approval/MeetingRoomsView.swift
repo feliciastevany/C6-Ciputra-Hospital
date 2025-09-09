@@ -8,23 +8,32 @@
 import SwiftUI
 
 struct MeetingRoomsView: View {
+    
     @State private var date = Date()
     @State private var capacity: Int = 1
     @State private var goToAvailable = false
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
-                
-                HStack {
-                    Text("Capacity")
-                    Spacer()
-                    Text("\(capacity)")
-                        .frame(width: 30, alignment: .center)
-                    Stepper("", value: $capacity, in: 1...500)
-                        .labelsHidden()
+//        NavigationView {
+            VStack (spacing: 10){
+                VStack {
+                    DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Capacity")
+                        Spacer()
+                        Text("\(capacity)")
+                            .frame(width: 30, alignment: .center)
+                        Stepper("", value: $capacity, in: 1...500)
+                            .labelsHidden()
+                    }
                 }
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
                 
                 NavigationLink(
                     destination: AvailableRoomsView(date: DateHelper.toBackendFormat(date),capacity: Int(capacity) ?? 1),
@@ -32,41 +41,42 @@ struct MeetingRoomsView: View {
                         EmptyView()
                     }
                 
-                    Button("Browse Rooms") {
-                        goToAvailable = true
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(3)
-                    .background(Color.blue)
-                    .cornerRadius(8)
+                Button("Browse Rooms") {
+                    goToAvailable = true
+                }
+                .font(.headline.bold())
+                .buttonStyle(.borderedProminent)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(3)
+                .background(Color.blue)
+                .cornerRadius(8)
                 
-//                Text("Schedule")
-//                    .font(.headline)
-//                    .padding(.horizontal)
-//                    
-//                List(rooms) { room in
-//                    HStack {
-//                        VStack(alignment: .leading, spacing: 4) {
-//                            Text(room.name)
-//                                .font(.body)
-//                                .bold()
-//                            Text("Capacity: \(room.capacity)")
-//                                .font(.subheadline)
-//                                .foregroundColor(.gray)
-//                        }
-//                        Spacer()
-//                        Image(systemName: "chevron.right")
-//                            .foregroundColor(.gray)
-//                    }
-//                    .padding(.vertical, 4)
-//                }
-//                .listStyle(PlainListStyle())
+                //                Text("Schedule")
+                //                    .font(.headline)
+                //                    .padding(.horizontal)
+                //
+                //                List(rooms) { room in
+                //                    HStack {
+                //                        VStack(alignment: .leading, spacing: 4) {
+                //                            Text(room.name)
+                //                                .font(.body)
+                //                                .bold()
+                //                            Text("Capacity: \(room.capacity)")
+                //                                .font(.subheadline)
+                //                                .foregroundColor(.gray)
+                //                        }
+                //                        Spacer()
+                //                        Image(systemName: "chevron.right")
+                //                            .foregroundColor(.gray)
+                //                    }
+                //                    .padding(.vertical, 4)
+                //                }
+                //                .listStyle(PlainListStyle())
             }
             .padding()
-            .navigationTitle("Meeting Rooms")
-        }
+            .background(Color(.systemGray6))
+//        }
     }
 }
 
@@ -148,6 +158,8 @@ struct AvailableRoomsView: View {
 
 struct RoomDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToMyBooking = false // Variabel untuk kontrol navigasi
     
     var room: Room
     var slot: TimeSlot
@@ -156,7 +168,6 @@ struct RoomDetailView: View {
     
     @State private var startTime: String = ""
     @State private var endTime: String = ""
-    @State private var goToSchedule = false
     @State private var eventName: String = ""
     @State private var eventDesc: String = ""
     
@@ -187,6 +198,8 @@ struct RoomDetailView: View {
                 HStack {
                     Text("Date")
                     Spacer()
+//                    Text(DateHelper.formatDate(date))
+//                }
                     Text(DateHelper.toDisplayFormat(date))
                 }.frame(maxWidth: .infinity)
                 
@@ -200,7 +213,8 @@ struct RoomDetailView: View {
                     ForEach(validEndOptions, id: \.self) { time in
                         Text(time).tag(time)
                     }
-                }.disabled(startTime.isEmpty)
+                }
+                .disabled(startTime.isEmpty)
             }
             
             Section {
@@ -219,7 +233,7 @@ struct RoomDetailView: View {
                     }
                 }
                 
-                HStack() {
+                HStack {
                     let maxVisible = 5
                     ForEach(selectedUsers.prefix(maxVisible)) { user in
                         Circle()
@@ -235,7 +249,7 @@ struct RoomDetailView: View {
                                 Circle().stroke(Color.white, lineWidth: 2)
                             )
                     }
-
+                    
                     if selectedUsers.count > maxVisible {
                         let extra = selectedUsers.count - maxVisible
                         Circle()
@@ -267,7 +281,7 @@ struct RoomDetailView: View {
                         Image(systemName: "plus")
                     }
                 }
-                                
+                
                 if selectedProperties.isEmpty {
                     Text("No properties selected")
                         .foregroundColor(.secondary)
@@ -286,6 +300,7 @@ struct RoomDetailView: View {
             Button("Booking") {
                 Task {
                     await addBooking()
+                    goToMyBooking = true
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -299,7 +314,7 @@ struct RoomDetailView: View {
         }
         .onAppear {
             if startTime.isEmpty {
-                startTime = slot.start // dari slot yg dipilih
+                startTime = slot.start
             }
             if endTime.isEmpty, let last = validEndOptions.last {
                 endTime = last
@@ -311,15 +326,19 @@ struct RoomDetailView: View {
         .sheet(isPresented: $showPropertyPicker) {
             PropertyPickerView(selectedProperties: $selectedProperties)
         }
+        NavigationLink(destination: ContentView().navigationBarBackButtonHidden(true), isActive: $goToMyBooking) {
+            EmptyView()
+        }
     }
     
     let bookingService = BookingService()
-
+    
     func addBooking() async {
+        let userId = loggedInUserId
         do {
             let booking = BookingRoomInsert(
                 room_id: room.room_id,
-                user_id: 1,
+                user_id: userId,
                 br_event: eventName,
                 br_date: date,
                 br_start: startTime,
@@ -331,7 +350,7 @@ struct RoomDetailView: View {
             guard let created = try await BookingService.shared.createBookingRoom(booking) else { return }
             
             try await BookingService.shared.addParticipants(
-                selectedUsers.map { Participant(user_id: $0.user_id, br_id: created.br_id, pic: false) }
+                selectedUsers.map { ParticipantBr(user_id: $0.user_id, br_id: created.br_id, pic: false) }
             )
             
             try await BookingService.shared.addProperties(
@@ -347,6 +366,7 @@ struct RoomDetailView: View {
         }
     }
 }
+
 
 struct RoomScheduleView: View {
     var room: Room

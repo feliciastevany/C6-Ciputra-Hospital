@@ -78,14 +78,14 @@ class BookingService {
     
     // MARK: - Participants
     
-    func addParticipants(_ participants: [Participant]) async throws {
+    func addParticipants(_ participants: [ParticipantBr]) async throws {
         try await client
             .from("participants_br")
             .insert(participants)
             .execute()
     }
     
-    func fetchParticipants(brId: Int) async throws -> [Participant] {
+    func fetchParticipants(brId: Int) async throws -> [ParticipantBr] {
         try await client
             .from("participants_br")
             .select()
