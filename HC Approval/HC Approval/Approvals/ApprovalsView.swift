@@ -81,228 +81,213 @@ struct ApprovalsView: View {
     }
     
     var body: some View {
-        VStack {
+        ZStack {
             VStack {
-                HStack {
-                    Text("Booking Request")
-                        .font(.title.bold())
-                        .accessibilityLabel("My Booking Requests")
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        print("Profile tapped")
-                        goToProfil = true
-                    }) {
-                        Image(systemName: "person.crop.circle")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .foregroundColor(Color(.systemBlue))
-                            .accessibilityLabel("My Profile")
-                        
-                    }.navigationDestination(isPresented: $goToProfil) {
-                        ProfilView(userId: loggedInUserId)
-                    }
-                }
-                .padding(.top)
-                
-                HStack {
+                VStack {
                     HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(Color(.systemGray))
+                        Text("Booking Request")
+                            .font(.title.bold())
+                            .accessibilityLabel("My Booking Requests")
                         
-                        TextField("Search bookings...", text: $searchText)
+                        Spacer()
                         
-                        if !searchText.isEmpty {
-                            Button(action: { searchText = "" }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(Color(.systemGray))
+                        Button(action: {
+                            print("Profile tapped")
+                            goToProfil = true
+                        }) {
+                            Image(systemName: "person.crop.circle")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .foregroundColor(Color(.systemBlue))
+                                .accessibilityLabel("My Profile")
+                            
+                        }.navigationDestination(isPresented: $goToProfil) {
+                            ProfilView(userId: loggedInUserId)
+                        }
+                    }
+                    .padding(.top)
+                    
+                    HStack {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(Color(.systemGray2))
+                            
+                            TextField("Search bookings...", text: $searchText)
+                            
+                            if !searchText.isEmpty {
+                                Button(action: { searchText = "" }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(Color(.systemGray2))
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.systemBackground))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color(.systemGray3), lineWidth: 1)
+                                )
+                        )
+                        
+                        Picker("ChooseType", selection: $selectedType) {
+                            ForEach(BookingType.allCases, id: \.self) { type in
+                                Text(type.rawValue).tag(type)
+                                
                             }
                         }
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.systemBackground))
+                    
+                    Picker("StatusRequest", selection: $selectedStatus) {
+                        ForEach(BookingStatus.allCases, id: \.self) { status in
+                            Text(status.rawValue).tag(status)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                .padding(.horizontal)
+                
+                
+                //<<<<<<< HEAD:HC Approval/HC Approval/ApprovalsView.swift
+                //            .background(Color(.systemGray6))
+                //
+                //            if showDeclineSheet {
+                //                Color.black.opacity(0.3).ignoresSafeArea()
+                //
+                //                VStack(spacing: 16) {
+                //                    Text("Decline Reason")
+                //                        .font(.title3.bold())
+                //
+                //                    ZStack(alignment: .topLeading) {
+                //                        TextEditor(text: $declineReason)
+                //                            .frame(height: 110)
+                //                            .padding(.vertical, 5)
+                //                            .padding(.horizontal, 10)
+                //                            .cornerRadius(10)
+                //                            .overlay(
+                //                                RoundedRectangle(cornerRadius: 10)
+                //                                    .stroke(Color(.systemGray), lineWidth: 1)
+                //                            )
+                //
+                //                        if declineReason.isEmpty {
+                //                            Text("Enter reason...")
+                //                                .foregroundColor(Color(.systemGray3))
+                //                                .padding(.top, 14)
+                //                                .padding(.leading, 15)
+                //                        }
+                //                    }
+                //
+                //                    HStack {
+                //                        Button("Cancel") { showDeclineSheet = false }
+                //                        Spacer()
+                //                        Button("Submit") {
+                //                            print("Reason: \(declineReason)")
+                //                            Task {
+                //                                if let booking = selectedBooking {
+                //                                    try? await SupabaseManager.shared.updateBookingStatus(
+                //                                        booking: booking,
+                //                                        status: "Declined",
+                //                                        dec_reason: declineReason
+                //                                    )
+                //                                    await fetchAllBookings()
+                //                                }
+                //                                showDeclineSheet = false
+                //                                declineReason = ""
+                //                            }
+                //
+                //                        }
+                //                        .disabled(declineReason.isEmpty)
+                //=======
+                //        .padding(.horizontal)
+                
+                ScrollView {
+                    VStack (spacing: 15) {
+                        ForEach(searchedBookings, id: \.bookId) { booking in
+                            bookingView(
+                                title: booking.title,
+                                event: booking.type == .rooms
+                                ? (booking as! BookingRoomJoined).br_event
+                                : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
+                                date: booking is BookingRoomJoined
+                                ? (booking as! BookingRoomJoined).br_date
+                                : (booking as! BookingCarJoined).bc_date,
+                                startTime: booking is BookingRoomJoined
+                                ? toHourMinute((booking as! BookingRoomJoined).br_start)
+                                : toHourMinute((booking as! BookingCarJoined).bc_start),
+                                endTime: booking is BookingRoomJoined
+                                ? toHourMinute((booking as! BookingRoomJoined).br_end)
+                                : toHourMinute((booking as! BookingCarJoined).bc_end),
+                                status: booking.status,
+                                bookings: booking
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    .task {
+                        await fetchAllBookings()
+                    }
+                }
+            }
+            .background(Color(.systemGray6))
+            
+            if showDeclineSheet {
+                Color.black.opacity(0.3).ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    Text("Decline Reason")
+                        .font(.title3.bold())
+                    
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $declineReason)
+                            .frame(height: 110)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .cornerRadius(10)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color(.systemGray3), lineWidth: 1)
+                                    .stroke(Color(.systemGray), lineWidth: 1)
                             )
-                    )
+                        
+                        if declineReason.isEmpty {
+                            Text("Enter reason...")
+                                .foregroundColor(Color(.systemGray3))
+                                .padding(.top, 14)
+                                .padding(.leading, 15)
+                        }
+                    }
                     
-                    Picker("ChooseType", selection: $selectedType) {
-                        ForEach(BookingType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
+                    HStack {
+                        Button("Cancel") { showDeclineSheet = false }
+                        Spacer()
+                        Button("Submit") {
+                            print("Reason: \(declineReason)")
+                            Task {
+                                if let booking = selectedBooking {
+                                    try? await SupabaseManager.shared.updateBookingStatus(
+                                        booking: booking,
+                                        status: "Declined",
+                                        dec_reason: declineReason
+                                    )
+                                    await fetchAllBookings()
+                                }
+                                showDeclineSheet = false
+                                declineReason = ""
+                            }
                             
                         }
+                        .disabled(declineReason.isEmpty)
                     }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.systemBackground))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(.systemGray3), lineWidth: 1)
-                        )
-                )
-                
-                Picker("ChooseType", selection: $selectedType) {
-                    ForEach(BookingType.allCases, id: \.self) { type in
-                        Text(type.rawValue).tag(type)
-                    }
-                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(radius: 8)
+                .padding(40)
             }
-            .padding(.bottom, 3)
-            
-            Picker("StatusRequest", selection: $selectedStatus) {
-                ForEach(BookingStatus.allCases, id: \.self) { status in
-                    Text(status.rawValue).tag(status)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.bottom, 3)
-            
-        }
-        //<<<<<<< HEAD:HC Approval/HC Approval/ApprovalsView.swift
-        //            .background(Color(.systemGray6))
-        //
-        //            if showDeclineSheet {
-        //                Color.black.opacity(0.3).ignoresSafeArea()
-        //
-        //                VStack(spacing: 16) {
-        //                    Text("Decline Reason")
-        //                        .font(.title3.bold())
-        //
-        //                    ZStack(alignment: .topLeading) {
-        //                        TextEditor(text: $declineReason)
-        //                            .frame(height: 110)
-        //                            .padding(.vertical, 5)
-        //                            .padding(.horizontal, 10)
-        //                            .cornerRadius(10)
-        //                            .overlay(
-        //                                RoundedRectangle(cornerRadius: 10)
-        //                                    .stroke(Color(.systemGray), lineWidth: 1)
-        //                            )
-        //
-        //                        if declineReason.isEmpty {
-        //                            Text("Enter reason...")
-        //                                .foregroundColor(Color(.systemGray3))
-        //                                .padding(.top, 14)
-        //                                .padding(.leading, 15)
-        //                        }
-        //                    }
-        //
-        //                    HStack {
-        //                        Button("Cancel") { showDeclineSheet = false }
-        //                        Spacer()
-        //                        Button("Submit") {
-        //                            print("Reason: \(declineReason)")
-        //                            Task {
-        //                                if let booking = selectedBooking {
-        //                                    try? await SupabaseManager.shared.updateBookingStatus(
-        //                                        booking: booking,
-        //                                        status: "Declined",
-        //                                        dec_reason: declineReason
-        //                                    )
-        //                                    await fetchAllBookings()
-        //                                }
-        //                                showDeclineSheet = false
-        //                                declineReason = ""
-        //                            }
-        //
-        //                        }
-        //                        .disabled(declineReason.isEmpty)
-        //=======
-        .padding(.horizontal)
-        
-        ScrollView {
-            VStack (spacing: 15) {
-                ForEach(searchedBookings, id: \.bookId) { booking in
-                    bookingView(
-                        title: booking.title,
-                        event: booking.type == .rooms
-                        ? (booking as! BookingRoomJoined).br_event
-                        : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
-                        date: booking is BookingRoomJoined
-                        ? (booking as! BookingRoomJoined).br_date
-                        : (booking as! BookingCarJoined).bc_date,
-                        startTime: booking is BookingRoomJoined
-                        ? toHourMinute((booking as! BookingRoomJoined).br_start)
-                        : toHourMinute((booking as! BookingCarJoined).bc_start),
-                        endTime: booking is BookingRoomJoined
-                        ? toHourMinute((booking as! BookingRoomJoined).br_end)
-                        : toHourMinute((booking as! BookingCarJoined).bc_end),
-                        status: booking.status,
-                        bookings: booking
-                    )
-                    //>>>>>>> tab_approval:HC Approval/HC Approval/Approvals/ApprovalsView.swift
-                }
-            }
-            .padding()
-            .task {
-                await fetchAllBookings()
-            }
-        }
-        .background(Color(.systemGray6))
-        
-        if showDeclineSheet {
-            Color.black.opacity(0.3).ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                Text("Decline Reason")
-                    .font(.title3.bold())
-                
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: $declineReason)
-                        .frame(height: 110)
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .cornerRadius(10)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(.systemGray), lineWidth: 1)
-                        )
-                    
-                    if declineReason.isEmpty {
-                        Text("Enter reason...")
-                            .foregroundColor(Color(.systemGray3))
-                            .padding(.top, 14)
-                            .padding(.leading, 15)
-                    }
-                }
-                
-                HStack {
-                    Button("Cancel") { showDeclineSheet = false }
-                    Spacer()
-                    Button("Submit") {
-                        print("Reason: \(declineReason)")
-                        Task {
-                            if let booking = selectedBooking {
-                                try? await SupabaseManager.shared.updateBookingStatus(
-                                    booking: booking,
-                                    status: "Declined",
-                                    dec_reason: declineReason
-                                )
-                                await fetchAllBookings()
-                            }
-                            showDeclineSheet = false
-                            declineReason = ""
-                        }
-                        
-                    }
-                    .disabled(declineReason.isEmpty)
-                }
-            }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(radius: 8)
-            .padding(40)
         }
     }
 
