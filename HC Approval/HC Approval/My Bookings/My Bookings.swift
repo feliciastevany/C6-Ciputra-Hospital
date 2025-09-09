@@ -135,18 +135,14 @@ struct MyBookings : View {
                                             carpool_desc: booking.carpool_desc,
                                             onApprove: {
                                     Task {
-                                        
                                         try? await SupabaseManager.shared.approveCarpool(booking: booking)
                                         await fetchMyBookings()
-                                        
                                     }
                                 },
                                             onDecline: {
                                     Task {
-                                        
                                         try? await SupabaseManager.shared.declineCarpool(booking: booking)
                                         await fetchMyBookings()
-                                
                                     }
                                 },
                                             onDetails: {
