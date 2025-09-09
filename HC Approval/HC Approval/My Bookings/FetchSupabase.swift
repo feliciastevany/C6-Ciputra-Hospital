@@ -24,9 +24,16 @@ extension SupabaseManager {
         
         var carQuery = client
             .from("bookings_car")
-            .select("*, destination:destinations(*), driver:drivers(*), user: users(*)")
+            .select("""
+                    *, 
+                    destination:destinations(*), 
+                    driver:drivers(*),
+                    user:users!bookings_car_user_id_fkey(*),
+                    carpool_user:users!bookings_car_carpool_req_id_fkey(*),
+                    participant:participants_bc(*, user:users(*))
+                """)
         if let userId {
-            carQuery = carQuery.eq("user_id", value: userId)
+            carQuery = carQuery.or("user_id.eq.\(userId),carpool_req_id.eq.\(userId)")
         }
         
         let responseCars = try await carQuery.execute()

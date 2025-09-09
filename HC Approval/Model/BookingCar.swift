@@ -8,6 +8,7 @@
 import Foundation
 
 struct BookingCar: Codable, Identifiable {
+
     var bc_id: Int
     var user_id: Int
     var driver_id: Int
@@ -23,6 +24,6 @@ struct BookingCar: Codable, Identifiable {
     var carpool_desc: String
     var carpool_status: String
     var created_at: Date
-    
+  
     var id: Int{bc_id}
 }

@@ -19,24 +19,34 @@ struct StatusView: View {
             VStack (alignment: .leading, spacing: 3){
                 HStack {
                     Text(title)
-                        .font(.title3.bold())
+                        .font(.headline)
+                        .accessibilityLabel("Booking for: \(title)")
                     
                     Spacer()
                     
                     Text(date.toEnglishFormat())
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("")
+                        .accessibilityHint("On: \(date.toEnglishFormat())")
                 }
                 
                 Text("\(startTime) - \(endTime) WIB")
-                    .font(.title3.bold())
+                    .font(.headline)
+                    .accessibilityLabel("From \(startTime) to \(endTime) WIB")
                 
                 Text(event)
-                    .font(.subheadline)
+                    .font(.footnote)
+                    .accessibilityLabel("Booking Event: \(event)")
+
             }
             .padding(14)
             .background(Color(.systemBackground))
-            .cornerRadius(14)
+            .cornerRadius(10)
         }
     }
+}
+
+#Preview {
+    ApprovalsView()
 }

@@ -10,11 +10,11 @@ import SwiftUI
 struct ApprovalsView: View {
     @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
     @State private var goToProfil = false
-
+    
     @State private var showDeclineSheet = false
     @State private var declineReason = ""
     @State private var selectedBooking: (any AnyBooking)?
-
+    
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
@@ -69,13 +69,13 @@ struct ApprovalsView: View {
             return mergedBookings.filter { booking in
                 let title = booking.title.lowercased()
                 let event = (booking is BookingRoomJoined)
-                    ? (booking as! BookingRoomJoined).br_event.lowercased()
-                    : (booking as! BookingCarJoined).destination?.last?.destination_name.lowercased() ?? ""
+                ? (booking as! BookingRoomJoined).br_event.lowercased()
+                : (booking as! BookingCarJoined).destination?.last?.destination_name.lowercased() ?? ""
                 let date = (booking is BookingRoomJoined) ? (booking as! BookingRoomJoined).br_date.toEnglishFormat().lowercased() : (booking as! BookingCarJoined).bc_date.toEnglishFormat().lowercased()
                 
                 return title.contains(searchText.lowercased()) ||
-                       event.contains(searchText.lowercased()) ||
-                        date.contains(searchText.lowercased())
+                event.contains(searchText.lowercased()) ||
+                date.contains(searchText.lowercased())
             }
         }
     }
@@ -87,6 +87,7 @@ struct ApprovalsView: View {
                     HStack {
                         Text("Booking Request")
                             .font(.title.bold())
+                            .accessibilityLabel("My Booking Requests")
                         
                         Spacer()
                         
@@ -96,8 +97,10 @@ struct ApprovalsView: View {
                         }) {
                             Image(systemName: "person.crop.circle")
                                 .resizable()
-                                .frame(width: 40, height: 40)
+                                .frame(width: 32, height: 32)
                                 .foregroundColor(Color(.systemBlue))
+                                .accessibilityLabel("My Profile")
+                            
                         }.navigationDestination(isPresented: $goToProfil) {
                             ProfilView(userId: loggedInUserId)
                         }
@@ -107,14 +110,14 @@ struct ApprovalsView: View {
                     HStack {
                         HStack {
                             Image(systemName: "magnifyingglass")
-                                .foregroundColor(Color(.systemGray))
+                                .foregroundColor(Color(.systemGray2))
                             
-                            TextField("Search...", text: $searchText)
+                            TextField("Search bookings...", text: $searchText)
                             
                             if !searchText.isEmpty {
                                 Button(action: { searchText = "" }) {
                                     Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(Color(.systemGray))
+                                        .foregroundColor(Color(.systemGray2))
                                 }
                             }
                         }
@@ -133,10 +136,10 @@ struct ApprovalsView: View {
                         Picker("ChooseType", selection: $selectedType) {
                             ForEach(BookingType.allCases, id: \.self) { type in
                                 Text(type.rawValue).tag(type)
+                                
                             }
                         }
                     }
-                    .padding(.bottom, 3)
                     
                     Picker("StatusRequest", selection: $selectedStatus) {
                         ForEach(BookingStatus.allCases, id: \.self) { status in
@@ -144,10 +147,61 @@ struct ApprovalsView: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    .padding(.bottom, 3)
-                    
                 }
                 .padding(.horizontal)
+                
+                
+                //<<<<<<< HEAD:HC Approval/HC Approval/ApprovalsView.swift
+                //            .background(Color(.systemGray6))
+                //
+                //            if showDeclineSheet {
+                //                Color.black.opacity(0.3).ignoresSafeArea()
+                //
+                //                VStack(spacing: 16) {
+                //                    Text("Decline Reason")
+                //                        .font(.title3.bold())
+                //
+                //                    ZStack(alignment: .topLeading) {
+                //                        TextEditor(text: $declineReason)
+                //                            .frame(height: 110)
+                //                            .padding(.vertical, 5)
+                //                            .padding(.horizontal, 10)
+                //                            .cornerRadius(10)
+                //                            .overlay(
+                //                                RoundedRectangle(cornerRadius: 10)
+                //                                    .stroke(Color(.systemGray), lineWidth: 1)
+                //                            )
+                //
+                //                        if declineReason.isEmpty {
+                //                            Text("Enter reason...")
+                //                                .foregroundColor(Color(.systemGray3))
+                //                                .padding(.top, 14)
+                //                                .padding(.leading, 15)
+                //                        }
+                //                    }
+                //
+                //                    HStack {
+                //                        Button("Cancel") { showDeclineSheet = false }
+                //                        Spacer()
+                //                        Button("Submit") {
+                //                            print("Reason: \(declineReason)")
+                //                            Task {
+                //                                if let booking = selectedBooking {
+                //                                    try? await SupabaseManager.shared.updateBookingStatus(
+                //                                        booking: booking,
+                //                                        status: "Declined",
+                //                                        dec_reason: declineReason
+                //                                    )
+                //                                    await fetchAllBookings()
+                //                                }
+                //                                showDeclineSheet = false
+                //                                declineReason = ""
+                //                            }
+                //
+                //                        }
+                //                        .disabled(declineReason.isEmpty)
+                //=======
+                //        .padding(.horizontal)
                 
                 ScrollView {
                     VStack (spacing: 15) {
@@ -171,7 +225,8 @@ struct ApprovalsView: View {
                             )
                         }
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.top, 10)
                     .task {
                         await fetchAllBookings()
                     }
@@ -235,6 +290,7 @@ struct ApprovalsView: View {
             }
         }
     }
+
 //    func fetchAllBookings() async {
 //        do {
 //            let responseRooms = try await SupabaseManager.shared.client
