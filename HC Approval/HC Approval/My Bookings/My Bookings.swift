@@ -77,7 +77,7 @@ struct MyBookings : View {
 
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray2))
                         .accessibilityHidden(true)
                     
                     TextField("Search bookings...", text: $searchText)
@@ -85,7 +85,7 @@ struct MyBookings : View {
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(Color(.systemGray))
+                                .foregroundColor(Color(.systemGray2))
                         }
                     }
                 }
@@ -97,7 +97,7 @@ struct MyBookings : View {
                         .fill(Color(.systemBackground))
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(.systemGray), lineWidth: 1)
+                                .stroke(Color(.systemGray3), lineWidth: 1)
                         )
                 )
                 
@@ -106,8 +106,8 @@ struct MyBookings : View {
                     Text("Cars").tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
-                .padding(.bottom, 15)
-                .padding(.top, 10)
+                .padding(.bottom, 10)
+//                .padding(.top, 5)
                 .accessibilityLabel("Booking type")
                 .accessibilityHint("Switch between rooms and cars")
                 
@@ -192,6 +192,7 @@ struct MyBookings : View {
                         }
                         
                     }
+                    .padding(.top, 10)
                     .task {
                         await fetchMyBookings()
                     }
