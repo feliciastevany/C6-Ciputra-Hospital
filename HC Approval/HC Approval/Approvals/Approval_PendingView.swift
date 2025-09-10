@@ -21,20 +21,26 @@ struct PendingView: View {
         VStack (alignment: .leading, spacing: 3){
             HStack {
                 Text(title)
-                    .font(.title3.bold())
+                    .font(.headline)
+                    .accessibilityLabel("Booking for: \(title)")
                 
                 Spacer()
                 
                 Text(date.toEnglishFormat())
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("")
+                    .accessibilityHint("On \(date.toEnglishFormat())")
             }
             
             Text("\(startTime) - \(endTime) WIB")
-                .font(.title3.bold())
+                .font(.headline)
+                .accessibilityLabel("From: \(startTime), To: \(endTime) WIB")
             
             Text(event)
-                .font(.subheadline)
+                .font(.footnote)
+                .accessibilityLabel("Booking Event: \(event)")
+
             
             HStack {
                 Button(action: {
@@ -44,10 +50,10 @@ struct PendingView: View {
                     HStack {
                         Spacer ()
                         Image(systemName: "xmark")
-                            .font(.headline.bold())
+                            .font(.subheadline.bold())
                         
                         Text("Decline")
-                            .font(.headline.bold())
+                            .font(.subheadline.bold())
                         Spacer ()
                     }
                     .padding(.vertical, 10)
@@ -64,10 +70,10 @@ struct PendingView: View {
                     HStack {
                         Spacer ()
                         Image(systemName: "checkmark")
-                            .font(.headline.bold())
+                            .font(.subheadline.bold())
                         
                         Text("Approve")
-                            .font(.headline.bold())
+                            .font(.subheadline.bold())
                         Spacer()
                     }
                     .padding(.vertical, 10)
@@ -82,4 +88,8 @@ struct PendingView: View {
         .background(Color(.systemBackground))
         .cornerRadius(10)
     }
+}
+
+#Preview {
+    ApprovalsView()
 }
