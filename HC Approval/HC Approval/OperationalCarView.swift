@@ -27,10 +27,6 @@ struct OperationalCarView: View {
                     Text("Operational Car")
                         .font(.title)
                         .bold()
-                    Button(action: {}) {
-                        Image(systemName: "plus.circle")
-                            .font(.title.bold())
-                    }
                     Spacer()
                     Button(action: {
                         print("Profile tapped")
@@ -45,8 +41,7 @@ struct OperationalCarView: View {
                 }
                 .padding()
                 
-                // INI GANTI
-                MeetingRoomsView()
+                BookingCarView()
                 
                 VStack {
                     HStack {

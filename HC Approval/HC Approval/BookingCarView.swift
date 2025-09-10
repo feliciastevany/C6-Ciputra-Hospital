@@ -13,18 +13,23 @@ struct BookingCarView: View {
     @State private var goToAvailable = false
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
-                
-                HStack {
-                    Text("Passengers")
-                    Spacer()
-                    Text("\(passengers)")
-                        .frame(width: 30, alignment: .center)
-                    Stepper("", value: $passengers, in: 1...500)
-                        .labelsHidden()
+            VStack(spacing: 10) {
+                VStack{
+                    DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
+                    
+                    HStack {
+                        Text("Passengers")
+                        Spacer()
+                        Text("\(passengers)")
+                            .frame(width: 30, alignment: .center)
+                        Stepper("", value: $passengers, in: 1...500)
+                            .labelsHidden()
+                    }
                 }
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
                 
                 NavigationLink(
                     destination: AvailableDriversView(date: DateHelper.toBackendFormat(date), passengers: passengers),
@@ -65,8 +70,7 @@ struct BookingCarView: View {
 //                .listStyle(PlainListStyle())
             }
             .padding()
-            .navigationTitle("Cars")
-        }
+            .background(Color(.systemGray6))
     }
 }
 
@@ -162,6 +166,7 @@ struct CarDetailView: View {
     @State private var from: String = ""
     @State private var destinations: [String] = [""]
     @State private var showSuccess = false
+    @State private var goHome = false
     
     private var availableTimeOptions: [String] {
         BookingTimeHelper.availableStartTimes(bookings: bookings)
@@ -239,7 +244,7 @@ struct CarDetailView: View {
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
             Button("OK") {
-                dismiss()
+                goHome = true
             }
         }
         .onAppear {
@@ -249,6 +254,12 @@ struct CarDetailView: View {
             if endTime.isEmpty, let last = validEndOptions.last {
                 endTime = last
             }
+        }
+        NavigationLink(
+            destination: ContentView().navigationBarBackButtonHidden(true),
+            isActive: $goHome
+        ) {
+            EmptyView()
         }
     }
     

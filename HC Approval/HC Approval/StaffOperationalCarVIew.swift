@@ -80,8 +80,7 @@
                 .padding(.top)
                 .padding(.horizontal)
                 
-                // INI GANTI
-                MeetingRoomsView()
+                BookingCarView()
 
                 VStack {
                   HStack {
