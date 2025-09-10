@@ -12,7 +12,6 @@
 		2A85FB132E68259500A63BC4 /* ParticipantBr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB122E68257D00A63BC4 /* ParticipantBr.swift */; };
 		2A85FB152E68268400A63BC4 /* ParticipantBc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB142E68268400A63BC4 /* ParticipantBc.swift */; };
 		BAE5B12D2E71627700DA301C /* ParticipantResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */; };
-		BAE5B12E2E71627700DA301C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12B2E71627700DA301C /* Participant.swift */; };
 		BAE5B1302E7162BB00DA301C /* UserInsert.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12F2E7162BB00DA301C /* UserInsert.swift */; };
 		BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249B02E5F604D00F92305 /* SupabaseManager.swift */; };
 		BEC249C32E5F614C00F92305 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C22E5F614C00F92305 /* Auth */; };
@@ -56,7 +55,6 @@
 		2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingRoomJoined.swift; sourceTree = "<group>"; };
 		2A85FB122E68257D00A63BC4 /* ParticipantBr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantBr.swift; sourceTree = "<group>"; };
 		2A85FB142E68268400A63BC4 /* ParticipantBc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantBc.swift; sourceTree = "<group>"; };
-		BAE5B12B2E71627700DA301C /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
 		BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantResponse.swift; sourceTree = "<group>"; };
 		BAE5B12F2E7162BB00DA301C /* UserInsert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInsert.swift; sourceTree = "<group>"; };
 		BEC249B02E5F604D00F92305 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
@@ -152,7 +150,6 @@
 			isa = PBXGroup;
 			children = (
 				BAE5B12F2E7162BB00DA301C /* UserInsert.swift */,
-				BAE5B12B2E71627700DA301C /* Participant.swift */,
 				BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */,
 				BEC249EB2E602F9B00F92305 /* Destination.swift */,
 				BEC249E92E602E2D00F92305 /* BookingCar.swift */,
@@ -329,7 +326,6 @@
 				BEC249E82E602C8600F92305 /* BookingRoomDetail.swift in Sources */,
 				BEC249EC2E602F9D00F92305 /* Destination.swift in Sources */,
 				BAE5B12D2E71627700DA301C /* ParticipantResponse.swift in Sources */,
-				BAE5B12E2E71627700DA301C /* Participant.swift in Sources */,
 				2A85FB132E68259500A63BC4 /* ParticipantBr.swift in Sources */,
 				BEC249E62E602B4E00F92305 /* BookingRoom.swift in Sources */,
 				BEC249E02E5FF66C00F92305 /* Room.swift in Sources */,

@@ -9,7 +9,7 @@ import SwiftUI
 struct ParticipantsView: View {
     var brId: Int
     @Environment(\.dismiss) var dismiss
-    @State private var participants: [Participant] = []
+    @State private var participants: [ParticipantBr] = []
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
 
@@ -74,7 +74,7 @@ struct ParticipantsView: View {
                 .value
             
             let mappedParticipants = response.map { p in
-                Participant(
+                ParticipantBr(
                     user_id: p.user_id,
                     br_id: p.br_id,
                     pic: p.pic,
