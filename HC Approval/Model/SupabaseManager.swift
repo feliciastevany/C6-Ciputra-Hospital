@@ -36,6 +36,12 @@ struct ErrorWrapper: Identifiable {
     let message: String
 }
 
+struct DriverAvailability: Identifiable {
+    let id = UUID()
+    let driver: Driver
+    let bookings: [BookingCar]
+    let availableSlots: [TimeSlot]
+}
 
 class SupabaseManager {
     static let shared = SupabaseManager()
@@ -74,14 +80,46 @@ class SupabaseManager {
         
         for room in rooms {
             let bookings = try await fetchRoomBookings(roomId: room.room_id, date: date)
-            let availableSlots = calculateAvailableSlots(for: bookings)
+            let availableSlots = calculateAvailableRoomSlots(for: bookings)
             result.append(RoomAvailability(room: room, bookings: bookings, availableSlots: availableSlots))
         }
         
         return result
     }
     
-    private func calculateAvailableSlots(for bookings: [BookingRoom]) -> [TimeSlot] {
+    func fetchBookingsCar(driverId: Int, date: String) async throws -> [BookingCar] {
+        try await client
+            .from("bookings_car")
+            .select()
+            .eq("driver_id", value: driverId)
+            .eq("bc_date", value: date)        
+            .execute()
+            .value
+    }
+    
+    func fetchDrivers() async throws -> [Driver] {
+        try await client
+            .from("drivers")
+            .select()
+            .eq("driver_active", value: true)
+            .execute()
+            .value
+    }
+    
+    func findAvailableDrivers(date: String) async throws -> [DriverAvailability] {
+        let drivers = try await fetchDrivers()
+        var result: [DriverAvailability] = []
+        
+        for driver in drivers {
+            let bookings = try await fetchBookingsCar(driverId: driver.driver_id, date: date)
+            let availableSlots = calculateAvailableDriverSlots(for: bookings)
+            result.append(DriverAvailability(driver: driver, bookings: bookings, availableSlots: availableSlots))
+        }
+        
+        return result
+    }
+    
+    private func calculateAvailableRoomSlots(for bookings: [BookingRoom]) -> [TimeSlot] {
         var slots: [TimeSlot] = []
         let dayStart = "07:30"
         let dayEnd = "21:00"
@@ -92,6 +130,24 @@ class SupabaseManager {
                 slots.append(TimeSlot(start: currentStart, end: booking.br_start))
             }
             currentStart = max(currentStart, booking.br_end)
+        }
+        if currentStart < dayEnd {
+            slots.append(TimeSlot(start: currentStart, end: dayEnd))
+        }
+        return slots
+    }
+    
+    private func calculateAvailableDriverSlots(for bookings: [BookingCar]) -> [TimeSlot] {
+        var slots: [TimeSlot] = []
+        let dayStart = "07:30"
+        let dayEnd = "21:00"
+        
+        var currentStart = dayStart
+        for booking in bookings {
+            if currentStart < booking.bc_start {
+                slots.append(TimeSlot(start: currentStart, end: booking.bc_start))
+            }
+            currentStart = max(currentStart, booking.bc_end)
         }
         if currentStart < dayEnd {
             slots.append(TimeSlot(start: currentStart, end: dayEnd))

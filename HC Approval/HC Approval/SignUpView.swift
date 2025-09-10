@@ -5,7 +5,6 @@
 //  Created by Livanty Efatania Dendy on 28/08/25.
 //
 
-
 import SwiftUI
 
 struct SignUpView: View {
@@ -19,6 +18,8 @@ struct SignUpView: View {
         user_active: true
     )
     
+    let departments = ["Human Capital Management", "Marketing", "Finance", "Building & Facilities", "IT"]
+    
     @State private var confirm_pass = ""
     @State private var isLoading = false
     @State private var errorMessage = ""
@@ -26,9 +27,9 @@ struct SignUpView: View {
     
     @State private var goToLogin = false
     
-    // Menambahkan state untuk mengontrol apakah password terlihat
     @State private var isPasswordVisible = false
     @State private var isConfirmPasswordVisible = false
+    
     
     var body: some View {
         NavigationStack {
@@ -51,11 +52,36 @@ struct SignUpView: View {
                             .cornerRadius(25)
                             .shadow(radius: 1)
                         
-                        TextField("Department", text: $user.user_dept)
-                            .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(25)
-                            .shadow(radius: 1)
+                        ZStack(alignment: .leading) {
+                            Text(user.user_dept.isEmpty ? "Select Department" : user.user_dept)
+                                .foregroundColor(user.user_dept.isEmpty ? Color(UIColor { $0.userInterfaceStyle == .dark ? .darkGray : .lightGray }) : .primary)
+
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(25)
+                                .shadow(radius: 1)
+                            
+                         
+                            Menu {
+                                ForEach(departments, id: \.self) { department in
+                                    Button(action: {
+                                        user.user_dept = department
+                                    }) {
+                                        Text(department)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "chevron.down")
+                                    .foregroundColor(.secondary)
+                                    .padding(15)
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                            }
+                            .padding(.trailing, 10)
+                        }
+                        
+
+
                         
                         TextField("Phone", text: $user.user_phone)
                             .keyboardType(.phonePad)
@@ -80,7 +106,6 @@ struct SignUpView: View {
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                                     .padding(15)
-                                    
                                     .background(Color(.systemBackground))
                                     .cornerRadius(25)
                                     .shadow(radius: 1)
@@ -93,7 +118,6 @@ struct SignUpView: View {
                                     .background(Color(.systemBackground))
                                     .cornerRadius(25)
                                     .shadow(radius: 1)
-                               
                             }
                            
                             HStack {
@@ -101,15 +125,14 @@ struct SignUpView: View {
                                 Button(action: {
                                     isPasswordVisible.toggle()
                                 }) {
-                                    Image(systemName: isConfirmPasswordVisible ? "eye.fill" : "eye.slash.fill")
-                                        .foregroundColor(isConfirmPasswordVisible ? .blue : .gray)
+                                    Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
+                                        .foregroundColor(isPasswordVisible ? .blue : .gray)
                                         .padding(.trailing, 15)
                                 }
                             }
                         }
                         
                         ZStack {
-                           
                             if isConfirmPasswordVisible {
                                 TextField("Repeat Password", text: $confirm_pass)
                                     .textContentType(.newPassword)
@@ -130,7 +153,6 @@ struct SignUpView: View {
                                     .shadow(radius: 1)
                             }
                             
-                           
                             HStack {
                                 Spacer()
                                 Button(action: {
@@ -159,9 +181,7 @@ struct SignUpView: View {
                                 .fontWeight(.bold)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(
-                                    .blue
-                                )
+                                .background(.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(30)
                         }
@@ -189,7 +209,6 @@ struct SignUpView: View {
                     }
                     Spacer()
                     
-                    // NavigationLink tersembunyi ke LoginView
                     NavigationLink(destination: LoginView().navigationBarBackButtonHidden(true), isActive: $goToLogin) {
                         EmptyView()
                     }
@@ -229,13 +248,11 @@ struct SignUpView: View {
             
             await MainActor.run {
                 successMessage = "Sign up berhasil!"
-                // Reset form
                 user = User(user_id: 0, user_name: "", user_pass: "", user_dept: "", user_email: "", user_phone: "", user_active: true)
                 confirm_pass = ""
             }
             
-            // Delay sebentar supaya user lihat pesan sukses, lalu navigate ke LoginView
-            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 detik
+            try await Task.sleep(nanoseconds: 1_000_000_000) 
             
             await MainActor.run {
                 goToLogin = true
@@ -260,3 +277,4 @@ struct SignUpView_Previews: PreviewProvider {
         SignUpView()
     }
 }
+
