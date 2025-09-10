@@ -11,6 +11,9 @@
 		2A442ADD2E6089CA00314464 /* BookingRoomJoined.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */; };
 		2A85FB132E68259500A63BC4 /* ParticipantBr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB122E68257D00A63BC4 /* ParticipantBr.swift */; };
 		2A85FB152E68268400A63BC4 /* ParticipantBc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB142E68268400A63BC4 /* ParticipantBc.swift */; };
+		BAE5B12D2E71627700DA301C /* ParticipantResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */; };
+		BAE5B12E2E71627700DA301C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12B2E71627700DA301C /* Participant.swift */; };
+		BAE5B1302E7162BB00DA301C /* UserInsert.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12F2E7162BB00DA301C /* UserInsert.swift */; };
 		BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249B02E5F604D00F92305 /* SupabaseManager.swift */; };
 		BEC249C32E5F614C00F92305 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C22E5F614C00F92305 /* Auth */; };
 		BEC249C52E5F614C00F92305 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C42E5F614C00F92305 /* Functions */; };
@@ -53,6 +56,9 @@
 		2A442ADC2E6089C700314464 /* BookingRoomJoined.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingRoomJoined.swift; sourceTree = "<group>"; };
 		2A85FB122E68257D00A63BC4 /* ParticipantBr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantBr.swift; sourceTree = "<group>"; };
 		2A85FB142E68268400A63BC4 /* ParticipantBc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantBc.swift; sourceTree = "<group>"; };
+		BAE5B12B2E71627700DA301C /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
+		BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantResponse.swift; sourceTree = "<group>"; };
+		BAE5B12F2E7162BB00DA301C /* UserInsert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInsert.swift; sourceTree = "<group>"; };
 		BEC249B02E5F604D00F92305 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		BEC249DF2E5FF66A00F92305 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		BEC249E12E5FF7AB00F92305 /* Property.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
@@ -145,6 +151,9 @@
 		BEE6AFC02E5F52EF00BE084D /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				BAE5B12F2E7162BB00DA301C /* UserInsert.swift */,
+				BAE5B12B2E71627700DA301C /* Participant.swift */,
+				BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */,
 				BEC249EB2E602F9B00F92305 /* Destination.swift */,
 				BEC249E92E602E2D00F92305 /* BookingCar.swift */,
 				BEC249E72E602C7F00F92305 /* BookingRoomDetail.swift */,
@@ -319,11 +328,14 @@
 				2A85FB152E68268400A63BC4 /* ParticipantBc.swift in Sources */,
 				BEC249E82E602C8600F92305 /* BookingRoomDetail.swift in Sources */,
 				BEC249EC2E602F9D00F92305 /* Destination.swift in Sources */,
+				BAE5B12D2E71627700DA301C /* ParticipantResponse.swift in Sources */,
+				BAE5B12E2E71627700DA301C /* Participant.swift in Sources */,
 				2A85FB132E68259500A63BC4 /* ParticipantBr.swift in Sources */,
 				BEC249E62E602B4E00F92305 /* BookingRoom.swift in Sources */,
 				BEC249E02E5FF66C00F92305 /* Room.swift in Sources */,
 				BEC249EA2E602E3100F92305 /* BookingCar.swift in Sources */,
 				BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */,
+				BAE5B1302E7162BB00DA301C /* UserInsert.swift in Sources */,
 				2A442ADB2E6089B600314464 /* BookingCarJoined.swift in Sources */,
 				BEC249E42E5FF82800F92305 /* Driver.swift in Sources */,
 				BEC249E22E5FF7AE00F92305 /* Property.swift in Sources */,

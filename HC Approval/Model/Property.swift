@@ -19,3 +19,5 @@ struct SelectedProperty: Identifiable {
     var property: Property
     var quantity: Int
 }
+
+

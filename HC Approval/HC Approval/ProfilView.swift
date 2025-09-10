@@ -17,6 +17,7 @@ struct ProfilView: View {
     
     @State private var showEditSheet = false
     @State private var isLoggedOut = false
+    
     @State private var showPassword = false
     
     var body: some View {
@@ -57,6 +58,7 @@ struct ProfilView: View {
                                 
                                 Spacer()
                                 
+                            
                                 ZStack(alignment: .trailing) {
                                     if showPassword {
                                         TextField("Password", text: .constant(user.user_pass ?? ""))
@@ -139,10 +141,11 @@ struct ProfilView: View {
     }
     
     private func logout() {
-        UserDefaults.standard.removeObject(forKey: "loggedInUserId") // Hapus status login
-        isLoggedOut = true // Mengarahkan ke halaman login
+        UserDefaults.standard.removeObject(forKey: "loggedInUserId")
+        isLoggedOut = true
     }
 }
+
 
 struct ProfilView_Previews: PreviewProvider {
     static var previews: some View {
