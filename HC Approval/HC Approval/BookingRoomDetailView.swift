@@ -45,7 +45,7 @@ struct BookingRoomDetailView: View {
                         HStack{
                             Text("Date")
                             Spacer()
-                            Text(DateHelper.formatDate(booking.br_date))
+                            Text(booking.br_date.formattedDateReadable)
                                 .foregroundColor(.secondary)
                         }
                         HStack {
@@ -155,7 +155,7 @@ struct BookingRoomDetailView: View {
     
     func fetchParticipants(brId: Int) async {
         do {
-            let response: [Participant] = try await SupabaseManager.shared.client
+            let response: [ParticipantBr] = try await SupabaseManager.shared.client
                 .from("participants_br")
                 .select("*, users:user_id(*)")
                 .eq("br_id", value: brId)
@@ -207,5 +207,22 @@ extension String {
         
         // fallback terakhir, kembalikan string asli
         return self
+    }
+}
+
+extension String {
+    var formattedDateReadable: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd" // format input dari backend
+        
+        if let date = formatter.date(from: self) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.locale = Locale(identifier: "id_ID") // bahasa Indonesia
+            displayFormatter.dateFormat = "dd MMMM yyyy" // contoh: 05 September 2025
+            return displayFormatter.string(from: date)
+        }
+        
+        return self // fallback kalau gagal parsing
     }
 }

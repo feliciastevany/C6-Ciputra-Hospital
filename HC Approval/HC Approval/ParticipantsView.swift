@@ -4,7 +4,6 @@
 //
 //  Created by Livanty Efatania Dendy on 08/09/25.
 //
-
 import SwiftUI
 
 struct ParticipantsView: View {
@@ -58,7 +57,7 @@ struct ParticipantsView: View {
             }
         }
         .task {
-            await fetchParticipants()
+            await fetchParticipants() // Menjalankan fetch data peserta
         }
     }
 
