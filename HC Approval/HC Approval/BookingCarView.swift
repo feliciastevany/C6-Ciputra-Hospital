@@ -17,6 +17,8 @@ struct BookingCarView: View {
                 VStack{
                     DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
                     
+                    Divider()
+                    
                     HStack {
                         Text("Passengers")
                         Spacer()
