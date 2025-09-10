@@ -12,8 +12,7 @@ struct MyBookings : View {
     
     @State var searchText: String = ""
     
-    @State private var selectedBookingCar: BookingCarJoined?
-    @State private var showDetails: Bool = false
+    @State private var selectedSheet: SheetType?
     
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
@@ -84,7 +83,7 @@ struct MyBookings : View {
                     }
                 }
                 .padding(.top)
-
+                
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(Color(.systemGray2))
@@ -140,7 +139,9 @@ struct MyBookings : View {
                                             startTime: toHourMinute(booking.br_start),
                                             endTime: toHourMinute(booking.br_end),
                                             status: booking.br_status
-                                        )
+                                        ).onTapGesture {
+                                            selectedSheet = .roombooking(booking)
+                                        }
                                     }
                                 }
                             }
@@ -168,10 +169,11 @@ struct MyBookings : View {
                                     }
                                 },
                                             onDetails: {
-                                    selectedBookingCar = booking
-                                    showDetails = true
+                                    selectedSheet = .carpool(booking)
                                 }
-                                    )
+                                ).onTapGesture {
+                                    selectedSheet = .carbooking(booking)
+                                }
                             }
                             
                             let nonPendingGroupedCars = Dictionary(
@@ -193,7 +195,10 @@ struct MyBookings : View {
                                                     event: booking.destination?.last?.destination_name ?? "Unknown",
                                                     startTime: toHourMinute(booking.bc_start),
                                                     endTime: toHourMinute(booking.bc_end),
-                                                    status: booking.bc_status)
+                                                    status: booking.bc_status
+                                        ).onTapGesture {
+                                            selectedSheet = .carbooking(booking)
+                                        }
                                     }
                                 }
                             }
@@ -207,8 +212,17 @@ struct MyBookings : View {
             }
             .padding(.horizontal)
             .background(Color(.systemGray6))
-            .sheet(item: $selectedBookingCar) { car in
-                BookingCarDetailView(booking: car)
+            .sheet(item: $selectedSheet) { sheet in
+                switch sheet {
+                case .carbooking(let car):
+//                    BookingCarDetailView(bcId: car.bc_id)
+//                    BookingRoomDetailView(brId: room.br_id)
+                    CarpoolDetailView(booking: car)
+                case .carpool(let car):
+                    CarpoolDetailView(booking: car)
+                case .roombooking(let room):
+                    BookingRoomDetailView(brId: room.br_id)
+                }
             }
         }
     }

@@ -19,7 +19,7 @@ struct ContentView: View {
                         Image(systemName: "checkmark.square")
                         Text("Approvals")
                     }
-                ApprovalsView()
+                MyBookings()
                     .tabItem {
                         Image(systemName: "text.page")
                         Text("Bookings")
@@ -37,7 +37,7 @@ struct ContentView: View {
             }
             
             else{
-                ApprovalsView()
+                MyBookings()
                     .tabItem {
                         Image(systemName: "text.page")
                         Text("Bookings")

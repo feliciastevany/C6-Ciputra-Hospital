@@ -46,3 +46,39 @@ extension SupabaseManager {
     }
 }
 
+
+//    func fetchAllBookings() async {
+//        do {
+//            let responseRooms = try await SupabaseManager.shared.client
+//                .from("bookings_room")
+//                .select("""
+//                        *, room:rooms(*), user: users(*)
+//                        """)
+//                .execute()
+//
+//            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+//                [BookingRoomJoined].self,
+//                from: responseRooms.data
+//            )
+//
+//            let responseCars = try await SupabaseManager.shared.client
+//                .from("bookings_car")
+//                .select("""
+//                        *, destination:destinations(*), driver:drivers(*), user: users(*)
+//                        """)
+//                .execute()
+//
+//            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+//                [BookingCarJoined].self,
+//                from: responseCars.data
+//            )
+//
+//            DispatchQueue.main.async {
+//                self.bookingRoom = rooms
+//                self.bookingCar = cars
+//            }
+//            print("respones: ", rooms, cars)
+//        } catch {
+//            print("Error fetch bookings:", error)
+//        }
+//    }

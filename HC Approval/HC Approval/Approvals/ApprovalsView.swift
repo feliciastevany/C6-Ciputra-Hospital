@@ -15,6 +15,8 @@ struct ApprovalsView: View {
     @State private var declineReason = ""
     @State private var selectedBooking: (any AnyBooking)?
     
+    @State private var selectedSheet: SheetType?
+    
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
@@ -169,7 +171,13 @@ struct ApprovalsView: View {
                                 : toHourMinute((booking as! BookingCarJoined).bc_end),
                                 status: booking.status,
                                 bookings: booking
-                            )
+                            ).onTapGesture {
+                                if let room = booking as? BookingRoomJoined {
+                                    selectedSheet = .roombooking(room)
+                                } else if let car = booking as? BookingCarJoined {
+                                    selectedSheet = .carbooking(car)
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -180,6 +188,18 @@ struct ApprovalsView: View {
                 }
             }
             .background(Color(.systemGray6))
+            .sheet(item: $selectedSheet) { sheet in
+                switch sheet {
+                case .carbooking(let car):
+//                    BookingCarDetailView(bcId: car.bc_id)
+//                    BookingRoomDetailView(brId: room.br_id)
+                    CarpoolDetailView(booking: car)
+                case .carpool(let car):
+                    CarpoolDetailView(booking: car)
+                case .roombooking(let room):
+                    BookingRoomDetailView(brId: room.br_id)
+                }
+            }
             
             if showDeclineSheet {
                 Color.black.opacity(0.3).ignoresSafeArea()
@@ -237,42 +257,6 @@ struct ApprovalsView: View {
             }
         }
     }
-
-//    func fetchAllBookings() async {
-//        do {
-//            let responseRooms = try await SupabaseManager.shared.client
-//                .from("bookings_room")
-//                .select("""
-//                        *, room:rooms(*), user: users(*)
-//                        """)
-//                .execute()
-//            
-//            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
-//                [BookingRoomJoined].self,
-//                from: responseRooms.data
-//            )
-//            
-//            let responseCars = try await SupabaseManager.shared.client
-//                .from("bookings_car")
-//                .select("""
-//                        *, destination:destinations(*), driver:drivers(*), user: users(*)
-//                        """)
-//                .execute()
-//            
-//            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
-//                [BookingCarJoined].self,
-//                from: responseCars.data
-//            )
-//            
-//            DispatchQueue.main.async {
-//                self.bookingRoom = rooms
-//                self.bookingCar = cars
-//            }
-//            print("respones: ", rooms, cars)
-//        } catch {
-//            print("Error fetch bookings:", error)
-//        }
-//    }
     func fetchAllBookings() async {
         do {
             let (rooms, cars) = try await SupabaseManager.shared.fetchBookings()
