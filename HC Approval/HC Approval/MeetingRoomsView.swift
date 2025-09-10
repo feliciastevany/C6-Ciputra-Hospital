@@ -14,18 +14,26 @@ struct MeetingRoomsView: View {
     @State private var goToAvailable = false
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
-                
-                HStack {
-                    Text("Capacity")
-                    Spacer()
-                    Text("\(capacity)")
-                        .frame(width: 30, alignment: .center)
-                    Stepper("", value: $capacity, in: 1...500)
-                        .labelsHidden()
+//        NavigationView {
+            VStack (spacing: 10){
+                VStack {
+                    DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Capacity")
+                        Spacer()
+                        Text("\(capacity)")
+                            .frame(width: 30, alignment: .center)
+                        Stepper("", value: $capacity, in: 1...500)
+                            .labelsHidden()
+                    }
                 }
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
                 
                 NavigationLink(
                     destination: AvailableRoomsView(date: DateHelper.toBackendFormat(date),capacity: Int(capacity) ?? 1),
@@ -36,6 +44,7 @@ struct MeetingRoomsView: View {
                 Button("Browse Rooms") {
                     goToAvailable = true
                 }
+                .font(.headline.bold())
                 .buttonStyle(.borderedProminent)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -66,8 +75,8 @@ struct MeetingRoomsView: View {
                 //                .listStyle(PlainListStyle())
             }
             .padding()
-            .navigationTitle("Meeting Rooms")
-        }
+            .background(Color(.systemGray6))
+//        }
     }
 }
 
@@ -317,7 +326,7 @@ struct RoomDetailView: View {
         .sheet(isPresented: $showPropertyPicker) {
             PropertyPickerView(selectedProperties: $selectedProperties)
         }
-        NavigationLink(destination: MeetingRoomsView().navigationBarBackButtonHidden(true), isActive: $goToMyBooking) {
+        NavigationLink(destination: ContentView().navigationBarBackButtonHidden(true), isActive: $goToMyBooking) {
             EmptyView()
         }
     }

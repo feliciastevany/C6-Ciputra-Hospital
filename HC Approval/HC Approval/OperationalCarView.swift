@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct OperationalCarView: View {
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToProfil = false
+    
     @State private var selectedDate = Date()
     @State private var currentMonth = Date()
     @State private var cars: [BookingCarJoined] = []
@@ -37,6 +40,8 @@ struct OperationalCarView: View {
                             .resizable()
                             .frame(width: 40, height: 40)
                             .foregroundColor(.blue)
+                    }.navigationDestination(isPresented: $goToProfil) {
+                        ProfilView(userId: loggedInUserId)
                     }
                 }
                 .padding()
@@ -114,7 +119,7 @@ struct OperationalCarView: View {
                     }
 
                 }
-                .padding()
+                .padding(.horizontal)
             }
         }
         // setiap kali selectedDate berubah → fetch ulang

@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MeetingRoomView: View {
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToProfil = false
+    
     @State private var selectedDate = Date()
     @State private var currentMonth = Date()
     @State private var rooms: [BookingRoomJoined] = []
@@ -17,10 +20,11 @@ struct MeetingRoomView: View {
     let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header + Month + Date Selector
+        NavigationStack{
             VStack(spacing: 0) {
-                // Header
+                // Header + Month + Date Selector
+                
+                //Header
                 HStack {
                     Text("Meeting Rooms")
                         .font(.title)
@@ -32,106 +36,110 @@ struct MeetingRoomView: View {
                     }) {
                         Image(systemName: "person.crop.circle")
                             .resizable()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 32, height: 32)
                             .foregroundColor(.blue)
+                    }.navigationDestination(isPresented: $goToProfil) {
+                        ProfilView(userId: loggedInUserId)
                     }
                 }
-                .padding()
+                .padding(.top)
+                .padding(.horizontal)
                 
-                BookingFilterView()
-                    .padding(.top, -15)
-                    .padding(.bottom, 10)
+                MeetingRoomsView()
                 
-                HStack {
-                    Text("Schedule")
-                        .font(.title3)
-                        .bold()
-                    Spacer()
+                VStack {
+                    HStack {
+                        Text("Schedule")
+                            .font(.title3)
+                            .bold()
+                        Spacer()
+                    }
+                    .padding(.top, 5)
+                    .padding(.horizontal)
+                    
+                    WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
+                        .frame(height: 120)
+                        .padding(.horizontal, -2)
+                    
+                    Divider()
                 }
-                .padding()
                 
-                WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
-                    .frame(height: 120)
-                    .padding(.horizontal, -2)
-                
-            }
-            .background(Color(.systemGray6))
-            
-            Divider()
-            
-            // Timeline + Schedule
-            ScrollView([.horizontal, .vertical]) {
-                HStack(alignment: .top, spacing: 0) {
-                    // Kolom jam di sisi kiri
-                    VStack(spacing: 0) {
-                        ForEach(hours, id: \.self) { hour in
-                            HStack {
+                // Timeline + Schedule
+                ScrollView([.horizontal, .vertical]) {
+                    HStack(alignment: .top, spacing: 0) {
+                        // Kolom jam di sisi kiri
+                        VStack(spacing: 0) {
+                            ForEach(hours, id: \.self) { hour in
                                 HStack {
-                                    Text("\(String(format: "%02d.00", hour))")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                    Spacer()
+                                    HStack {
+                                        Text("\(String(format: "%02d.00", hour))")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                        Spacer()
+                                    }
+                                    .frame(height: hourHeight)
+                                    .frame(width: 50, alignment: .leading)
+                                    
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(height: 1)
                                 }
-                                .frame(height: hourHeight)
-                                .frame(width: 50, alignment: .leading)
-                                
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 1)
                             }
                         }
-                    }
-                    
-                    // Grid tiap Room
-                    ForEach(filteredRooms, id: \.self) { room in
-                        VStack(spacing: 0) {
-                            ZStack(alignment: .topLeading) {
-                                // Background grid
-                                VStack(spacing: 0) {
-                                    ForEach(hours, id: \.self) { hour in
-                                        ZStack {
-                                            Rectangle()
-                                                .fill(Color.gray.opacity(0.3))
-                                                .frame(height: 1)
-                                            Rectangle()
-                                                .fill(Color.clear)
-                                                .frame(height: hourHeight)
+                        
+                        // Grid tiap Room
+                        ForEach(filteredRooms, id: \.self) { room in
+                            VStack(spacing: 0) {
+                                ZStack(alignment: .topLeading) {
+                                    // Background grid
+                                    VStack(spacing: 0) {
+                                        ForEach(hours, id: \.self) { hour in
+                                            ZStack {
+                                                Rectangle()
+                                                    .fill(Color.gray.opacity(0.3))
+                                                    .frame(height: 1)
+                                                Rectangle()
+                                                    .fill(Color.clear)
+                                                    .frame(height: hourHeight)
+                                            }
                                         }
                                     }
-                                }
-                                
-                                // Events
-                                ForEach(events.filter { event in
-                                    (selectedRoom == "All" || event.room == selectedRoom) && event.room == room
-                                }) { event in
-                                    ScheduleBlock(
-                                        room: event.room,
-                                        name: event.name,
-                                        dept: event.dept,
-                                        color: event.color,
-                                        startHour: event.startHour,
-                                        startMinute: event.startMinute,
-                                        endHour: event.endHour,
-                                        endMinute: event.endMinute,
-                                        hourHeight: hourHeight
-                                    )
+                                    
+                                    // Events
+                                    ForEach(events.filter { event in
+                                        (selectedRoom == "All" || event.room == selectedRoom) && event.room == room
+                                    }) { event in
+                                        ScheduleBlock(
+                                            room: event.room,
+                                            name: event.name,
+                                            dept: event.dept,
+                                            color: event.color,
+                                            startHour: event.startHour,
+                                            startMinute: event.startMinute,
+                                            endHour: event.endHour,
+                                            endMinute: event.endMinute,
+                                            hourHeight: hourHeight
+                                        )
+                                    }
                                 }
                             }
+                            .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 90)
                         }
-                        .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 90)
                     }
+                    .padding(.horizontal)
                 }
-                .padding()
+                .background(Color(.systemBackground))
             }
-        }
-        // setiap kali selectedDate berubah → fetch ulang
-        .onChange(of: selectedDate) { _ in
-            Task {
-                await fetchBookRooms(for: selectedDate)
+            .background(Color(.systemGray6))
+            // setiap kali selectedDate berubah → fetch ulang
+            .onChange(of: selectedDate) { _ in
+                Task {
+                    await fetchBookRooms(for: selectedDate)
+                }
             }
-        }
-        .task {
-            await fetchBookRooms(for: selectedDate) // pertama kali load
+            .task {
+                await fetchBookRooms(for: selectedDate) // pertama kali load
+            }
         }
     }
     private var filteredRooms: [String] {
