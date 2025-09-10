@@ -13,18 +13,25 @@ struct BookingCarView: View {
     @State private var goToAvailable = false
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
-                
-                HStack {
-                    Text("Passengers")
-                    Spacer()
-                    Text("\(passengers)")
-                        .frame(width: 30, alignment: .center)
-                    Stepper("", value: $passengers, in: 1...500)
-                        .labelsHidden()
+            VStack(spacing: 10) {
+                VStack{
+                    DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Passengers")
+                        Spacer()
+                        Text("\(passengers)")
+                            .frame(width: 30, alignment: .center)
+                        Stepper("", value: $passengers, in: 1...500)
+                            .labelsHidden()
+                    }
                 }
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
                 
                 NavigationLink(
                     destination: AvailableDriversView(date: DateHelper.toBackendFormat(date), passengers: passengers),
@@ -65,8 +72,7 @@ struct BookingCarView: View {
 //                .listStyle(PlainListStyle())
             }
             .padding()
-            .navigationTitle("Cars")
-        }
+            .background(Color(.systemGray6))
     }
 }
 
@@ -90,7 +96,9 @@ struct AvailableDriversView: View {
                                 .font(.headline)
                         }
                         
-                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: driverAvail.bookings)
+//                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: driverAvail.bookings)
+                        
+                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
                         
                         if availableSlots.isEmpty {
                             Text("Tidak ada slot tersedia")
@@ -143,211 +151,6 @@ struct AvailableDriversView: View {
     }
 }
 
-//struct CarDetailView: View {
-//    @Environment(\.dismiss) private var dismiss
-//    
-//    var driver: Driver
-//    var slot: TimeSlot
-//    var date: String
-//    var passengers: Int
-//    var bookings: [BookingCar]
-//    
-//    @State private var startTime: String = ""
-//    @State private var endTime: String = ""
-//    @State private var goToSchedule = false
-//    @State private var fromPlace = ""
-//    @State private var destinations: [String] = []   // daftar tujuan
-//    @State private var newDestination: String = ""   // input sementara
-//    @State private var outingDesc = ""
-//    
-////    @State private var showUserPicker = false
-////    @State private var selectedUsers: [User] = []
-//    
-////    @State private var selectedProperties: [SelectedProperty] = []
-////    @State private var showPropertyPicker = false
-//    
-//    @State private var showSuccess = false
-//    
-//    private var availableTimeOptions: [String] {
-//        BookingTimeHelper.availableStartTimes(bookings: bookings)
-//    }
-//    
-//    private var validEndOptions: [String] {
-//        BookingTimeHelper.validEndTimes(startTime: startTime, bookings: bookings)
-//    }
-//    
-//    var body: some View {
-//        Form {
-//            Section(header: Text("Driver & Passenger Info")) {
-//                Text(driver.driver_name)
-//                Text("\(passengers) passengers")
-//            }
-//            
-//            Section(header: Text("Booking")) {
-//                HStack {
-//                    Text("Date")
-//                    Spacer()
-//                    Text(DateHelper.toDisplayFormat(date))
-//                }.frame(maxWidth: .infinity)
-//                
-//                Picker("Departure", selection: $startTime) {
-//                    ForEach(availableTimeOptions, id: \.self) { time in
-//                        Text(time).tag(time)
-//                    }
-//                }
-//                
-//                Picker("Arrival", selection: $endTime) {
-//                    ForEach(validEndOptions, id: \.self) { time in
-//                        Text(time).tag(time)
-//                    }
-//                }.disabled(startTime.isEmpty)
-//            }
-//            
-//            Section {
-//                TextField("From", text: $fromPlace)
-//            }
-//            
-//            Section(header: Text("Destinations")) {
-//                ForEach(destinations, id: \.self) { dest in
-//                    Text(dest)
-//                }
-//                .onDelete { indexSet in
-//                    destinations.remove(atOffsets: indexSet)
-//                }
-//                
-//                HStack {
-//                    TextField("Add destination", text: $newDestination)
-//                    Button(action: {
-//                        if !newDestination.isEmpty {
-//                            destinations.append(newDestination)
-//                            newDestination = ""
-//                        }
-//                    }) {
-//                        Image(systemName: "plus.circle.fill")
-//                            .foregroundColor(.blue)
-//                    }
-//                }
-//            }
-//            
-//            Section {
-//                TextField("Description", text: $outingDesc)
-//            }
-//
-//            
-////            Section {
-////                HStack {
-////                    Text("Participant")
-////                    Spacer()
-////                    Button {
-////                        showUserPicker = true
-////                    } label: {
-////                        Image(systemName: "plus")
-////                    }
-////                }
-////                
-////                HStack() {
-////                    let maxVisible = 5
-////                    ForEach(selectedUsers.prefix(maxVisible)) { user in
-////                        Circle()
-////                            .fill(Color.gray.opacity(0.3))
-////                            .frame(width: 32, height: 32)
-////                            .overlay(
-////                                Text(user.user_name.initials)
-////                                    .font(.caption)
-////                                    .fontWeight(.semibold)
-////                                    .foregroundColor(.black)
-////                            )
-////                            .overlay(
-////                                Circle().stroke(Color.white, lineWidth: 2)
-////                            )
-////                    }
-////
-////                    if selectedUsers.count > maxVisible {
-////                        let extra = selectedUsers.count - maxVisible
-////                        Circle()
-////                            .fill(Color.gray.opacity(0.3))
-////                            .frame(width: 32, height: 32)
-////                            .overlay(
-////                                Text("+\(extra)")
-////                                    .font(.caption)
-////                                    .fontWeight(.semibold)
-////                                    .foregroundColor(.black)
-////                            )
-////                            .overlay(
-////                                Circle().stroke(Color.white, lineWidth: 2)
-////                            )
-////                    } else if selectedUsers.isEmpty {
-////                        Text("No participants selected")
-////                            .foregroundColor(.secondary)
-////                    }
-////                }
-////            }
-//            
-//            Button("Booking") {
-//                Task {
-//                    await addBooking()
-//                }
-//            }
-//            .buttonStyle(.borderedProminent)
-//            .frame(maxWidth: .infinity)
-//        }
-//        .navigationTitle("Booking Details")
-//        .alert("Booking berhasil!", isPresented: $showSuccess) {
-//            Button("OK") {
-//                dismiss()
-//            }
-//        }
-//        .onAppear {
-//            if startTime.isEmpty {
-//                startTime = slot.start // dari slot yg dipilih
-//            }
-//            if endTime.isEmpty, let last = validEndOptions.last {
-//                endTime = last
-//            }
-//        }
-////        .sheet(isPresented: $showUserPicker) {
-////            UserPickerView(selectedUsers: $selectedUsers)
-////        }
-//    }
-//    
-//    let bookingService = BookingService()
-//
-//    func addBooking() async {
-//        do {
-//            let booking = BookingCarInsert(
-//                user_id: 1,
-//                driver_id: driver.driver_id,
-//                bc_date: date,
-//                bc_start: startTime,
-//                bc_end: endTime,
-//                bc_from: fromPlace,
-//                bc_desc: outingDesc,
-//                bc_people: passengers,
-//                bc_status: "Pending",
-//                carpool_req: false
-//            )
-//            
-//            guard let created = try await BookingService.shared.createBookingCar(booking) else { return }
-//            
-////            try await BookingService.shared.addParticipants(
-////                selectedUsers.map { Participant(user_id: $0.user_id, br_id: created.br_id, pic: false) }
-////            )
-//            
-//            for dest in destinations {
-//                let destinationInsert = DestinationInsert(destination_name: dest, bc_id: created.bc_id)
-//                try await BookingService.shared.addDestinations(destinationInsert)
-//            }
-//            
-//            await MainActor.run {
-//                showSuccess = true
-//            }
-//            
-//        } catch {
-//            print("Error: \(error)")
-//        }
-//    }
-//}
-
 struct CarDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
@@ -359,11 +162,13 @@ struct CarDetailView: View {
     
     @State private var startTime: String = ""
     @State private var endTime: String = ""
-    @State private var goToSchedule = false
+//    @State private var goToSchedule = false
     @State private var outingDesc = ""
     
+    @State private var from: String = ""
     @State private var destinations: [String] = [""]
     @State private var showSuccess = false
+    @State private var goHome = false
     
     private var availableTimeOptions: [String] {
         BookingTimeHelper.availableStartTimes(bookings: bookings)
@@ -398,6 +203,10 @@ struct CarDetailView: View {
                         Text(time).tag(time)
                     }
                 }.disabled(startTime.isEmpty)
+            }
+            
+            Section(header: Text("From")) {
+                TextField("From", text: $from)
             }
             
             Section(header: Text("Destinations")) {
@@ -437,7 +246,7 @@ struct CarDetailView: View {
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
             Button("OK") {
-                dismiss()
+                goHome = true
             }
         }
         .onAppear {
@@ -447,6 +256,12 @@ struct CarDetailView: View {
             if endTime.isEmpty, let last = validEndOptions.last {
                 endTime = last
             }
+        }
+        NavigationLink(
+            destination: ContentView().navigationBarBackButtonHidden(true),
+            isActive: $goHome
+        ) {
+            EmptyView()
         }
     }
     
@@ -461,7 +276,7 @@ struct CarDetailView: View {
                 bc_date: date,
                 bc_start: startTime,
                 bc_end: endTime,
-                bc_from: destinations.first ?? "",
+                bc_from: from,
                 bc_desc: outingDesc,
                 bc_people: passengers,
                 bc_status: "Pending",

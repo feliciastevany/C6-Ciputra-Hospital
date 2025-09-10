@@ -1,0 +1,247 @@
+//
+//  StaffRoomDetailView.swift
+//  HC Approval
+//
+//  Created by Wilbert Bryan on 08/09/25.
+//
+
+import SwiftUI
+
+struct StaffRoomDetailView: View {
+    let name: String
+    @State private var selectedDate = Date()
+    
+    // Timeline state
+    let hours = Array(8...22)
+    let hourHeight: CGFloat = 80
+    
+    // Data
+    @State private var events: [roomEvent] = []
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack{
+                Text("\(name)")
+                    .font(.title)
+                    .bold()
+                
+                Spacer()
+                
+                Button(action: {
+                    print("Profile tapped")
+                }) {
+                    Text("+ Create Booking")
+                }
+            }
+            .padding()
+            
+            
+            // Calendar
+            StaffWeeklyCalendarView(selectedDate: $selectedDate)
+                .onChange(of: selectedDate) { newValue in
+                    Task {
+                        await fetchBookRoom(for: newValue, selectedRoomName: name)
+                    }
+                }
+                .padding(.bottom, 10)
+            
+        }
+        .background(Color(.systemGray6))
+        
+        
+        // Timeline (single room column)
+        ScrollView([.vertical, .horizontal], showsIndicators: false) {
+            HStack(alignment: .top, spacing: 0) {
+                // Left hour ruler
+                VStack(spacing: 0) {
+                    ForEach(hours, id: \.self) { h in
+                        HStack {
+                            HStack {
+                                Text("\(String(format: "%02d.00", h))")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                            }
+                            .frame(height: hourHeight)
+                            .frame(width: 55, alignment: .leading)
+                            
+                        }
+                    }
+                }
+                
+                // One room column
+                VStack(spacing: 0) {
+                    ZStack(alignment: .topLeading) {
+                        // Background grid
+                        VStack(spacing: 0) {
+                            ForEach(hours, id: \.self) { _ in
+                                ZStack {
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(height: 1)
+                                    Rectangle()
+                                        .fill(Color.clear)
+                                        .frame(height: hourHeight)
+                                }
+                            }
+                        }
+                        
+                        // Events
+                        ForEach(events) { e in
+                            ScheduleBlockSingle(
+                                room: e.room,
+                                name: e.name,
+                                dept: e.dept,
+                                color: e.color,
+                                startHour: e.startHour,
+                                startMinute: e.startMinute,
+                                endHour: e.endHour,
+                                endMinute: e.endMinute,
+                                hourHeight: hourHeight,
+                                baseHour: hours.first ?? 8
+                            )
+                        }
+                    }
+                }
+                .frame(width: UIScreen.main.bounds.width - 80) // lebar kolom room
+            }
+        }
+        
+        .task {
+            await fetchBookRoom(for: selectedDate, selectedRoomName: name)
+        }
+    }
+    
+    // MARK: - Helpers
+    func roomId(for name: String) -> Int? {
+        switch name.lowercased() {
+        case "room 1": return 1
+        case "room 2": return 2
+        case "room 3": return 3
+        case "hall": return 4
+        case "auditorium": return 5
+        default: return nil
+        }
+    }
+    
+    func fetchBookRoom(for date: Date, selectedRoomName: String? = nil) async {
+        do {
+            // "yyyy-MM-dd" untuk kolom DATE
+            let df = DateFormatter()
+            df.locale = Locale(identifier: "en_US_POSIX")
+            df.dateFormat = "yyyy-MM-dd"
+            let dateOnly = df.string(from: date)
+            
+            var q = SupabaseManager.shared.client
+                .from("bookings_room")
+                .select("""
+                    *,
+                    room:room_id!inner(*),
+                    user:user_id(*)
+                """)
+                .eq("br_date", value: dateOnly)
+                .eq("br_status", value: "Approved")
+                .eq("room.room_name", value: selectedRoomName)
+                .order("br_start", ascending: true)
+            
+            
+            let raw = try await q.execute()
+            
+            let rows: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+                [BookingRoomJoined].self,
+                from: raw.data
+            )
+            
+            // Parser "HH:mm"
+            func parseHHmm(_ s: String) -> (h: Int, m: Int)? {
+                let parts = s.split(separator: ":")
+                guard parts.count >= 2,
+                      let h = Int(String(parts[0])),
+                      let m = Int(String(parts[1])) else { return nil }
+                return (h, m)
+            }
+            
+            // Mapping → roomEvent
+            let newEvents: [roomEvent] = rows.compactMap { b in
+                guard let user = b.user, let room = b.room else { return nil }
+                guard let s = parseHHmm(b.br_start),
+                      let e = parseHHmm(b.br_end) else { return nil }
+                
+                return roomEvent(
+                    room: room.room_name,
+                    name: user.user_name,
+                    dept: user.user_dept,
+                    color: colorForRoom(room.room_name),
+                    startHour: s.h, startMinute: s.m,
+                    endHour: e.h, endMinute: e.m
+                )
+            }
+            
+            await MainActor.run {
+                self.events = newEvents
+                print("✅ Events: \(newEvents.count)")
+            }
+            
+        } catch {
+            print("❌ Error fetch bookings:", error)
+        }
+    }
+    
+    
+}
+
+struct ScheduleBlockSingle: View {
+    var room: String
+    var name: String
+    var dept: String
+    var color: Color
+    var startHour: Int
+    var startMinute: Int
+    var endHour: Int
+    var endMinute: Int
+    var hourHeight: CGFloat
+    var baseHour: Int = 8
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(room)
+                .font(.caption).bold()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(name.components(separatedBy: " ").first ?? name)
+                .font(.caption2)
+                .lineLimit(1)
+            Text(dept.replacingOccurrences(of: " ", with: "\n",
+                                           options: .literal,
+                                           range: dept.range(of: " ")))
+            .font(.caption2)
+            .multilineTextAlignment(.leading)
+        }
+        .padding(6)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: blockHeight(), alignment: .topLeading)
+        .background(color.opacity(0.2))
+        .overlay(alignment: .leading) {
+            Rectangle().fill(color).frame(width: 3)
+        }
+        .offset(y: yOffset())
+    }
+    
+    private func blockDurationMinutes() -> Int {
+        (endHour * 60 + endMinute) - (startHour * 60 + startMinute)
+    }
+    private func blockHeight() -> CGFloat {
+        CGFloat(blockDurationMinutes()) * hourHeight / 60.0
+    }
+    private func offsetMinutes() -> Int {
+        (startHour * 60 + startMinute) - (baseHour * 60)
+    }
+    private func yOffset() -> CGFloat {
+        CGFloat(offsetMinutes()) * hourHeight / 60.0 + 40
+    }
+}
+
+#Preview {
+    StaffRoomDetailView(name: "Room 1")
+}
+

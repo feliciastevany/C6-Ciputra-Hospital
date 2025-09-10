@@ -17,7 +17,7 @@ struct MeetingRoomView: View {
     @State private var events: [roomEvent] = []
     @State private var selectedRoom = "All"
     let hours = Array(8...22) // jam 08.00 - 22.00
-    let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
+    let hourHeight: CGFloat = 80 // tinggi tetap untuk setiap jam
     
     var body: some View {
         NavigationStack{
@@ -65,7 +65,7 @@ struct MeetingRoomView: View {
                 }
                 
                 // Timeline + Schedule
-                ScrollView([.horizontal, .vertical]) {
+                ScrollView([.horizontal, .vertical], showsIndicators: false) {
                     HStack(alignment: .top, spacing: 0) {
                         // Kolom jam di sisi kiri
                         VStack(spacing: 0) {
@@ -83,6 +83,7 @@ struct MeetingRoomView: View {
                                     Rectangle()
                                         .fill(Color.gray.opacity(0.3))
                                         .frame(height: 1)
+                                        .padding(.leading, -20)
                                 }
                             }
                         }
@@ -123,10 +124,10 @@ struct MeetingRoomView: View {
                                     }
                                 }
                             }
-                            .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 90)
+                            .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 70)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding()
                 }
                 .background(Color(.systemBackground))
             }
@@ -238,19 +239,23 @@ struct ScheduleBlock: View {
             Text(room)
                 .bold()
                 .font(.caption)
-            Text(name)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .allowsTightening(true)
+            Text(name.components(separatedBy: " ").first ?? name)
                 .font(.caption2)
-            Text(dept)
+            Text(dept.replacingOccurrences(of: " ", with: "\n", options: .literal, range: dept.range(of: " ")))
                 .font(.caption2)
-                .lineLimit(2)
+                .multilineTextAlignment(.leading)
         }
         .padding(6)
-        .frame(width: 90, height: blockHeight(), alignment: .topLeading)
+        .frame(width: 70, height: blockHeight(), alignment: .topLeading)
         .background(color.opacity(0.20))
         .overlay(alignment: .leading) {
             Rectangle().fill(color).frame(width: 3)   // accent bar kiri
         }
         .offset(y: yOffset())
+        .padding(.leading, -20)
     }
     
     private func blockHeight() -> CGFloat {
@@ -260,7 +265,7 @@ struct ScheduleBlock: View {
     
     private func yOffset() -> CGFloat {
         let offsetMinutes = offsetMinutes()
-        return CGFloat(offsetMinutes) * hourHeight / 60.0 + 30
+        return CGFloat(offsetMinutes) * hourHeight / 60.0 + 40
     }
     
     private func blockDurationMinutes() -> Int {

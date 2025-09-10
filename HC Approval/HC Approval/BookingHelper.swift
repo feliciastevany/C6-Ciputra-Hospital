@@ -22,6 +22,19 @@ extension BookingCar: Bookable {
     var endTime: String { bc_end }
 }
 
+protocol HasStatus {
+    var status: String { get }
+}
+
+extension BookingCar: HasStatus {
+    var status: String { bc_status }
+}
+
+extension BookingRoom: HasStatus {
+    var status: String { br_status }
+}
+
+
 struct BookingTimeHelper {
     static func timeToDate(_ time: String) -> Date? {
         let formatter = DateFormatter()
@@ -78,6 +91,15 @@ struct BookingTimeHelper {
         return all.filter { !isBooked(time: $0, bookings: bookings, forStart: true) }
     }
     
+    // 🔥 versi baru: auto skip cancelled/declined
+    static func availableStartTimesIgnoringCancelled<T: Bookable & HasStatus>(bookings: [T]) -> [String] {
+        let activeBookings = bookings.filter {
+            let status = $0.status.lowercased()
+            return status != "cancel" && status != "cancelled" && status != "declined"
+        }
+        return availableStartTimes(bookings: activeBookings)
+    }
+    
     static func validEndTimes<T: Bookable>(startTime: String, bookings: [T]) -> [String] {
         guard let start = timeToDate(startTime) else { return [] }
         
@@ -99,6 +121,7 @@ struct BookingTimeHelper {
         }
     }
 }
+
 
 struct DateHelper {
     /// Format Date → "yyyy-MM-dd" (buat backend)

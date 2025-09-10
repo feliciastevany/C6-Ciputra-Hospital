@@ -8,22 +8,21 @@
 import Foundation
 
 struct BookingCar: Codable, Identifiable {
-    let bc_id: Int
-    let user_id: Int
-    let driver_id: Int
-    let bc_date: Date
-    let bc_start: String
-    let bc_end: String
-    let bc_from: String
-    let bc_desc: String
-    let bc_people: Int
-    let bc_status: String
-    let bc_decline_reason: String
-    let carpool_req: Bool
-    let carpool_req_id: Int
-    let carpool_status: String
-    let carpool_desc: String
-    let created_at: Date
+    var bc_id: Int
+    var user_id: Int
+    var driver_id: Int
+    var bc_date: String
+    var bc_start: String
+    var bc_end: String
+    var bc_from: String
+    var bc_desc: String
+    var bc_people: Int
+    var bc_status: String
+    var bc_decline_reason: String
+    var carpool_req: Bool
+    var carpool_desc: String
+    var carpool_status: String
+    var created_at: Date
     
     var id: Int{bc_id}
 }
