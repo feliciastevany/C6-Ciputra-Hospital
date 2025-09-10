@@ -16,9 +16,9 @@ struct ProfilView: View {
     @State private var errorMessage = ""
     
     @State private var showEditSheet = false
-    @State private var isLoggedOut = false  // Menambahkan state untuk logout
+    @State private var isLoggedOut = false
     
-    @State private var showPassword = false  // State untuk mengontrol visibilitas password
+    @State private var showPassword = false
     
     var body: some View {
         NavigationStack {
@@ -33,21 +33,20 @@ struct ProfilView: View {
                             profileRow(title: "Email", value: user.user_email)
                             profileRow(title: "Phone", value: user.user_phone ?? "-")
                             
-                            // Password Row with Eye Icon
                             HStack {
                                 Text("Password")
                                 
                                 Button(action: {
-                                    showPassword.toggle()  // Toggle visibility of password
+                                    showPassword.toggle()
                                 }) {
                                     Image(systemName: showPassword ? "eye.fill" : "eye.slash.fill")
                                         .foregroundColor(showPassword ? .blue : .gray)
-                                        .padding(.trailing, 15) // Adjust the padding to position it to the right
+                                        .padding(.trailing, 15)
                                 }
                                 
                                 Spacer()
                                 
-                                // Toggle between SecureField and TextField based on password visibility
+                            
                                 ZStack(alignment: .trailing) {
                                     if showPassword {
                                         TextField("Password", text: .constant(user.user_pass ?? ""))
@@ -147,11 +146,10 @@ struct ProfilView: View {
     }
     
     private func logout() {
-        UserDefaults.standard.removeObject(forKey: "loggedInUserId") // Hapus status login
-        isLoggedOut = true // Mengarahkan ke halaman login
+        UserDefaults.standard.removeObject(forKey: "loggedInUserId")
+        isLoggedOut = true
     }
 }
-
 
 
 struct ProfilView_Previews: PreviewProvider {

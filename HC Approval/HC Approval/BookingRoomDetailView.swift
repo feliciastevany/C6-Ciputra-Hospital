@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct BookingRoomDetailView: View {
     var brId: Int
     @State private var bookingDetail: BookingRoom?
@@ -15,29 +14,82 @@ struct BookingRoomDetailView: View {
     @State private var participants: [Participant] = []
     @State private var properties: [Property] = []
     
+    @State private var showParticipant = false
+    @State private var showProperty = false
+    
     var body: some View {
         NavigationView {
             Form {
                 if let booking = bookingDetail {
-                    Section(header: Text("ROOM INFO")){
-                        Text("Room: \(rooms.first(where: { $0.room_id == booking.room_id })?.room_name ?? "None")")
-                        Text("Status: \(booking.br_status)")
+                    
+                    Section(header: Text("STATUS")){
+                        Text("\(booking.br_status)").foregroundColor(.secondary)
+                        if booking.br_status == "Declined"{
+                                Text("\(booking.br_decline_reason)").foregroundColor(.secondary)
+                            
+                        }
                     }
+                    
+                    Section(header: Text("ROOM INFO")) {
+                        let room = rooms.first(where: { $0.room_id == booking.room_id })
+                        Text(room?.room_name ?? "None").foregroundColor(.secondary)
+                        
+                        if let capacity = room?.room_capacity {
+                            Text("\(capacity)").foregroundColor(.secondary)
+                        } else {
+                            Text("None") .foregroundColor(.secondary)
+                        }
+                    }
+                    
                     Section(header: Text("BOOKING DETAIL")){
-                        Text("Date: \(booking.br_date)")
-                        Text("Start: \(booking.br_start)")
-                        Text("End: \(booking.br_end)")
+                        HStack{
+                            Text("Date")
+                            Spacer()
+                            Text(DateHelper.formatDate(booking.br_date))
+                                .foregroundColor(.secondary)
+                        }
+                        HStack {
+                            Text("Start")
+                            Spacer()
+                            Text(booking.br_start.formattedHourMinute)
+                                .foregroundColor(.secondary)
+                        }
+                        HStack{
+                            Text("End")
+                            Spacer()
+                            Text(booking.br_end.formattedHourMinute).foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Section {
+                        Text("\(booking.br_event)").foregroundColor(.secondary)
+                        Text("\(booking.br_desc)").foregroundColor(.secondary)
+                    }
+                    
+                    Section {
+                        HStack{
+                            Text("Participant")
+                            Spacer()
+                            Button {
+                                showParticipant = true
+                            } label: {
+                                Image(systemName: "chevron.right").foregroundColor(.secondary)
+                            }
+                        }
                     }
                     Section {
-                        Text("Event: \(booking.br_event)")
-                        Text("Description: \(booking.br_desc)")
-                        
-                        
+                        HStack{
+                            Text("Properties")
+                            Spacer()
+                            Button {
+                                showProperty = true
+                            } label: {
+                                Image(systemName: "chevron.right").foregroundColor(.secondary)
+                            }
+                        }
                     }
-                    Section {
-                        Text("No participants or properties defined")
-                            .foregroundColor(.secondary)
-                    }
+                   
+                  
                 } else {
                     Text("Loading details...").foregroundColor(.gray)
                 }
@@ -56,6 +108,12 @@ struct BookingRoomDetailView: View {
                 }
             }
             .navigationTitle("Booking Details")
+            .sheet(isPresented: $showParticipant) {
+                       ParticipantsView(brId: brId)
+                   }
+            .sheet(isPresented: $showProperty) {
+                       PropertyView(brId: brId)
+                   }
         }
     }
     
@@ -93,6 +151,25 @@ struct BookingRoomDetailView: View {
             print("Error fetching rooms: \(error)")
         }
     }
+    
+    
+    func fetchParticipants(brId: Int) async {
+        do {
+            let response: [Participant] = try await SupabaseManager.shared.client
+                .from("participants_br")
+                .select("*, users:user_id(*)")
+                .eq("br_id", value: brId)
+                .execute()
+                .value
+            
+            DispatchQueue.main.async {
+                participants = response
+            }
+        } catch {
+            print("Error fetching participants: \(error)")
+        }
+    }
+
 }
 
 struct BookingRoomDetailView_Previews: PreviewProvider {
@@ -100,5 +177,35 @@ struct BookingRoomDetailView_Previews: PreviewProvider {
         BookingRoomDetailView(brId: 1)
             .previewLayout(.sizeThatFits)
             .padding()
+    }
+}
+
+import Foundation
+
+extension String {
+    var formattedHourMinute: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        // coba format "HH:mm:ss" dulu
+        formatter.dateFormat = "HH:mm:ss"
+        if let date = formatter.date(from: self) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.locale = Locale(identifier: "en_US_POSIX")
+            displayFormatter.dateFormat = "HH:mm"
+            return displayFormatter.string(from: date)
+        }
+        
+        // fallback kalau input cuma "HH:mm"
+        formatter.dateFormat = "HH:mm"
+        if let date = formatter.date(from: self) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.locale = Locale(identifier: "en_US_POSIX")
+            displayFormatter.dateFormat = "HH:mm"
+            return displayFormatter.string(from: date)
+        }
+        
+        // fallback terakhir, kembalikan string asli
+        return self
     }
 }
