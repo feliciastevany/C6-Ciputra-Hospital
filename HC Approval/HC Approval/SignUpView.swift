@@ -18,7 +18,7 @@ struct SignUpView: View {
         user_active: true
     )
     
-    let departments = ["Human Capital Management", "Marketing", "Finance", "Building & Facilities", "IT"]
+    let departments = ["Human Capital", "Marketing", "Finance", "Building & Facilities", "IT"]
     
     @State private var confirm_pass = ""
     @State private var isLoading = false

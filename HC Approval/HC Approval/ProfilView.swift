@@ -102,9 +102,11 @@ struct ProfilView: View {
                     }
                 }
             }
+            .interactiveDismissDisabled(true)
             .navigationDestination(isPresented: $isLoggedOut) {
                 LoginView()
             }
+            
         }
     }
     

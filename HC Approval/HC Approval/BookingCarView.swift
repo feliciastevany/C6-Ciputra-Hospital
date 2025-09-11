@@ -39,15 +39,17 @@ struct BookingCarView: View {
                         EmptyView()
                     }
                 
-                    Button("Browse Drivers") {
-                        goToAvailable = true
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(3)
-                    .background(Color.blue)
-                    .cornerRadius(8)
+                   
+                
+                Button(action: {
+                    goToAvailable = true
+                }) {
+                    Text("Browse Drivers")
+                        .font(.headline.bold())
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .cornerRadius(8)
                 
 //                Text("Schedule")
 //                    .font(.headline)
