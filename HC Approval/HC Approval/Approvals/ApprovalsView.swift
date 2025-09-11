@@ -186,6 +186,9 @@ struct ApprovalsView: View {
                         await fetchAllBookings()
                     }
                 }
+                .refreshable {
+                    await fetchAllBookings()
+                }
             }
             .background(Color(.systemGray6))
             .sheet(item: $selectedSheet) { sheet in

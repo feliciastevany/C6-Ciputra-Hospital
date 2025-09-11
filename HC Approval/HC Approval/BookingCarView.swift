@@ -134,11 +134,11 @@ struct AvailableDriversView: View {
                     .padding()
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
             }
             .padding()
         }
+        .background(Color(.systemGray6))
         .navigationTitle("Available Drivers")
         .task {
             await vm.searchDriver(date: date)

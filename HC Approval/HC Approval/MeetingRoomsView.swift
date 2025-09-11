@@ -49,7 +49,7 @@ struct MeetingRoomsView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(3)
-                .background(Color.blue)
+                .background(Color(.systemBlue))
                 .cornerRadius(8)
                 
                 //                Text("Schedule")
@@ -137,12 +137,12 @@ struct AvailableRoomsView: View {
                     }
                     .padding()
                     .background(Color(.systemBackground))
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .cornerRadius(10)
                 }
             }
             .padding()
         }
+        .background(Color(.systemGray6))
         .navigationTitle("Available Rooms")
         .task {
             await vm.searchRoom(date: date, capacity: capacity)

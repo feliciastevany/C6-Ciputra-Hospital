@@ -27,7 +27,9 @@ struct MyBookings : View {
             ? baseFilter
             : baseFilter.filter {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.br_event.localizedCaseInsensitiveContains(searchText)
+                $0.br_event.localizedCaseInsensitiveContains(searchText) ||
+                $0.br_status.localizedCaseInsensitiveContains(searchText) ||
+                $0.br_date.toEnglishFormat().localizedCaseInsensitiveContains(searchText)
             }
         
         return filtered.sorted { $0.br_date < $1.br_date }
@@ -41,7 +43,9 @@ struct MyBookings : View {
             ? baseFilter
             : baseFilter.filter {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
-                ($0.destination?.last?.destination_name.localizedCaseInsensitiveContains(searchText) ?? false)
+                ($0.destination?.last?.destination_name.localizedCaseInsensitiveContains(searchText) ?? false) ||
+                $0.bc_status.localizedCaseInsensitiveContains(searchText) ||
+                $0.bc_date.toEnglishFormat().localizedCaseInsensitiveContains(searchText)
             }
         
         return filtered.sorted { $0.bc_date < $1.bc_date }
@@ -208,6 +212,9 @@ struct MyBookings : View {
                     .task {
                         await fetchMyBookings()
                     }
+                }
+                .refreshable {
+                    await fetchMyBookings()
                 }
             }
             .padding(.horizontal)
