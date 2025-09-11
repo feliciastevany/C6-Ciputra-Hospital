@@ -74,6 +74,15 @@ struct BookingCarDetailView: View {
                         }
                     }
                 }
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Back") {
+                            dismiss()
+                        }
+                        .foregroundColor(Color(.systemBlue))
+                    }
+                }
+                .navigationTitle("Booking Details")
             } else if let errorMessage = errorMessage {
                 Text("Error: \(errorMessage)")
                     .foregroundColor(.red)
@@ -81,7 +90,7 @@ struct BookingCarDetailView: View {
                 Text("No booking found")
             }
         }
-        .navigationTitle("Booking Details")
+
         .onAppear {
             fetchBookingCar()
         }

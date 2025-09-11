@@ -344,7 +344,7 @@ struct RoomDetailView: View {
         .sheet(isPresented: $showPropertyPicker) {
             PropertyPickerView(selectedProperties: $selectedProperties)
         }
-        NavigationLink(destination: MyBookings().navigationBarBackButtonHidden(true), isActive: $goToMyBooking) {
+        NavigationLink(destination: ContentView().navigationBarBackButtonHidden(true), isActive: $goToMyBooking) {
             EmptyView()
         }
         Button(action: {

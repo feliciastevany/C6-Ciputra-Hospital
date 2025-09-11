@@ -107,7 +107,7 @@ struct BookingRoomDetailView: View {
                     Button("Back") {
                         dismiss()
                     }
-                    .foregroundColor(.red)
+                    .foregroundColor(Color(.systemBlue))
                 }
             }
             .navigationTitle("Booking Details")

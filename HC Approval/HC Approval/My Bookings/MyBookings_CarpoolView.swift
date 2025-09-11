@@ -110,7 +110,7 @@ struct CarpoolCard: View {
                     Image(systemName: "location")
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(.systemBlue))
                         .frame(width: 13, height: 13)
                         .accessibilityHidden(true)
                     Text(event)

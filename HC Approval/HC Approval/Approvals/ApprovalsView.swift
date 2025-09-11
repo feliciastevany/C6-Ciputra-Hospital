@@ -27,7 +27,9 @@ struct ApprovalsView: View {
     
     // MARK: - Filtered Data by type & status
     var filteredRooms: [BookingRoomJoined] {
-        bookingRoom
+        let today = Calendar.current.startOfDay(for: Date())
+        
+        return bookingRoom
             .filter { room in
                 selectedType == .all || selectedType == .rooms
             }
@@ -40,10 +42,16 @@ struct ApprovalsView: View {
                 case .cancelled: return room.br_status == "Cancelled"
                 }
             }
+            .filter { room in
+                // tampilkan hanya yang >= hari ini
+                room.br_date >= today
+            }
     }
     
     var filteredCars: [BookingCarJoined] {
-        bookingCar
+        let today = Calendar.current.startOfDay(for: Date())
+        
+        return bookingCar
             .filter { car in
                 selectedType == .all || selectedType == .cars
             }
@@ -54,6 +62,9 @@ struct ApprovalsView: View {
                 case .declined:  return car.bc_status == "Declined"
                 case .cancelled: return car.bc_status == "Cancelled"
                 }
+            }
+            .filter { car in
+                car.bc_date >= today
             }
     }
     
@@ -194,9 +205,7 @@ struct ApprovalsView: View {
             .sheet(item: $selectedSheet) { sheet in
                 switch sheet {
                 case .carbooking(let car):
-//                    BookingCarDetailView(bcId: car.bc_id)
-//                    BookingRoomDetailView(brId: room.br_id)
-                    CarpoolDetailView(booking: car)
+                    BookingCarDetailView(bcId: car.bc_id)
                 case .carpool(let car):
                     CarpoolDetailView(booking: car)
                 case .roombooking(let room):

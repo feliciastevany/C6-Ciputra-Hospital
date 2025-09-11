@@ -35,9 +35,18 @@ struct StatusView: View {
                     .font(.headline)
                     .accessibilityLabel("From \(startTime) to \(endTime) WIB")
                 
-                Text(event)
-                    .font(.footnote)
-                    .accessibilityLabel("Booking Event: \(event)")
+//                HStack {
+                    Text(event)
+                        .font(.footnote)
+                        .accessibilityLabel("Booking Event: \(event)")
+                    
+//                    Spacer()
+//                    
+//                    Text(approvedBy)
+//                        .font(.footnote)
+//                        .foregroundStyle(Color(.systemGray6))
+//                        .accessibilityLabel("Approved By: \(approvedBy)")
+//                }
 
             }
             .padding(14)

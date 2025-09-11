@@ -222,9 +222,7 @@ struct MyBookings : View {
             .sheet(item: $selectedSheet) { sheet in
                 switch sheet {
                 case .carbooking(let car):
-//                    BookingCarDetailView(bcId: car.bc_id)
-//                    BookingRoomDetailView(brId: room.br_id)
-                    CarpoolDetailView(booking: car)
+                    BookingCarDetailView(bcId: car.bc_id)
                 case .carpool(let car):
                     CarpoolDetailView(booking: car)
                 case .roombooking(let room):

@@ -235,14 +235,6 @@ struct CarDetailView: View {
             Section {
                 TextField("Description", text: $outingDesc)
             }
-            
-            Button("Booking") {
-                Task {
-                    await addBooking()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .frame(maxWidth: .infinity)
         }
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
@@ -264,6 +256,18 @@ struct CarDetailView: View {
         ) {
             EmptyView()
         }
+        Button(action: {
+            Task {
+                await addBooking()
+            }
+        }) {
+            Text("Booking")
+                .font(.headline.bold())
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .cornerRadius(8)
+        .padding(.horizontal)
     }
     
     let bookingService = BookingService()
