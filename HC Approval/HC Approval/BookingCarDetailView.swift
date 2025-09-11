@@ -23,6 +23,14 @@ struct BookingCarDetailView: View {
                 ProgressView("Loading...")
             } else if let booking = booking {
                 Form {
+                    Section(header: Text("Status")) {
+                        Text(booking.bc_status)
+                        if !booking.bc_decline_reason.isEmpty {
+                            Text("Reason: \(booking.bc_decline_reason)")
+//                                .foregroundColor(.red)
+                        }
+                    }
+                    
                     Section(header: Text("Driver & Passenger Info")) {
                         Text(driver?.driver_name ?? "-")
                         Text("\(booking.bc_people) passengers")
@@ -66,13 +74,6 @@ struct BookingCarDetailView: View {
                         Text(booking.bc_desc.isEmpty ? "-" : booking.bc_desc)
                     }
                     
-                    Section(header: Text("Status")) {
-                        Text(booking.bc_status)
-                        if !booking.bc_decline_reason.isEmpty {
-                            Text("Reason: \(booking.bc_decline_reason)")
-                                .foregroundColor(.red)
-                        }
-                    }
                 }
             } else if let errorMessage = errorMessage {
                 Text("Error: \(errorMessage)")

@@ -104,10 +104,10 @@ struct AvailableRoomsView: View {
                                 .font(.subheadline)
                         }
                         
-                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: roomAvail.bookings)
+                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: roomAvail.bookings)
                         
                         if availableSlots.isEmpty {
-                            Text("Tidak ada slot tersedia")
+                            Text("No available time slots")
                                 .foregroundColor(.secondary)
                                 .padding(.vertical, 8)
                         } else {
@@ -179,12 +179,21 @@ struct RoomDetailView: View {
     
     @State private var showSuccess = false
     
+    private var isFormValid: Bool {
+        !eventName.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !eventDesc.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !startTime.isEmpty &&
+        !endTime.isEmpty &&
+        !selectedUsers.isEmpty &&
+        !selectedProperties.isEmpty
+    }
+    
     private var availableTimeOptions: [String] {
-        BookingTimeHelper.availableStartTimes(bookings: bookings)
+        BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: bookings)
     }
     
     private var validEndOptions: [String] {
-        BookingTimeHelper.validEndTimes(startTime: startTime, bookings: bookings)
+        BookingTimeHelper.validEndTimesIgnoringCancelled(startTime: startTime, bookings: bookings)
     }
     
     var body: some View {
@@ -305,6 +314,7 @@ struct RoomDetailView: View {
             }
             .buttonStyle(.borderedProminent)
             .frame(maxWidth: .infinity)
+            .disabled(!isFormValid)
         }
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
@@ -371,7 +381,6 @@ struct RoomDetailView: View {
         }
     }
 }
-
 
 struct RoomScheduleView: View {
     var room: Room

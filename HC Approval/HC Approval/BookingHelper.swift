@@ -86,17 +86,36 @@ struct BookingTimeHelper {
         return times
     }
     
-    static func availableStartTimes<T: Bookable>(bookings: [T]) -> [String] {
-        let all = generateHalfHourTimes(start: "07:30", end: "21:00")
-        return all.filter { !isBooked(time: $0, bookings: bookings, forStart: true) }
+    static func currentTimeOfDay() -> Date {
+        let now = Date()
+        let cal = Calendar.current
+        let comps = cal.dateComponents([.hour, .minute], from: now)
+        return cal.date(from: comps)! // Date dengan jam & menit hari ini
     }
     
-    // 🔥 versi baru: auto skip cancelled/declined
+    static func availableStartTimes<T: Bookable>(bookings: [T]) -> [String] {
+        let all = generateHalfHourTimes(start: "07:30", end: "20:30")
+        
+        let now = DateHelper.currentHourMinute()
+        
+        return all.filter { timeStr in
+            guard let slot = DateHelper.timeStringToHourMinute(timeStr) else { return false }
+            
+            // cek apakah slot >= jam sekarang
+            if slot.hour < now.hour || (slot.hour == now.hour && slot.minute < now.minute) {
+                return false
+            }
+            
+            return !isBooked(time: timeStr, bookings: bookings, forStart: true)
+        }
+    }
+    
     static func availableStartTimesIgnoringCancelled<T: Bookable & HasStatus>(bookings: [T]) -> [String] {
         let activeBookings = bookings.filter {
             let status = $0.status.lowercased()
             return status != "cancel" && status != "cancelled" && status != "declined"
         }
+        
         return availableStartTimes(bookings: activeBookings)
     }
     
@@ -108,7 +127,7 @@ struct BookingTimeHelper {
             .filter { $0 > start }
             .min()
         
-        return generateHalfHourTimes(start: "07:30", end: "21:00").filter { timeStr in
+        return generateHalfHourTimes(start: "08:00", end: "21:00").filter { timeStr in
             guard let t = timeToDate(timeStr) else { return false }
             
             guard t > start else { return false }
@@ -154,6 +173,19 @@ struct DateHelper {
         displayFormatter.dateFormat = "d MMMM yyyy"
         
         return displayFormatter.string(from: date)
+    }
+    
+    static func currentHourMinute() -> (hour: Int, minute: Int) {
+        let comps = Calendar.current.dateComponents([.hour, .minute], from: Date())
+        return (comps.hour ?? 0, comps.minute ?? 0)
+    }
+
+    static func timeStringToHourMinute(_ time: String) -> (hour: Int, minute: Int)? {
+        let parts = time.split(separator: ":")
+        guard parts.count == 2,
+              let h = Int(parts[0]),
+              let m = Int(parts[1]) else { return nil }
+        return (h, m)
     }
 }
 

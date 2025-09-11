@@ -13,27 +13,44 @@ struct UserPickerView: View {
     
     @State private var users: [User] = []
     @State private var tempSelectedUsers: [User] = []
+    @State private var searchText: String = ""
+    
+    // Filter user sesuai search (kalau kosong → tampil semua)
+    private var filteredUsers: [User] {
+        if searchText.isEmpty {
+            return users
+        } else {
+            return users.filter { $0.user_name.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
     
     var body: some View {
         NavigationView {
-            List(users) { user in
-                Button(action: {
-                    if let index = tempSelectedUsers.firstIndex(where: { $0.user_id == user.user_id }) {
-                        tempSelectedUsers.remove(at: index)
-                    } else {
-                        tempSelectedUsers.append(user)
-                    }
-                }) {
-                    HStack {
-                        Circle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 30, height: 30)
-                            .overlay(Text(String(user.user_name.prefix(1))))
-                        Text(user.user_name)
-                        Spacer()
-                        if tempSelectedUsers.contains(where: {$0.user_id == user.user_id}) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
+            VStack {
+                // Search field di atas list
+                TextField("Search users...", text: $searchText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+                
+                List(filteredUsers) { user in
+                    Button(action: {
+                        if let index = tempSelectedUsers.firstIndex(where: { $0.user_id == user.user_id }) {
+                            tempSelectedUsers.remove(at: index)
+                        } else {
+                            tempSelectedUsers.append(user)
+                        }
+                    }) {
+                        HStack {
+                            Circle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 30, height: 30)
+                                .overlay(Text(String(user.user_name.prefix(1))))
+                            Text(user.user_name)
+                            Spacer()
+                            if tempSelectedUsers.contains(where: { $0.user_id == user.user_id }) {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
                         }
                     }
                 }

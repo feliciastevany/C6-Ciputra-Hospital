@@ -95,7 +95,7 @@ struct AvailableDriversView: View {
                         let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
                         
                         if availableSlots.isEmpty {
-                            Text("Tidak ada slot tersedia")
+                            Text("No available time slots")
                                 .foregroundColor(.secondary)
                                 .padding(.vertical, 8)
                         } else {
@@ -163,6 +163,14 @@ struct CarDetailView: View {
     @State private var from: String = ""
     @State private var destinations: [String] = [""]
     @State private var showSuccess = false
+    
+    private var isFormValid: Bool {
+        !from.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !startTime.isEmpty &&
+        !endTime.isEmpty &&
+        destinations.contains { !$0.trimmingCharacters(in: .whitespaces).isEmpty } &&
+        !outingDesc.trimmingCharacters(in: .whitespaces).isEmpty
+    }
     
     private var availableTimeOptions: [String] {
         BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: bookings)
@@ -236,6 +244,7 @@ struct CarDetailView: View {
             }
             .buttonStyle(.borderedProminent)
             .frame(maxWidth: .infinity)
+            .disabled(!isFormValid)
         }
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
