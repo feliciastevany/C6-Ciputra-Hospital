@@ -135,33 +135,33 @@ struct BookingCarDetailView: View {
     }
 }
 
-extension String {
-    var formattedHourMinute: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        
-        // coba format "HH:mm:ss" dulu
-        formatter.dateFormat = "HH:mm:ss"
-        if let date = formatter.date(from: self) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.locale = Locale(identifier: "en_US_POSIX")
-            displayFormatter.dateFormat = "HH:mm"
-            return displayFormatter.string(from: date)
-        }
-        
-        // fallback kalau input cuma "HH:mm"
-        formatter.dateFormat = "HH:mm"
-        if let date = formatter.date(from: self) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.locale = Locale(identifier: "en_US_POSIX")
-            displayFormatter.dateFormat = "HH:mm"
-            return displayFormatter.string(from: date)
-        }
-        
-        // fallback terakhir, kembalikan string asli
-        return self
-    }
-}
+//extension String {
+//    var formattedHourMinute: String {
+//        let formatter = DateFormatter()
+//        formatter.locale = Locale(identifier: "en_US_POSIX")
+//        
+//        // coba format "HH:mm:ss" dulu
+//        formatter.dateFormat = "HH:mm:ss"
+//        if let date = formatter.date(from: self) {
+//            let displayFormatter = DateFormatter()
+//            displayFormatter.locale = Locale(identifier: "en_US_POSIX")
+//            displayFormatter.dateFormat = "HH:mm"
+//            return displayFormatter.string(from: date)
+//        }
+//        
+//        // fallback kalau input cuma "HH:mm"
+//        formatter.dateFormat = "HH:mm"
+//        if let date = formatter.date(from: self) {
+//            let displayFormatter = DateFormatter()
+//            displayFormatter.locale = Locale(identifier: "en_US_POSIX")
+//            displayFormatter.dateFormat = "HH:mm"
+//            return displayFormatter.string(from: date)
+//        }
+//        
+//        // fallback terakhir, kembalikan string asli
+//        return self
+//    }
+//}
 
 //#Preview {
 //    BookingCarDetailView()
