@@ -29,13 +29,6 @@ struct MeetingRoomsView: View {
                     Stepper("", value: $capacity, in: 1...500)
                         .labelsHidden()
                 }
-                .font(.headline.bold())
-                .buttonStyle(.borderedProminent)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(3)
-                .background(Color(.systemBlue))
-                .cornerRadius(8)
                 
                 //                Text("Schedule")
                 //                    .font(.headline)
