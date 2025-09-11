@@ -42,6 +42,7 @@ struct BookingCarView: View {
                     Button("Browse Drivers") {
                         goToAvailable = true
                     }
+                    .font(.headline.bold())
                     .buttonStyle(.borderedProminent)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

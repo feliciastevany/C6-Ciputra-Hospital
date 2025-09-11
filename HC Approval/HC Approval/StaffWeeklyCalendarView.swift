@@ -4,7 +4,8 @@ struct StaffWeeklyCalendarView: View {
     @State private var currentWeekStart: Date = Calendar.current.startOfWeek(for: Date())
     @State private var dragOffset: CGFloat = 0
     @Binding var selectedDate: Date
-
+    @State private var didSetup = false
+    
     @State private var selectedMonth: Int = Calendar.current.component(.month, from: Date())
     private let horizontalPadding: CGFloat = 15
 
@@ -87,8 +88,10 @@ struct StaffWeeklyCalendarView: View {
         // ⬇️ Biar benar-benar “size to fit”
         .fixedSize(horizontal: false, vertical: true)
         .onAppear {
-            selectedDate = Date()
-            selectedMonth = Calendar.current.component(.month, from: Date())
+            guard !didSetup else { return }
+            currentWeekStart = Calendar.current.startOfWeek(for: selectedDate)
+            selectedMonth = Calendar.current.component(.month, from: selectedDate)
+            didSetup = true
         }
     }
 
