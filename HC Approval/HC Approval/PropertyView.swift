@@ -30,7 +30,7 @@ struct PropertyView: View {
                             HStack {
                                 Text(property.properties_name)
                                 Spacer()
-                                Text("Qty: \(detail.qty)")
+                                Text("\(detail.qty)")
                             }
                         }
                     }
@@ -56,15 +56,13 @@ struct PropertyView: View {
         isLoading = true
         Task {
             do {
-                // Ambil data dari br_details berdasarkan br_id
                 let brResponse: [BookingRoomDetail] = try await SupabaseManager.shared.client
                     .from("br_details")
                     .select("*")
                     .eq("br_id", value: brId)
                     .execute()
                     .value
-
-                // Ambil data properties berdasarkan properties_id yang ditemukan di br_details
+                
                 let propertyIds = Set(brResponse.map { $0.properties_id })
                 let propertyResponse: [Property] = try await SupabaseManager.shared.client
                     .from("properties")

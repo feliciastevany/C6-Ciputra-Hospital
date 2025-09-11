@@ -17,6 +17,8 @@ struct BookingRoomDetailView: View {
     @State private var showParticipant = false
     @State private var showProperty = false
     
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         NavigationView {
             Form {
@@ -103,6 +105,7 @@ struct BookingRoomDetailView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Back") {
+                        dismiss()
                     }
                     .foregroundColor(.red)
                 }
@@ -186,8 +189,7 @@ extension String {
     var formattedHourMinute: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        
-        // coba format "HH:mm:ss" dulu
+      
         formatter.dateFormat = "HH:mm:ss"
         if let date = formatter.date(from: self) {
             let displayFormatter = DateFormatter()
@@ -195,8 +197,7 @@ extension String {
             displayFormatter.dateFormat = "HH:mm"
             return displayFormatter.string(from: date)
         }
-        
-        // fallback kalau input cuma "HH:mm"
+ 
         formatter.dateFormat = "HH:mm"
         if let date = formatter.date(from: self) {
             let displayFormatter = DateFormatter()
@@ -204,8 +205,7 @@ extension String {
             displayFormatter.dateFormat = "HH:mm"
             return displayFormatter.string(from: date)
         }
-        
-        // fallback terakhir, kembalikan string asli
+       
         return self
     }
 }
@@ -214,15 +214,15 @@ extension String {
     var formattedDateReadable: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd" // format input dari backend
+        formatter.dateFormat = "yyyy-MM-dd"
         
         if let date = formatter.date(from: self) {
             let displayFormatter = DateFormatter()
-            displayFormatter.locale = Locale(identifier: "id_ID") // bahasa Indonesia
-            displayFormatter.dateFormat = "dd MMMM yyyy" // contoh: 05 September 2025
+            displayFormatter.locale = Locale(identifier: "id_ID")
+            displayFormatter.dateFormat = "dd MMMM yyyy"
             return displayFormatter.string(from: date)
         }
         
-        return self // fallback kalau gagal parsing
+        return self
     }
 }

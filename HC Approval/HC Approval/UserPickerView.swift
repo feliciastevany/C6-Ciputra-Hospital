@@ -14,6 +14,8 @@ struct UserPickerView: View {
     @State private var users: [User] = []
     @State private var tempSelectedUsers: [User] = []
     
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    
     var body: some View {
         NavigationView {
             List(users) { user in
@@ -68,7 +70,7 @@ struct UserPickerView: View {
                 .execute()
                 .value
             DispatchQueue.main.async {
-                users = response
+                users = response.filter { $0.user_id != loggedInUserId }
             }
         } catch {
             print("Error fetch users: ", error)

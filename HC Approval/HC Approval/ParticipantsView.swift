@@ -41,6 +41,11 @@ struct ParticipantsView: View {
                             
                             Text(participant.user_name ?? "Unknown User")
                                 .font(.body)
+                            Spacer()
+                            if participant.pic {
+                                Text("PIC")
+                                    
+                            }
                         }
                         .padding(.vertical, 4)
                     }
