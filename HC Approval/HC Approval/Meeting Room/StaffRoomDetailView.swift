@@ -10,6 +10,11 @@ import SwiftUI
 struct StaffRoomDetailView: View {
     let name: String
     @State private var selectedDate = Date()
+    @State private var room: Room = Room(
+        room_id : 0,
+        room_name : "",
+        room_capacity : 0
+    )
     
     // Timeline state
     let hours = Array(8...22)
@@ -19,6 +24,9 @@ struct StaffRoomDetailView: View {
     @State private var selectedBrId: Int? = nil
     // Data
     @State private var events: [roomEvent] = []
+    @State private var bookingRows: [BookingRoomJoined] = []
+    
+    @State private var goToBooking = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -29,10 +37,8 @@ struct StaffRoomDetailView: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    print("Profile tapped")
-                }) {
-                    Text("+ Create Booking")
+                Button("+ Create Booking") {
+                    goToBooking = true
                 }
             }
             .padding()
@@ -115,8 +121,28 @@ struct StaffRoomDetailView: View {
         }
         
         .task {
+            await fetchRoomByName(name)
             await fetchBookRoom(for: selectedDate, selectedRoomName: name)
         }
+        .navigationDestination(isPresented: $goToBooking) {
+            let bookingList = bookingRows.map { $0.toBookingRoom() }
+
+            let start = BookingTimeHelper
+                .availableStartTimesIgnoringCancelled(bookings: bookingList)
+                .first ?? ""
+
+            let end = BookingTimeHelper
+                .validEndTimes(startTime: start, bookings: bookingList)
+                .first ?? ""
+
+            RoomDetailView(
+                room: room,
+                slot: TimeSlot(start: start, end: end),
+                date: DateHelper.toBackendFormat(selectedDate),
+                bookings: bookingList
+            )
+        }
+
         .sheet(item: $selectedBrId) { brId in
             BookingRoomDetailView(brId: brId)
         }
@@ -133,6 +159,26 @@ struct StaffRoomDetailView: View {
         default: return nil
         }
     }
+    
+    func fetchRoomByName(_ roomName: String) async {
+        do {
+            let raw = try await SupabaseManager.shared.client
+                .from("rooms")
+                .select()
+                .eq("room_name", value: roomName)
+                .single() // cuma ambil 1
+                .execute()
+            
+            let r: Room = try JSONDecoder().decode(Room.self, from: raw.data)
+            
+            await MainActor.run {
+                self.room = r   // pastikan kamu punya @State var room: Room
+            }
+        } catch {
+            print("❌ Error fetch room:", error)
+        }
+    }
+
     
     func fetchBookRoom(for date: Date, selectedRoomName: String? = nil) async {
         do {
@@ -202,6 +248,7 @@ struct StaffRoomDetailView: View {
             }
 
             await MainActor.run {
+                self.bookingRows = rows
                 self.events = newEvents
                 print("✅ Events: \(newEvents.count)")
             }
@@ -269,6 +316,31 @@ struct ScheduleBlockSingle: View {
 extension Int: Identifiable {
     public var id: Int { self }
 }
+extension BookingRoomJoined {
+    func toBookingRoom() -> BookingRoom {
+        BookingRoom(
+            br_id: self.br_id,
+            room_id: self.room_id,
+            br_event: self.br_event,
+            br_date: Self.dateToString(self.br_date),
+            br_start: self.br_start,
+            br_end: self.br_end,
+            br_desc: self.br_desc,
+            br_status: self.br_status,
+            br_decline_reason: self.br_decline_reason,
+            created_at: self.created_at,
+            user_id: self.user?.user_id ?? 0   // fallback 0 kalau nil
+        )
+    }
+    
+    private static func dateToString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: date)
+    }
+}
+
 
 #Preview {
     StaffRoomDetailView(name: "Room 1")

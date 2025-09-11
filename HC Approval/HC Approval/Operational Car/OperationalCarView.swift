@@ -125,7 +125,7 @@ struct OperationalCarView: View {
                     }
                     
                 }
-                .padding(.horizontal)
+                .padding()
             }
             .background(Color(.systemBackground))
         }
