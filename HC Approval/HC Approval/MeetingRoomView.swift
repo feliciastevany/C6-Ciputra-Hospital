@@ -16,131 +16,139 @@ struct MeetingRoomView: View {
     @State private var rooms: [BookingRoomJoined] = []
     @State private var events: [roomEvent] = []
     @State private var selectedRoom = "All"
+    @State private var selectedEvent: roomEvent? = nil
+    @State private var showBookingDetail = false
     let hours = Array(8...22) // jam 08.00 - 22.00
     let hourHeight: CGFloat = 80 // tinggi tetap untuk setiap jam
     
     var body: some View {
-        NavigationStack{
-            VStack(spacing: 0) {
-                // Header + Month + Date Selector
+        VStack(spacing: 0) {
+            // Header + Month + Date Selector
+            
+            //Header
+            HStack {
+                Text("Meeting Rooms")
+                    .font(.title)
+                    .bold()
                 
-                //Header
-                HStack {
-                    Text("Meeting Rooms")
-                        .font(.title)
-                        .bold()
-                    
-                    Spacer()
-                    Button(action: {
-                        print("Profile tapped")
-                    }) {
-                        Image(systemName: "person.crop.circle")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .foregroundColor(.blue)
-                    }.navigationDestination(isPresented: $goToProfil) {
-                        ProfilView(userId: loggedInUserId)
-                    }
+                Spacer()
+                Button(action: {
+                    goToProfil = true
+                }) {
+                    Image(systemName: "person.crop.circle")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundColor(.blue)
+                }.navigationDestination(isPresented: $goToProfil) {
+                    ProfilView(userId: loggedInUserId)
                 }
-                .padding(.top)
+            }
+            .padding(.top)
+            .padding(.horizontal)
+            
+            MeetingRoomsView()
+            
+            VStack {
+                HStack {
+                    Text("Schedule")
+                        .font(.title3)
+                        .bold()
+                    Spacer()
+                }
+                .padding(.top, 5)
                 .padding(.horizontal)
                 
-                MeetingRoomsView()
+                WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
+                    .frame(height: 120)
+                    .padding(.horizontal, -2)
                 
-                VStack {
-                    HStack {
-                        Text("Schedule")
-                            .font(.title3)
-                            .bold()
-                        Spacer()
-                    }
-                    .padding(.top, 5)
-                    .padding(.horizontal)
-                    
-                    WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .room(selectedRoom: $selectedRoom))
-                        .frame(height: 120)
-                        .padding(.horizontal, -2)
-                    
-                    Divider()
-                }
-                
-                // Timeline + Schedule
-                ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                    HStack(alignment: .top, spacing: 0) {
-                        // Kolom jam di sisi kiri
-                        VStack(spacing: 0) {
-                            ForEach(hours, id: \.self) { hour in
+                Divider()
+            }
+            
+            // Timeline + Schedule
+            ScrollView([.horizontal, .vertical], showsIndicators: false) {
+                HStack(alignment: .top, spacing: 0) {
+                    // Kolom jam di sisi kiri
+                    VStack(spacing: 0) {
+                        ForEach(hours, id: \.self) { hour in
+                            HStack {
                                 HStack {
-                                    HStack {
-                                        Text("\(String(format: "%02d.00", hour))")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                        Spacer()
-                                    }
-                                    .frame(height: hourHeight)
-                                    .frame(width: 50, alignment: .leading)
-                                    
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(height: 1)
-                                        .padding(.leading, -20)
+                                    Text("\(String(format: "%02d.00", hour))")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    Spacer()
                                 }
+                                .frame(height: hourHeight)
+                                .frame(width: 50, alignment: .leading)
+                                
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(height: 1)
+                                    .padding(.leading, -20)
                             }
                         }
-                        
-                        // Grid tiap Room
-                        ForEach(filteredRooms, id: \.self) { room in
-                            VStack(spacing: 0) {
-                                ZStack(alignment: .topLeading) {
-                                    // Background grid
-                                    VStack(spacing: 0) {
-                                        ForEach(hours, id: \.self) { hour in
-                                            ZStack {
-                                                Rectangle()
-                                                    .fill(Color.gray.opacity(0.3))
-                                                    .frame(height: 1)
-                                                Rectangle()
-                                                    .fill(Color.clear)
-                                                    .frame(height: hourHeight)
-                                            }
+                    }
+                    
+                    // Grid tiap Room
+                    ForEach(filteredRooms, id: \.self) { room in
+                        VStack(spacing: 0) {
+                            ZStack(alignment: .topLeading) {
+                                // Background grid
+                                VStack(spacing: 0) {
+                                    ForEach(hours, id: \.self) { hour in
+                                        ZStack {
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(height: 1)
+                                            Rectangle()
+                                                .fill(Color.clear)
+                                                .frame(height: hourHeight)
                                         }
                                     }
-                                    
-                                    // Events
-                                    ForEach(events.filter { event in
-                                        (selectedRoom == "All" || event.room == selectedRoom) && event.room == room
-                                    }) { event in
-                                        ScheduleBlock(
-                                            room: event.room,
-                                            name: event.name,
-                                            dept: event.dept,
-                                            color: event.color,
-                                            startHour: event.startHour,
-                                            startMinute: event.startMinute,
-                                            endHour: event.endHour,
-                                            endMinute: event.endMinute,
-                                            hourHeight: hourHeight
-                                        )
+                                }
+                                
+                                // Events
+                                ForEach(events.filter { event in
+                                    (selectedRoom == "All" || event.room == selectedRoom) && event.room == room
+                                }) { event in
+                                    ScheduleBlock(
+                                        br_id: event.br_id,
+                                        room: event.room,
+                                        name: event.name,
+                                        dept: event.dept,
+                                        color: event.color,
+                                        startHour: event.startHour,
+                                        startMinute: event.startMinute,
+                                        endHour: event.endHour,
+                                        endMinute: event.endMinute,
+                                        hourHeight: hourHeight
+                                    )
+                                    .onTapGesture {
+                                        selectedEvent = event
+                                        showBookingDetail = true
                                     }
                                 }
                             }
-                            .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 70)
                         }
+                        .frame(width: filteredRooms.count == 1 ? UIScreen.main.bounds.width - 60 : 70)
                     }
-                    .padding()
                 }
-                .background(Color(.systemBackground))
+                .padding()
             }
-            .background(Color(.systemGray6))
-            // setiap kali selectedDate berubah → fetch ulang
-            .onChange(of: selectedDate) { _ in
-                Task {
-                    await fetchBookRooms(for: selectedDate)
-                }
+            .background(Color(.systemBackground))
+        }
+        .background(Color(.systemGray6))
+        // setiap kali selectedDate berubah → fetch ulang
+        .onChange(of: selectedDate) { _ in
+            Task {
+                await fetchBookRooms(for: selectedDate)
             }
-            .task {
-                await fetchBookRooms(for: selectedDate) // pertama kali load
-            }
+        }
+        .task {
+            await fetchBookRooms(for: selectedDate) // pertama kali load
+        }
+        .sheet(item: $selectedEvent) { event in
+            BookingRoomDetailView(brId: event.br_id)
         }
     }
     private var filteredRooms: [String] {
@@ -158,9 +166,9 @@ struct MeetingRoomView: View {
             dayFormatter.locale = Locale(identifier: "en_US_POSIX")
             dayFormatter.dateFormat = "yyyy-MM-dd"
             let dateOnly = dayFormatter.string(from: date)
-
+            
             print("🗓️ Query date: \(dateOnly)")
-
+            
             let raw = try await SupabaseManager.shared.client
                 .from("bookings_room")
                 .select("""
@@ -171,30 +179,31 @@ struct MeetingRoomView: View {
                 .eq("br_date", value: dateOnly)
                 .eq("br_status", value: "Approved")
                 .execute()
-
+            
             let rows: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
                 [BookingRoomJoined].self,
                 from: raw.data
             )
-
+            
             print("✅ Response count: \(rows.count)")
-
+            
             // Mapping → roomEvent
             let newEvents: [roomEvent] = rows.compactMap { booking in
                 guard let user = booking.user, let room = booking.room else { return nil }
-
+                
                 func parseHHmm(_ s: String) -> (h: Int, m: Int)? {
                     let p = s.split(separator: ":").compactMap { Int($0) }
                     guard p.count >= 2 else { return nil }
                     return (p[0], p[1])
                 }
-
+                
                 guard
                     let s = parseHHmm(booking.br_start),
                     let e = parseHHmm(booking.br_end)
                 else { return nil }
-
+                
                 return roomEvent(
+                    br_id: booking.br_id,
                     room: room.room_name,
                     name: user.user_name,
                     dept: user.user_dept,
@@ -205,7 +214,7 @@ struct MeetingRoomView: View {
                     endMinute: e.m
                 )
             }
-
+            
             await MainActor.run {
                 self.events = newEvents
                 print("📌 Events count: \(newEvents.count)")
@@ -213,15 +222,16 @@ struct MeetingRoomView: View {
                     print("➡️ \(e.room) | \(e.name) | \(e.dept) | \(e.startHour):\(String(format: "%02d", e.startMinute)) - \(e.endHour):\(String(format: "%02d", e.endMinute))")
                 }
             }
-
+            
         } catch {
             print("❌ Error fetch bookings:", error)
         }
     }
-
+    
 }
 
 struct ScheduleBlock: View {
+    var br_id: Int
     var room: String
     var name: String
     var dept: String
@@ -279,6 +289,7 @@ struct ScheduleBlock: View {
 
 struct roomEvent: Identifiable {
     let id = UUID()
+    let br_id: Int
     let room: String
     let name: String
     let dept: String

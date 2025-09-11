@@ -15,6 +15,8 @@ struct StaffRoomDetailView: View {
     let hours = Array(8...22)
     let hourHeight: CGFloat = 80
     
+    @State private var showBookingDetail = false
+    @State private var selectedBrId: Int? = nil
     // Data
     @State private var events: [roomEvent] = []
     
@@ -89,6 +91,7 @@ struct StaffRoomDetailView: View {
                         // Events
                         ForEach(events) { e in
                             ScheduleBlockSingle(
+                                br_id: e.br_id,
                                 room: e.room,
                                 name: e.name,
                                 dept: e.dept,
@@ -100,6 +103,10 @@ struct StaffRoomDetailView: View {
                                 hourHeight: hourHeight,
                                 baseHour: hours.first ?? 8
                             )
+                            .onTapGesture {
+                                selectedBrId = e.br_id
+                                showBookingDetail = true
+                            }
                         }
                     }
                 }
@@ -109,6 +116,9 @@ struct StaffRoomDetailView: View {
         
         .task {
             await fetchBookRoom(for: selectedDate, selectedRoomName: name)
+        }
+        .sheet(item: $selectedBrId) { brId in
+            BookingRoomDetailView(brId: brId)
         }
     }
     
@@ -162,21 +172,35 @@ struct StaffRoomDetailView: View {
             }
             
             // Mapping → roomEvent
-            let newEvents: [roomEvent] = rows.compactMap { b in
+            let newEvents: [roomEvent] = rows.compactMap { (b: BookingRoomJoined) -> roomEvent? in
                 guard let user = b.user, let room = b.room else { return nil }
-                guard let s = parseHHmm(b.br_start),
-                      let e = parseHHmm(b.br_end) else { return nil }
-                
+
+                func parseHHmm(_ s: String) -> (h: Int, m: Int)? {
+                    let parts = s.split(separator: ":")
+                    guard parts.count >= 2,
+                          let h = Int(parts[0]),
+                          let m = Int(parts[1]) else { return nil }
+                    return (h, m)
+                }
+
+                guard
+                    let s = parseHHmm(b.br_start),
+                    let e = parseHHmm(b.br_end)
+                else { return nil }
+
                 return roomEvent(
+                    br_id: b.br_id,
                     room: room.room_name,
                     name: user.user_name,
                     dept: user.user_dept,
                     color: colorForRoom(room.room_name),
-                    startHour: s.h, startMinute: s.m,
-                    endHour: e.h, endMinute: e.m
+                    startHour: s.h,
+                    startMinute: s.m,
+                    endHour: e.h,
+                    endMinute: e.m
                 )
             }
-            
+
             await MainActor.run {
                 self.events = newEvents
                 print("✅ Events: \(newEvents.count)")
@@ -191,6 +215,7 @@ struct StaffRoomDetailView: View {
 }
 
 struct ScheduleBlockSingle: View {
+    var br_id: Int
     var room: String
     var name: String
     var dept: String
@@ -239,6 +264,10 @@ struct ScheduleBlockSingle: View {
     private func yOffset() -> CGFloat {
         CGFloat(offsetMinutes()) * hourHeight / 60.0 + 40
     }
+}
+
+extension Int: Identifiable {
+    public var id: Int { self }
 }
 
 #Preview {

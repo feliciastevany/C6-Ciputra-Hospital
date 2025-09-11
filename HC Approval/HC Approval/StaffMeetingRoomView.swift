@@ -64,51 +64,50 @@ struct StaffMeetingRoomView: View {
     @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
     @State private var goToProfil = false
     var body: some View{
-        NavigationStack{
-            ZStack{
-                Color(.systemGray6).ignoresSafeArea()
-                
-                VStack(spacing: 0) {
-                    //Header
-                    HStack {
-                        Text("Meeting Rooms")
-                            .font(.title)
-                            .bold()
-                        
-                        Spacer()
-                        Button(action: {
-                            print("Profile tapped")
-                        }) {
-                            Image(systemName: "person.crop.circle")
-                                .resizable()
-                                .frame(width: 32, height: 32)
-                                .foregroundColor(.blue)
-                        }.navigationDestination(isPresented: $goToProfil) {
-                            ProfilView(userId: loggedInUserId)
-                        }
+        ZStack{
+            Color(.systemGray6).ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                //Header
+                HStack {
+                    Text("Meeting Rooms")
+                        .font(.title)
+                        .bold()
+                    
+                    Spacer()
+                    Button(action: {
+                        goToProfil = true
+                    }) {
+                        Image(systemName: "person.crop.circle")
+                            .resizable()
+                            .frame(width: 32, height: 32)
+                            .foregroundColor(.blue)
+                    }.navigationDestination(isPresented: $goToProfil) {
+                        ProfilView(userId: loggedInUserId)
                     }
-                    .padding(.top)
+                }
+                .padding(.top)
+                .padding(.horizontal)
+                
+                MeetingRoomsView()
+                
+                VStack {
+                    HStack {
+                        Text("Schedule")
+                            .font(.title3)
+                            .bold()
+                        Spacer()
+                    }
+                    .padding(.top, 5)
                     .padding(.horizontal)
                     
-                    MeetingRoomsView()
-                    
-                    VStack {
-                        HStack {
-                            Text("Schedule")
-                                .font(.title3)
-                                .bold()
-                            Spacer()
-                        }
-                        .padding(.top, 5)
-                        .padding(.horizontal)
-                        
-                        RoomsScreen()
-                    }
-                    
+                    RoomsScreen()
                 }
+                
             }
-            .background(Color(.systemGray6))
         }
+        .background(Color(.systemGray6))
+        
     }
 }
 

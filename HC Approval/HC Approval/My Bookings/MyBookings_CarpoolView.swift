@@ -143,7 +143,7 @@ struct CarpoolCard: View {
     }
 }
 
-struct BookingCarDetailView: View {
+struct CarpoolDetailView: View {
     let booking: BookingCarJoined
     @Environment(\.dismiss) private var dismiss
     

@@ -29,6 +29,35 @@ struct MeetingRoomsView: View {
                     Stepper("", value: $capacity, in: 1...500)
                         .labelsHidden()
                 }
+                .font(.headline.bold())
+                .buttonStyle(.borderedProminent)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(3)
+                .background(Color(.systemBlue))
+                .cornerRadius(8)
+                
+                //                Text("Schedule")
+                //                    .font(.headline)
+                //                    .padding(.horizontal)
+                //
+                //                List(rooms) { room in
+                //                    HStack {
+                //                        VStack(alignment: .leading, spacing: 4) {
+                //                            Text(room.name)
+                //                                .font(.body)
+                //                                .bold()
+                //                            Text("Capacity: \(room.capacity)")
+                //                                .font(.subheadline)
+                //                                .foregroundColor(.gray)
+                //                        }
+                //                        Spacer()
+                //                        Image(systemName: "chevron.right")
+                //                            .foregroundColor(.gray)
+                //                    }
+                //                    .padding(.vertical, 4)
+                //                }
+                //                .listStyle(PlainListStyle())
             }
             .padding(.vertical, 8)
             .padding(.horizontal)
@@ -138,12 +167,12 @@ struct AvailableRoomsView: View {
                     }
                     .padding()
                     .background(Color(.systemBackground))
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .cornerRadius(10)
                 }
             }
             .padding()
         }
+        .background(Color(.systemGray6))
         .navigationTitle("Available Rooms")
         .task {
             await vm.searchRoom(date: date, capacity: capacity)

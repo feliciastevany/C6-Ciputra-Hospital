@@ -16,6 +16,7 @@ struct WeeklyCalendarView: View {
     @State private var currentWeekStart: Date = Calendar.current.startOfWeek(for: Date())
     @State private var dragOffset: CGFloat = 0
     @Binding var selectedDate: Date // tanggal yang dipilih
+    @State private var didSetup = false
     
     @State private var selectedMonth: Int = Calendar.current.component(.month, from: Date())
     
@@ -131,8 +132,10 @@ struct WeeklyCalendarView: View {
             }
         }
         .onAppear {
-            selectedDate = Date()
-            selectedMonth = Calendar.current.component(.month, from: Date())
+            guard !didSetup else { return }
+            currentWeekStart = Calendar.current.startOfWeek(for: selectedDate)
+            selectedMonth = Calendar.current.component(.month, from: selectedDate)
+            didSetup = true
         }
     }
 }
