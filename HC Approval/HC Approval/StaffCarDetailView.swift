@@ -10,6 +10,12 @@ import SwiftUI
 struct StaffCarDetailView: View {
     let name: String
     @State private var selectedDate = Date()
+    @State private var driver: Driver = Driver(
+        driver_id: 0,
+        driver_name: "",
+        driver_phone: "",
+        driver_active: false
+    )
     
     // Timeline state
     let hours = Array(8...22)
@@ -19,6 +25,8 @@ struct StaffCarDetailView: View {
     @State private var events: [carEvent] = []
     @State private var cars: [BookingCarJoined] = []
     
+    @State private var goToBooking = false
+
     var body: some View {
         VStack(spacing: 0) {
             HStack{
@@ -28,10 +36,8 @@ struct StaffCarDetailView: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    print("Profile tapped")
-                }) {
-                    Text("+ Create Booking")
+                Button("+ Create Booking") {
+                    goToBooking = true
                 }
             }
             .padding()
@@ -112,7 +118,50 @@ struct StaffCarDetailView: View {
         }
         
         .task {
+            await fetchDriverByName(name)
             await fetchBookCar(for: selectedDate, selectedCarName: name)
+        }
+        .navigationDestination(isPresented: $goToBooking) {
+            let bookingList = cars.map { $0.toBookingCar() }
+
+            // cari start pertama
+            let start = BookingTimeHelper
+                .availableStartTimesIgnoringCancelled(bookings: bookingList)
+                .first ?? ""
+
+            // cari end valid untuk start tsb
+            let end = BookingTimeHelper
+                .validEndTimes(startTime: start, bookings: bookingList)
+                .first ?? ""
+
+            CarDetailView(
+                driver: driver,
+                slot: TimeSlot(start: start, end: end),
+                date: DateHelper.toBackendFormat(selectedDate),
+                passengers: 1,
+                bookings: bookingList
+            )
+        }
+
+    }
+    
+    
+    func fetchDriverByName(_ driverName: String) async {
+        do {
+            let raw = try await SupabaseManager.shared.client
+                .from("drivers")
+                .select()
+                .eq("driver_name", value: driverName)
+                .single() // cuma ambil 1
+                .execute()
+            
+            let d: Driver = try JSONDecoder().decode(Driver.self, from: raw.data)
+            
+            await MainActor.run {
+                self.driver = d
+            }
+        } catch {
+            print("❌ Error fetch driver:", error)
         }
     }
     
@@ -262,6 +311,38 @@ struct ScheduleCarBlockSingle: View {
         CGFloat(offsetMinutes()) * hourHeight / 60.0 + 40
     }
 }
+extension BookingCarJoined {
+    func toBookingCar() -> BookingCar {
+        return BookingCar(
+            bc_id: self.bc_id,
+            user_id: self.user_id,
+            driver_id: self.driver_id,
+            bc_date: Self.dateToString(self.bc_date),
+            bc_start: self.bc_start,
+            bc_end: self.bc_end,
+            bc_from: self.bc_from,
+            bc_desc: self.bc_desc,
+            bc_people: self.bc_people,
+            bc_status: self.bc_status,
+            bc_decline_reason: self.bc_decline_reason ?? "",
+            carpool_req: self.carpool_req ?? false,
+            carpool_desc: self.carpool_desc ?? "",
+            carpool_status: self.carpool_status,
+            created_at: self.created_at ?? Date()
+        )
+    }
+    
+    private static func dateToString(_ date: Date?) -> String {
+        guard let date else { return "" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"   // format sesuai kolom supabase
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: date)
+    }
+}
+
+
+
 
 #Preview {
     StaffCarDetailView(name: "Purbo")

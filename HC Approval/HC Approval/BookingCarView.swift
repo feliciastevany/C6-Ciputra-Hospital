@@ -24,7 +24,7 @@ struct BookingCarView: View {
                         Spacer()
                         Text("\(passengers)")
                             .frame(width: 30, alignment: .center)
-                        Stepper("", value: $passengers, in: 1...500)
+                        Stepper("", value: $passengers, in: 1...7)
                             .labelsHidden()
                     }
                 }
