@@ -76,7 +76,7 @@ class BookingService {
             .value
     }
     
-    // MARK: - Participants
+    // MARK: - Room Participants
     
     func addParticipants(_ participants: [ParticipantBr]) async throws {
         try await client
@@ -132,6 +132,7 @@ class BookingService {
             .value
     }
     
+    // MARK: - Drivers
     func fetchDrivers() async throws -> [Driver] {
         try await client
             .from("drivers")
@@ -141,6 +142,7 @@ class BookingService {
             .value
     }
     
+    // MARK: - Destinations
     func addDestinations(_ destinations: [DestinationInsert]) async throws -> [Destination] {
         let response: [Destination] = try await client
             .from("destinations")
@@ -151,4 +153,21 @@ class BookingService {
         return response
     }
 
+    // MARK: - Car Participants
+    
+    func addCarParticipants(_ participants: [ParticipantBc]) async throws {
+        try await client
+            .from("participants_bc")
+            .insert(participants)
+            .execute()
+    }
+    
+    func fetchParticipants(bcId: Int) async throws -> [ParticipantBc] {
+        try await client
+            .from("participants_bc")
+            .select()
+            .eq("bc_id", value: bcId)
+            .execute()
+            .value
+    }
 }

@@ -381,21 +381,31 @@ struct RoomDetailView: View {
             
             guard let created = try await BookingService.shared.createBookingRoom(booking) else { return }
             
-            let picParticipant = ParticipantBr(
-                user_id: userId,
-                br_id: created.br_id,
-                pic: true
+//<<<<<<< HEAD:HC Approval/HC Approval/Meeting Room/New Booking/BookingRoomView.swift
+//            let picParticipant = ParticipantBr(
+//                user_id: userId,
+//                br_id: created.br_id,
+//                pic: true
+//=======
+//            try await BookingService.shared.addParticipants(
+//                selectedUsers.map { ParticipantBr(user_id: $0.user_id, br_id: created.br_id, pic: false) }
+//            )
+            
+            try await BookingService.shared.addParticipants(
+                selectedUsers.map { ParticipantBr(user_id: $0.user_id, br_id: created.br_id, pic: false) }
+                + [ParticipantBr(user_id: userId, br_id: created.br_id, pic: true)]
+//>>>>>>> origin/car_booking_detail:HC Approval/HC Approval/MeetingRoomsView.swift
             )
             
-            let otherParticipants = selectedUsers.map { user in
-                ParticipantBr(
-                    user_id: user.user_id,
-                    br_id: created.br_id,
-                    pic: false
-                )
-            }
+//            let otherParticipants = selectedUsers.map { user in
+//                ParticipantBr(
+//                    user_id: user.user_id,
+//                    br_id: created.br_id,
+//                    pic: false
+//                )
+//            }
             
-            try await BookingService.shared.addParticipants([picParticipant] + otherParticipants)
+//            try await BookingService.shared.addParticipants([picParticipant] + otherParticipants)
             
             try await BookingService.shared.addProperties(
                 selectedProperties.map { BookingRoomDetail(properties_id: $0.property.properties_id, br_id: created.br_id, qty: $0.quantity) }
