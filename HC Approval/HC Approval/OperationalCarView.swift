@@ -20,125 +20,124 @@ struct OperationalCarView: View {
     let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
     
     var body: some View {
-        NavigationStack{
-            VStack(spacing: 0) {
-                // Header
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Operational Car")
+                    .font(.title)
+                    .bold()
+                Spacer()
+                Button(action: {
+                    goToProfil = true
+                }) {
+                    Image(systemName: "person.crop.circle")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundColor(.blue)
+                }.navigationDestination(isPresented: $goToProfil) {
+                    ProfilView(userId: loggedInUserId)
+                }
+            }
+            .padding(.top)
+            .padding(.horizontal)
+            
+            BookingCarView()
+            
+            VStack {
                 HStack {
-                    Text("Operational Car")
-                        .font(.title)
+                    Text("Schedule")
+                        .font(.title3)
                         .bold()
                     Spacer()
-                    Button(action: {
-                        print("Profile tapped")
-                    }) {
-                        Image(systemName: "person.crop.circle")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .foregroundColor(.blue)
-                    }.navigationDestination(isPresented: $goToProfil) {
-                        ProfilView(userId: loggedInUserId)
-                    }
                 }
-                .padding()
+                .padding(.top, 5)
+                .padding(.horizontal)
                 
-                BookingCarView()
+                WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .car(selectedCar: $selectedCar))
+                    .frame(height: 120)
+                    .padding(.horizontal, -2)
                 
-                VStack {
-                    HStack {
-                        Text("Schedule")
-                            .font(.title3)
-                            .bold()
-                        Spacer()
-                    }
-                    .padding(.top, 5)
-                    .padding(.horizontal)
-                    
-                    WeeklyCalendarView(selectedDate: $selectedDate, pickerMode: .car(selectedCar: $selectedCar))
-                        .frame(height: 120)
-                        .padding(.horizontal, -2)
-                    
-                    Divider()
-                }
-                
-                // Timeline + Schedule
-                ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                    HStack(alignment: .top, spacing: 0) {
-                        // Kolom jam di sisi kiri
-                        VStack(spacing: 0) {
-                            ForEach(hours, id: \.self) { hour in
+                Divider()
+            }
+            
+            // Timeline + Schedule
+            ScrollView([.horizontal, .vertical], showsIndicators: false) {
+                HStack(alignment: .top, spacing: 0) {
+                    // Kolom jam di sisi kiri
+                    VStack(spacing: 0) {
+                        ForEach(hours, id: \.self) { hour in
+                            HStack {
                                 HStack {
-                                    HStack {
-                                        Text("\(String(format: "%02d.00", hour))")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                        Spacer()
-                                    }
-                                    .frame(height: hourHeight)
-                                    .frame(width: 50, alignment: .leading)
-                                    
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(height: 1)
+                                    Text("\(String(format: "%02d.00", hour))")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    Spacer()
                                 }
+                                .frame(height: hourHeight)
+                                .frame(width: 50, alignment: .leading)
+                                
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(height: 1)
                             }
                         }
-                        
-                        // Grid tiap Car (anggap analogi room → car slot)
-                        ForEach(filteredCars, id: \.self) { car in
-                            VStack(spacing: 0) {
-                                ZStack(alignment: .topLeading) {
-                                    // Background grid
-                                    VStack(spacing: 0) {
-                                        ForEach(hours, id: \.self) { hour in
-                                            ZStack {
-                                                Rectangle()
-                                                    .fill(Color.gray.opacity(0.3))
-                                                    .frame(height: 1)
-                                                Rectangle()
-                                                    .fill(Color.clear)
-                                                    .frame(height: hourHeight)
-                                            }
+                    }
+                    
+                    // Grid tiap Car (anggap analogi room → car slot)
+                    ForEach(filteredCars, id: \.self) { car in
+                        VStack(spacing: 0) {
+                            ZStack(alignment: .topLeading) {
+                                // Background grid
+                                VStack(spacing: 0) {
+                                    ForEach(hours, id: \.self) { hour in
+                                        ZStack {
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(height: 1)
+                                            Rectangle()
+                                                .fill(Color.clear)
+                                                .frame(height: hourHeight)
                                         }
                                     }
-                                    
-                                    // Events
-                                    ForEach(events.filter { $0.driver == car }) { event in
-                                        ScheduleBlockCar(
-                                            driver: event.driver,
-                                            from: event.from,
-                                            destination: event.destination,
-                                            participant: event.participant,
-                                            name: event.name,
-                                            dept: event.dept,
-                                            color: colorForCar(event.driver),
-                                            startHour: event.startHour,
-                                            startMinute: event.startMinute,
-                                            endHour: event.endHour,
-                                            endMinute: event.endMinute,
-                                            hourHeight: hourHeight,
-                                            carpoolStatus: event.carpoolStatus
-                                        )
-                                    }
+                                }
+                                
+                                // Events
+                                ForEach(events.filter { $0.driver == car }) { event in
+                                    ScheduleBlockCar(
+                                        driver: event.driver,
+                                        from: event.from,
+                                        destination: event.destination,
+                                        participant: event.participant,
+                                        name: event.name,
+                                        dept: event.dept,
+                                        color: colorForCar(event.driver),
+                                        startHour: event.startHour,
+                                        startMinute: event.startMinute,
+                                        endHour: event.endHour,
+                                        endMinute: event.endMinute,
+                                        hourHeight: hourHeight,
+                                        carpoolStatus: event.carpoolStatus
+                                    )
                                 }
                             }
-                            .frame(width: filteredCars.count == 1 ? UIScreen.main.bounds.width - 60 : 150)
                         }
-                        
+                        .frame(width: filteredCars.count == 1 ? UIScreen.main.bounds.width - 60 : 150)
                     }
-                    .padding(.horizontal)
+                    
                 }
-                .background(Color(.systemBackground))
+                .padding(.horizontal)
             }
-            .background(Color(.systemGray6))
-            // setiap kali selectedDate berubah → fetch ulang
-            .onChange(of: selectedDate) { _ in
-                Task {
-                    await fetchBookCars(for: selectedDate)
-                }
+            .background(Color(.systemBackground))
+        }
+        .background(Color(.systemGray6))
+        // setiap kali selectedDate berubah → fetch ulang
+        .onChange(of: selectedDate) { _ in
+            Task {
+                await fetchBookCars(for: selectedDate)
             }
-            .task {
-                await fetchBookCars(for: selectedDate) // pertama kali load
-            }
+        }
+        .task {
+            await fetchBookCars(for: selectedDate) // pertama kali load
         }
     }
     

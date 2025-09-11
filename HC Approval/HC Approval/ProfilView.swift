@@ -84,6 +84,9 @@ struct ProfilView: View {
                                 Image(systemName: "arrow.right")
                             }
                         }
+                        .navigationDestination(isPresented: $isLoggedOut) {
+                            LoginView()
+                        }
                     }
                 } else {
                     Text(errorMessage.isEmpty ? "User not found" : errorMessage)
