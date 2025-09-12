@@ -48,7 +48,7 @@ struct MeetingRoomView: View {
             
             MeetingRoomsView()
             
-            VStack {
+            VStack(spacing: 0){
                 HStack {
                     Text("Schedule")
                         .font(.title3)
@@ -78,13 +78,9 @@ struct MeetingRoomView: View {
                                         .foregroundColor(.gray)
                                     Spacer()
                                 }
+                                .padding(.leading, 6)
                                 .frame(height: hourHeight)
                                 .frame(width: 50, alignment: .leading)
-                                
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 1)
-                                    .padding(.leading, -20)
                             }
                         }
                     }
@@ -265,7 +261,7 @@ struct ScheduleBlock: View {
             Rectangle().fill(color).frame(width: 3)   // accent bar kiri
         }
         .offset(y: yOffset())
-        .padding(.leading, -20)
+        .padding(.leading, -4)
     }
     
     private func blockHeight() -> CGFloat {

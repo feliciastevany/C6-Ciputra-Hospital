@@ -19,7 +19,7 @@ struct OperationalCarView: View {
     @State private var selectedEvent: carEvent? = nil
     @State private var showBookingDetail = false
     let hours = Array(8...22) // jam 08.00 - 22.00
-    let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
+    let hourHeight: CGFloat = 80 // tinggi tetap untuk setiap jam
     
     var body: some View {
         VStack(spacing: 0) {
@@ -45,7 +45,7 @@ struct OperationalCarView: View {
             
             BookingCarView()
             
-            VStack {
+            VStack(spacing: 0) {
                 HStack {
                     Text("Schedule")
                         .font(.title3)
@@ -78,9 +78,6 @@ struct OperationalCarView: View {
                                 .frame(height: hourHeight)
                                 .frame(width: 50, alignment: .leading)
                                 
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 1)
                             }
                         }
                     }
@@ -100,6 +97,7 @@ struct OperationalCarView: View {
                                                 .fill(Color.clear)
                                                 .frame(height: hourHeight)
                                         }
+                                        .padding(.leading, -6)
                                     }
                                 }
                                 
@@ -290,6 +288,7 @@ struct ScheduleBlockCar: View {
             Rectangle().fill(color).frame(width: 3)   // accent bar kiri
         }
         .offset(y: yOffset())
+        .padding(.leading, -4)
     }
     
     private func blockHeight() -> CGFloat {
@@ -299,7 +298,7 @@ struct ScheduleBlockCar: View {
     
     private func yOffset() -> CGFloat {
         let offsetMinutes = offsetMinutes()
-        return CGFloat(offsetMinutes) * hourHeight / 60.0 + 30
+        return CGFloat(offsetMinutes) * hourHeight / 60.0 + 40
     }
     
     private func blockDurationMinutes() -> Int {
