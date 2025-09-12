@@ -44,6 +44,27 @@ extension SupabaseManager {
         
         return (rooms, cars)
     }
+    
+    func updateBookingStatus(booking: any AnyBooking, status: String, dec_reason: String) async throws {
+        if let roomBooking = booking as? BookingRoomJoined {
+            try await client
+                .from("bookings_room")
+                .update(["br_status": status, "br_decline_reason": dec_reason])
+                .eq("br_id", value: roomBooking.br_id)
+                .execute()
+            print(status, dec_reason)
+            
+        } else if let carBooking = booking as? BookingCarJoined {
+            try await client
+                .from("bookings_car")
+                .update(["bc_status": status, "bc_decline_reason": dec_reason])
+                .eq("bc_id", value: carBooking.bc_id)
+                .execute()
+            
+            print(status, dec_reason)
+        }
+    }
+
 }
 
 

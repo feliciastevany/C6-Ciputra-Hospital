@@ -9,7 +9,7 @@ import SwiftUI
 
 struct StatusView: View {
     var title: String
-    var event: String
+    var eventView: AnyView
     var date: Date
     var startTime: String
     var endTime: String
@@ -35,19 +35,11 @@ struct StatusView: View {
                     .font(.headline)
                     .accessibilityLabel("From \(startTime) to \(endTime) WIB")
                 
-//                HStack {
-                    Text(event)
-                        .font(.footnote)
-                        .accessibilityLabel("Booking Event: \(event)")
-                    
-//                    Spacer()
-//                    
-//                    Text(approvedBy)
-//                        .font(.footnote)
-//                        .foregroundStyle(Color(.systemGray6))
-//                        .accessibilityLabel("Approved By: \(approvedBy)")
-//                }
-
+//                Text(event)
+//                    .font(.footnote)
+//                    .accessibilityLabel("Booking Event: \(event)")
+                eventView
+            
             }
             .padding(14)
             .background(Color(.systemBackground))
