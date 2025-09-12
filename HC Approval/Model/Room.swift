@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Room: Codable, Identifiable {
-    let room_id: Int
-    let room_name: String
-    let room_capacity: Int
+struct Room: Codable, Identifiable, Hashable {
+    var room_id: Int
+    var room_name: String
+    var room_capacity: Int
     
     var id: Int{room_id}
 }

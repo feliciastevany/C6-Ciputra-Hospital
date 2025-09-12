@@ -16,9 +16,9 @@ struct ProfilView: View {
     @State private var errorMessage = ""
     
     @State private var showEditSheet = false
-    @State private var isLoggedOut = false  // Menambahkan state untuk logout
+    @State private var isLoggedOut = false
     
-    @State private var showPassword = false  // State untuk mengontrol visibilitas password
+    @State private var showPassword = false
     
     var body: some View {
         NavigationStack {
@@ -27,27 +27,38 @@ struct ProfilView: View {
                     ProgressView("Loading profile...")
                 } else if let user = user {
                     Form {
-                        Section(header: Text("Profile Details")) {
+                        Section(header: HStack {
+                            Text("Profile Details")
+                            Spacer()
+                            Button(action: {
+                                showEditSheet = true
+                            }) {
+                                Image(systemName: "pencil")
+                                    .resizable()
+                                    .frame(width: 18, height: 18)
+                                    .foregroundColor(.primary)
+                            }
+                        }) {
                             profileRow(title: "Name", value: user.user_name)
                             profileRow(title: "Department", value: user.user_dept)
                             profileRow(title: "Email", value: user.user_email)
                             profileRow(title: "Phone", value: user.user_phone ?? "-")
                             
-                            // Password Row with Eye Icon
                             HStack {
                                 Text("Password")
                                 
                                 Button(action: {
-                                    showPassword.toggle()  // Toggle visibility of password
+                                    showPassword.toggle()
                                 }) {
                                     Image(systemName: showPassword ? "eye.fill" : "eye.slash.fill")
                                         .foregroundColor(showPassword ? .blue : .gray)
-                                        .padding(.trailing, 15) // Adjust the padding to position it to the right
-                                }
+                                        .padding(.trailing, 15)
+                                }.accessibilityLabel("Hide")
+                                    .accessibilityHint("Tap to see the password")
                                 
                                 Spacer()
                                 
-                                // Toggle between SecureField and TextField based on password visibility
+                            
                                 ZStack(alignment: .trailing) {
                                     if showPassword {
                                         TextField("Password", text: .constant(user.user_pass ?? ""))
@@ -68,10 +79,13 @@ struct ProfilView: View {
                             logout()
                         } label: {
                             HStack {
-                                Text("Logout")
+                                Text("Logout").accessibilityHint("Tap to log out and return to the login screen")
                                 Spacer()
                                 Image(systemName: "arrow.right")
                             }
+                        }
+                        .navigationDestination(isPresented: $isLoggedOut) {
+                            LoginView()
                         }
                     }
                 } else {
@@ -80,27 +94,10 @@ struct ProfilView: View {
                 }
             }
             .navigationTitle("Profile")
+            .accessibilityLabel("Halaman profil")
             .task {
                 await loadUser()
             }
-            .overlay(
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button {
-                            showEditSheet = true
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .resizable()
-                                .frame(width: 56, height: 56)
-                                .foregroundColor(.blue)
-                                .shadow(radius: 4)
-                        }
-                        .padding()
-                    }
-                }
-            )
             .sheet(isPresented: $showEditSheet) {
                 if let user = user {
                     EditProfileView(user: user) { updatedUser in
@@ -108,9 +105,11 @@ struct ProfilView: View {
                     }
                 }
             }
+            .interactiveDismissDisabled(true)
             .navigationDestination(isPresented: $isLoggedOut) {
                 LoginView()
             }
+            
         }
     }
     
@@ -147,15 +146,14 @@ struct ProfilView: View {
     }
     
     private func logout() {
-        UserDefaults.standard.removeObject(forKey: "loggedInUserId") // Hapus status login
-        isLoggedOut = true // Mengarahkan ke halaman login
+        UserDefaults.standard.removeObject(forKey: "loggedInUserId")
+        isLoggedOut = true
     }
 }
 
 
-
 struct ProfilView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfilView(userId: 1)
+        ProfilView(userId: 2)
     }
 }

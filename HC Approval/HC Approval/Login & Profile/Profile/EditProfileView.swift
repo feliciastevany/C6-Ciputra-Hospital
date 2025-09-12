@@ -8,23 +8,23 @@
 import SwiftUI
 
 struct EditProfileView: View {
-    // incoming immutable user
     let user: UserResponse
-    // callback untuk mengirim user yang sudah di-update ke ProfilView
     var onSave: (UserResponse) -> Void
 
-    // local editable states
     @State private var name: String
     @State private var department: String
     @State private var email: String
     @State private var phone: String
     @State private var password: String
 
-    @State private var isPasswordVisible = false // To control password visibility
+    @State private var isPasswordVisible = false
+    @State private var showCancelAlert = false
+    @State private var hasChanges = false
 
     @Environment(\.dismiss) private var dismiss
 
-    // inisialisasi state dari user yang dikirim
+    let departments = ["Human Capital", "Marketing", "Finance", "Building & Facilities", "IT"]
+
     init(user: UserResponse, onSave: @escaping (UserResponse) -> Void) {
         self.user = user
         self.onSave = onSave
@@ -44,16 +44,15 @@ struct EditProfileView: View {
                         Spacer()
                         TextField("Name", text: $name)
                             .multilineTextAlignment(.trailing)
-                            .foregroundColor(.primary)
+                            .onChange(of: name) { _ in checkForChanges() }
                     }
 
-                    HStack {
-                        Text("Department")
-                        Spacer()
-                        TextField("Department", text: $department)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(.primary)
+                    Picker("Department", selection: $department) {
+                        ForEach(departments, id: \.self) { dept in
+                            Text(dept).tag(dept)
+                        }
                     }
+                    .onChange(of: department) { _ in checkForChanges() }
 
                     HStack {
                         Text("Email")
@@ -62,7 +61,7 @@ struct EditProfileView: View {
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
                             .multilineTextAlignment(.trailing)
-                            .foregroundColor(.primary)
+                            .onChange(of: email) { _ in checkForChanges() }
                     }
 
                     HStack {
@@ -71,45 +70,46 @@ struct EditProfileView: View {
                         TextField("Phone", text: $phone)
                             .keyboardType(.phonePad)
                             .multilineTextAlignment(.trailing)
-                            .foregroundColor(.primary)
+                            .onChange(of: phone) { _ in checkForChanges() }
                     }
 
                     HStack {
                         Text("Password")
-                        Button(action: {
-                            isPasswordVisible.toggle()
-                        }) {
+                        Button(action: { isPasswordVisible.toggle() }) {
                             Image(systemName: isPasswordVisible ? "eye.fill" : "eye.slash.fill")
                                 .foregroundColor(isPasswordVisible ? .blue : .gray)
-                                .padding(.trailing, 15) // Adjust the padding to position it to the right
+                                .padding(.trailing, 15)
                         }
                         Spacer()
-                        
+
                         ZStack(alignment: .trailing) {
                             if isPasswordVisible {
                                 TextField("Password", text: $password)
                                     .multilineTextAlignment(.trailing)
-                                    .foregroundColor(.primary)
                                     .textContentType(.password)
+                                    .onChange(of: password) { _ in checkForChanges() }
                             } else {
                                 SecureField("Password", text: $password)
                                     .multilineTextAlignment(.trailing)
-                                    .foregroundColor(.primary)
                                     .textContentType(.password)
+                                    .onChange(of: password) { _ in checkForChanges() }
                             }
-                            
-                            // Eye Icon Button for toggling password visibility
-                            
                         }
                     }
-
                 }
             }
             .navigationTitle("Edit Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") {
+                        if hasChanges {
+                            showCancelAlert = true
+                        } else {
+                            dismiss()
+                        }
+                    }
+                    .foregroundColor(.red)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
@@ -117,10 +117,16 @@ struct EditProfileView: View {
                     }
                 }
             }
+            .alert("Are you sure you want to discard changes?",
+                   isPresented: $showCancelAlert) {
+                Button("No", role: .cancel) { }
+                Button("Yes", role: .destructive) {
+                    dismiss()
+                }
+            }
         }
     }
 
-    // build updated user and call service
     private func saveChanges() async {
         let updatedUser = UserResponse(
             user_id: user.user_id,
@@ -131,7 +137,6 @@ struct EditProfileView: View {
             user_phone: phone.isEmpty ? nil : phone,
             user_active: user.user_active
         )
-
         do {
             try await UserService().updateUser(user: updatedUser)
             await MainActor.run {
@@ -139,28 +144,16 @@ struct EditProfileView: View {
                 dismiss()
             }
         } catch {
-            await MainActor.run {
-                print("Update failed: \(error.localizedDescription)")
-            }
+            print("Update failed: \(error.localizedDescription)")
         }
     }
-}
 
-
-struct EditProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        EditProfileView(user: UserResponse(
-            user_id: 1,
-            user_name: "John Doe",
-            user_email: "john.doe@example.com",
-            user_pass: "password123",
-            user_dept: "Engineering",
-            user_phone: "1234567890",
-            user_active: true
-        ), onSave: { updatedUser in
-            print("Updated User: \(updatedUser)")
-        })
-        .previewDevice("iPhone 13")
+    private func checkForChanges() {
+        hasChanges =
+            name != user.user_name ||
+            department != user.user_dept ||
+            email != user.user_email ||
+            phone != (user.user_phone ?? "") ||
+            password != user.user_pass
     }
 }
-

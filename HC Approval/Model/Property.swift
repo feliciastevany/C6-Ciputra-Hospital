@@ -8,8 +8,16 @@
 import Foundation
 
 struct Property: Codable, Identifiable {
-    let properties_id: Int
-    let properties_name: String
+    var properties_id: Int
+    var properties_name: String
     
     var id: Int{properties_id}
 }
+
+struct SelectedProperty: Identifiable {
+    var id: Int { property.id }
+    var property: Property
+    var quantity: Int
+}
+
+

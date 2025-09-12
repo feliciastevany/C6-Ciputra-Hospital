@@ -18,3 +18,11 @@ struct User: Codable, Identifiable {
     // biar cocok sama Identifiablenya, jadi id refer ke user_id
     var id: Int {user_id}
 }
+
+extension String {
+    var initials: String {
+        let words = self.split(separator: " ")
+        let firstLetters = words.prefix(2).compactMap { $0.first }
+        return firstLetters.map { String($0) }.joined().uppercased()
+    }
+}

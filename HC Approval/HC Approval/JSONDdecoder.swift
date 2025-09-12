@@ -58,4 +58,10 @@ extension Date {
         formatter.dateFormat = "EE, d MMM yyyy"      // contoh: Senin, 1 Sept 2025
         return formatter.string(from: self)
     }
+    
+    func toSimpleFormat() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        return formatter.string(from: self)
+    }
 }

@@ -12,8 +12,7 @@ struct MyBookings : View {
     
     @State var searchText: String = ""
     
-    @State private var selectedBookingCar: BookingCarJoined?
-    @State private var showDetails: Bool = false
+    @State private var selectedSheet: SheetType?
     
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
@@ -23,31 +22,45 @@ struct MyBookings : View {
     var filteredRooms: [BookingRoomJoined] {
         let today = Calendar.current.startOfDay(for: Date())
         let baseFilter = bookingRoom.filter { $0.br_date >= today }
-    
-        if searchText.isEmpty { return bookingRoom }
-        return baseFilter.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.br_event.localizedCaseInsensitiveContains(searchText)
-        }
+        
+        let filtered = searchText.isEmpty
+            ? baseFilter
+            : baseFilter.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.br_event.localizedCaseInsensitiveContains(searchText) ||
+                $0.br_status.localizedCaseInsensitiveContains(searchText) ||
+                $0.br_date.toEnglishFormat().localizedCaseInsensitiveContains(searchText)
+            }
+        
+        return filtered.sorted { $0.br_date < $1.br_date }
     }
 
     var filteredCars: [BookingCarJoined] {
         let today = Calendar.current.startOfDay(for: Date())
         let baseFilter = bookingCar.filter { $0.bc_date >= today }
+        
+        let filtered = searchText.isEmpty
+            ? baseFilter
+            : baseFilter.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                ($0.destination?.last?.destination_name.localizedCaseInsensitiveContains(searchText) ?? false) ||
+                $0.bc_status.localizedCaseInsensitiveContains(searchText) ||
+                $0.bc_date.toEnglishFormat().localizedCaseInsensitiveContains(searchText)
+            }
+        
+        return filtered.sorted { $0.bc_date < $1.bc_date }
+    }
     
-        if searchText.isEmpty { return bookingCar }
-        return baseFilter.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            ($0.destination?.last?.destination_name.localizedCaseInsensitiveContains(searchText) ?? false)
-        }
-    }
-
-    var groupedRooms: [Date: [BookingRoomJoined]] {
+    var groupedRooms: [(date: Date, bookings: [BookingRoomJoined])] {
         Dictionary(grouping: filteredRooms, by: { $0.br_date })
+            .sorted { $0.key < $1.key }   // urut ascending
+            .map { ($0.key, $0.value) }
     }
 
-    var groupedCars: [Date: [BookingCarJoined]] {
+    var groupedCars: [(date: Date, bookings: [BookingCarJoined])] {
         Dictionary(grouping: filteredCars, by: { $0.bc_date })
+            .sorted { $0.key < $1.key }
+            .map { ($0.key, $0.value) }
     }
     
     var body: some View {
@@ -74,10 +87,10 @@ struct MyBookings : View {
                     }
                 }
                 .padding(.top)
-
+                
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray2))
                         .accessibilityHidden(true)
                     
                     TextField("Search bookings...", text: $searchText)
@@ -85,7 +98,7 @@ struct MyBookings : View {
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(Color(.systemGray))
+                                .foregroundColor(Color(.systemGray2))
                         }
                     }
                 }
@@ -97,7 +110,7 @@ struct MyBookings : View {
                         .fill(Color(.systemBackground))
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(.systemGray), lineWidth: 1)
+                                .stroke(Color(.systemGray3), lineWidth: 1)
                         )
                 )
                 
@@ -106,24 +119,22 @@ struct MyBookings : View {
                     Text("Cars").tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
-                .padding(.bottom, 15)
-                .padding(.top, 10)
                 .accessibilityLabel("Booking type")
                 .accessibilityHint("Switch between rooms and cars")
                 
                 ScrollView {
                     VStack (spacing: 15) {
                         if segmentedControl == 0 {
-                            ForEach(groupedRooms.keys.sorted(by: { $0 > $1 }), id: \.self) { date in
+                            ForEach(groupedRooms, id: \.date) { group in
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("\(date.toEnglishFormat())")
+                                    Text("\(group.date.toEnglishFormat())")
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                         .accessibilityLabel("")
-                                        .accessibilityHint("Bookings on \(date.toEnglishFormat())")
+                                        .accessibilityHint("Bookings on \(group.date.toEnglishFormat())")
                                     
                                     
-                                    ForEach(groupedRooms[date] ?? [], id: \.bookId) { booking in
+                                    ForEach(group.bookings, id: \.bookId) { booking in
                                         BookingCard(
                                             title: booking.title,
                                             joinName: "",
@@ -132,7 +143,9 @@ struct MyBookings : View {
                                             startTime: toHourMinute(booking.br_start),
                                             endTime: toHourMinute(booking.br_end),
                                             status: booking.br_status
-                                        )
+                                        ).onTapGesture {
+                                            selectedSheet = .roombooking(booking)
+                                        }
                                     }
                                 }
                             }
@@ -160,10 +173,11 @@ struct MyBookings : View {
                                     }
                                 },
                                             onDetails: {
-                                    selectedBookingCar = booking
-                                    showDetails = true
+                                    selectedSheet = .carpool(booking)
                                 }
-                                    )
+                                ).onTapGesture {
+                                    selectedSheet = .carbooking(booking)
+                                }
                             }
                             
                             let nonPendingGroupedCars = Dictionary(
@@ -171,7 +185,7 @@ struct MyBookings : View {
                                 by: { $0.bc_date }
                             )
                             
-                            ForEach(nonPendingGroupedCars.keys.sorted(by: { $0 > $1 }), id: \.self) { date in
+                            ForEach(nonPendingGroupedCars.keys.sorted(by: { $1 > $0 }), id: \.self) { date in
                                 
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("\(date.toEnglishFormat())")
@@ -185,23 +199,35 @@ struct MyBookings : View {
                                                     event: booking.destination?.last?.destination_name ?? "Unknown",
                                                     startTime: toHourMinute(booking.bc_start),
                                                     endTime: toHourMinute(booking.bc_end),
-                                                    status: booking.bc_status)
+                                                    status: booking.bc_status
+                                        ).onTapGesture {
+                                            selectedSheet = .carbooking(booking)
+                                        }
                                     }
                                 }
                             }
                         }
-                        
                     }
+                    .padding(.top, 10)
                     .task {
                         await fetchMyBookings()
                     }
                 }
+                .refreshable {
+                    await fetchMyBookings()
+                }
             }
             .padding(.horizontal)
             .background(Color(.systemGray6))
-            
-            .sheet(item: $selectedBookingCar) { car in
-                BookingCarDetailView(booking: car)
+            .sheet(item: $selectedSheet) { sheet in
+                switch sheet {
+                case .carbooking(let car):
+                    BookingCarDetailView(bcId: car.bc_id)
+                case .carpool(let car):
+                    CarpoolDetailView(booking: car)
+                case .roombooking(let room):
+                    BookingRoomDetailView(brId: room.br_id)
+                }
             }
         }
     }
@@ -245,7 +271,6 @@ struct MyBookings : View {
         }
     }
 }
-
 
 extension SupabaseManager {
     func approveCarpool(booking: any AnyBooking) async throws {

@@ -8,24 +8,28 @@
 import SwiftUI
 
 struct ApprovalsView: View {
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    @State private var goToProfil = false
+    
     @State private var showDeclineSheet = false
     @State private var declineReason = ""
     @State private var selectedBooking: (any AnyBooking)?
+    
+    @State private var selectedSheet: SheetType?
     
     @State var bookingRoom: [BookingRoomJoined] = []
     @State var bookingCar: [BookingCarJoined] = []
     
     @State private var searchText = ""
     
-    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
-    @State private var goToProfil = false
-    
     @State private var selectedStatus: BookingStatus = .pending
     @State private var selectedType: BookingType = .all
     
     // MARK: - Filtered Data by type & status
     var filteredRooms: [BookingRoomJoined] {
-        bookingRoom
+        let today = Calendar.current.startOfDay(for: Date())
+        
+        return bookingRoom
             .filter { room in
                 selectedType == .all || selectedType == .rooms
             }
@@ -38,10 +42,16 @@ struct ApprovalsView: View {
                 case .cancelled: return room.br_status == "Cancelled"
                 }
             }
+            .filter { room in
+                // tampilkan hanya yang >= hari ini
+                room.br_date >= today
+            }
     }
     
     var filteredCars: [BookingCarJoined] {
-        bookingCar
+        let today = Calendar.current.startOfDay(for: Date())
+        
+        return bookingCar
             .filter { car in
                 selectedType == .all || selectedType == .cars
             }
@@ -52,6 +62,9 @@ struct ApprovalsView: View {
                 case .declined:  return car.bc_status == "Declined"
                 case .cancelled: return car.bc_status == "Cancelled"
                 }
+            }
+            .filter { car in
+                car.bc_date >= today
             }
     }
     
@@ -81,197 +94,181 @@ struct ApprovalsView: View {
     }
     
     var body: some View {
-        VStack {
+        ZStack {
             VStack {
-                HStack {
-                    Text("Booking Request")
-                        .font(.title.bold())
-                        .accessibilityLabel("My Booking Requests")
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        print("Profile tapped")
-                        goToProfil = true
-                    }) {
-                        Image(systemName: "person.crop.circle")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .foregroundColor(Color(.systemBlue))
-                            .accessibilityLabel("My Profile")
-                        
-                    }.navigationDestination(isPresented: $goToProfil) {
-                        ProfilView(userId: loggedInUserId)
-                    }
-                }
-                .padding(.top)
-                
-                HStack {
+                VStack {
                     HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(Color(.systemGray))
+                        Text("Booking Request")
+                            .font(.title.bold())
+                            .accessibilityLabel("My Booking Requests")
                         
-                        TextField("Search...", text: $searchText)
+                        Spacer()
                         
-                        if !searchText.isEmpty {
-                            Button(action: { searchText = "" }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(Color(.systemGray))
+                        Button(action: {
+                            print("Profile tapped")
+                            goToProfil = true
+                        }) {
+                            Image(systemName: "person.crop.circle")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .foregroundColor(Color(.systemBlue))
+                                .accessibilityLabel("My Profile")
+                            
+                        }.navigationDestination(isPresented: $goToProfil) {
+                            ProfilView(userId: loggedInUserId)
+                        }
+                    }
+                    .padding(.top)
+                    
+                    HStack {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(Color(.systemGray2))
+                            
+                            TextField("Search bookings...", text: $searchText)
+                            
+                            if !searchText.isEmpty {
+                                Button(action: { searchText = "" }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(Color(.systemGray2))
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.systemBackground))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color(.systemGray3), lineWidth: 1)
+                                )
+                        )
+                        
+                        Picker("ChooseType", selection: $selectedType) {
+                            ForEach(BookingType.allCases, id: \.self) { type in
+                                Text(type.rawValue).tag(type)
+                                
                             }
                         }
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.systemBackground))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color(.systemGray3), lineWidth: 1)
-                            )
-                    )
                     
-                    Picker("ChooseType", selection: $selectedType) {
-                        ForEach(BookingType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
+                    Picker("StatusRequest", selection: $selectedStatus) {
+                        ForEach(BookingStatus.allCases, id: \.self) { status in
+                            Text(status.rawValue).tag(status)
                         }
                     }
+                    .pickerStyle(.segmented)
                 }
-                .padding(.bottom, 3)
+                .padding(.horizontal)
                 
-                Picker("StatusRequest", selection: $selectedStatus) {
-                    ForEach(BookingStatus.allCases, id: \.self) { status in
-                        Text(status.rawValue).tag(status)
+                ScrollView {
+                    VStack (spacing: 15) {
+                        ForEach(searchedBookings, id: \.bookId) { booking in
+                            bookingView(
+                                title: booking.title,
+                                event: booking.type == .rooms
+                                ? (booking as! BookingRoomJoined).br_event
+                                : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
+                                date: booking is BookingRoomJoined
+                                ? (booking as! BookingRoomJoined).br_date
+                                : (booking as! BookingCarJoined).bc_date,
+                                startTime: booking is BookingRoomJoined
+                                ? toHourMinute((booking as! BookingRoomJoined).br_start)
+                                : toHourMinute((booking as! BookingCarJoined).bc_start),
+                                endTime: booking is BookingRoomJoined
+                                ? toHourMinute((booking as! BookingRoomJoined).br_end)
+                                : toHourMinute((booking as! BookingCarJoined).bc_end),
+                                status: booking.status,
+                                bookings: booking
+                            ).onTapGesture {
+                                if let room = booking as? BookingRoomJoined {
+                                    selectedSheet = .roombooking(room)
+                                } else if let car = booking as? BookingCarJoined {
+                                    selectedSheet = .carbooking(car)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    .task {
+                        await fetchAllBookings()
                     }
                 }
-                .pickerStyle(.segmented)
-                .padding(.bottom, 3)
-                
-            }
-            .padding(.horizontal)
-            
-            ScrollView {
-                VStack (spacing: 15) {
-                    ForEach(searchedBookings, id: \.bookId) { booking in
-                        bookingView(
-                            title: booking.title,
-                            event: booking.type == .rooms
-                            ? (booking as! BookingRoomJoined).br_event
-                            : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
-                            date: booking is BookingRoomJoined
-                            ? (booking as! BookingRoomJoined).br_date
-                            : (booking as! BookingCarJoined).bc_date,
-                            startTime: booking is BookingRoomJoined
-                            ? toHourMinute((booking as! BookingRoomJoined).br_start)
-                            : toHourMinute((booking as! BookingCarJoined).bc_start),
-                            endTime: booking is BookingRoomJoined
-                            ? toHourMinute((booking as! BookingRoomJoined).br_end)
-                            : toHourMinute((booking as! BookingCarJoined).bc_end),
-                            status: booking.status,
-                            bookings: booking
-                        )
-                    }
-                }
-                .padding()
-                .task {
+                .refreshable {
                     await fetchAllBookings()
                 }
             }
-        }
-        .background(Color(.systemGray6))
-        
-        if showDeclineSheet {
-            Color.black.opacity(0.3).ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                Text("Decline Reason")
-                    .font(.title3.bold())
-                
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: $declineReason)
-                        .frame(height: 110)
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .cornerRadius(10)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(.systemGray), lineWidth: 1)
-                        )
-                    
-                    if declineReason.isEmpty {
-                        Text("Enter reason...")
-                            .foregroundColor(Color(.systemGray3))
-                            .padding(.top, 14)
-                            .padding(.leading, 15)
-                    }
-                }
-                
-                HStack {
-                    Button("Cancel") { showDeclineSheet = false }
-                    Spacer()
-                    Button("Submit") {
-                        print("Reason: \(declineReason)")
-                        Task {
-                            if let booking = selectedBooking {
-                                try? await SupabaseManager.shared.updateBookingStatus(
-                                    booking: booking,
-                                    status: "Declined",
-                                    dec_reason: declineReason
-                                )
-                                await fetchAllBookings()
-                            }
-                            showDeclineSheet = false
-                            declineReason = ""
-                        }
-                        
-                    }
-                    .disabled(declineReason.isEmpty)
+            .background(Color(.systemGray6))
+            .sheet(item: $selectedSheet) { sheet in
+                switch sheet {
+                case .carbooking(let car):
+                    BookingCarDetailView(bcId: car.bc_id)
+                case .carpool(let car):
+                    CarpoolDetailView(booking: car)
+                case .roombooking(let room):
+                    BookingRoomDetailView(brId: room.br_id)
                 }
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(radius: 8)
-            .padding(40)
+            
+            if showDeclineSheet {
+                Color.black.opacity(0.3).ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    Text("Decline Reason")
+                        .font(.title3.bold())
+                    
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $declineReason)
+                            .frame(height: 110)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color(.systemGray), lineWidth: 1)
+                            )
+                        
+                        if declineReason.isEmpty {
+                            Text("Enter reason...")
+                                .foregroundColor(Color(.systemGray3))
+                                .padding(.top, 14)
+                                .padding(.leading, 15)
+                        }
+                    }
+                    
+                    HStack {
+                        Button("Cancel") { showDeclineSheet = false }
+                        Spacer()
+                        Button("Submit") {
+                            print("Reason: \(declineReason)")
+                            Task {
+                                if let booking = selectedBooking {
+                                    try? await SupabaseManager.shared.updateBookingStatus(
+                                        booking: booking,
+                                        status: "Declined",
+                                        dec_reason: declineReason
+                                    )
+                                    await fetchAllBookings()
+                                }
+                                showDeclineSheet = false
+                                declineReason = ""
+                            }
+                            
+                        }
+                        .disabled(declineReason.isEmpty)
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .shadow(radius: 8)
+                .padding(40)
+            }
         }
     }
-
-//    func fetchAllBookings() async {
-//        do {
-//            let responseRooms = try await SupabaseManager.shared.client
-//                .from("bookings_room")
-//                .select("""
-//                        *, room:rooms(*), user: users(*)
-//                        """)
-//                .execute()
-//            
-//            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
-//                [BookingRoomJoined].self,
-//                from: responseRooms.data
-//            )
-//            
-//            let responseCars = try await SupabaseManager.shared.client
-//                .from("bookings_car")
-//                .select("""
-//                        *, destination:destinations(*), driver:drivers(*), user: users(*)
-//                        """)
-//                .execute()
-//            
-//            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
-//                [BookingCarJoined].self,
-//                from: responseCars.data
-//            )
-//            
-//            DispatchQueue.main.async {
-//                self.bookingRoom = rooms
-//                self.bookingCar = cars
-//            }
-//            print("respones: ", rooms, cars)
-//        } catch {
-//            print("Error fetch bookings:", error)
-//        }
-//    }
     func fetchAllBookings() async {
         do {
             let (rooms, cars) = try await SupabaseManager.shared.fetchBookings()
@@ -302,10 +299,6 @@ struct ApprovalsView: View {
                     onDecline: {
                         selectedBooking = bookings
                         showDeclineSheet = true
-//                        Task {
-//                            try? await SupabaseManager.shared.updateBookingStatus(booking: bookings, status: "Declined", dec_reason: declineReason)
-//                            await fetchAllBookings()
-//                        }
                     }
                 )
             )

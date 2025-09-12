@@ -56,7 +56,7 @@ struct LoginView: View {
                             .autocapitalization(.none)
                             .padding()
                             .background(Color(.systemBackground))
-                            .cornerRadius(25)
+                            .cornerRadius(10)
                             .shadow(radius: 1)
                         
                         ZStack {
@@ -65,14 +65,14 @@ struct LoginView: View {
                                 TextField("Password", text: $password)
                                     .padding()
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(25)
+                                    .cornerRadius(10)
                                     .shadow(radius: 1)
                                     .textContentType(.password)
                             } else {
                                 SecureField("Password", text: $password)
                                     .padding()
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(25)
+                                    .cornerRadius(10)
                                     .shadow(radius: 1)
                                     .textContentType(.password)
                             }
@@ -103,7 +103,7 @@ struct LoginView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.gray)
-                                .cornerRadius(30)
+                                .cornerRadius(10)
                         } else {
                             Text("Login")
                                 .fontWeight(.bold)
@@ -111,7 +111,7 @@ struct LoginView: View {
                                 .padding()
                                 .background(.blue)
                                 .foregroundColor(.white)
-                                .cornerRadius(30)
+                                .cornerRadius(10)
                         }
                     }
                     .navigationBarBackButtonHidden(true)

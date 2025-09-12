@@ -1,0 +1,366 @@
+//
+//  BookingCarView.swift
+//  HC Approval
+//
+//  Created by Euginia Gabrielle on 03/09/25.
+//
+
+import SwiftUI
+
+struct BookingCarView: View {
+    @State private var date = Date()
+    @State private var passengers: Int = 1
+    @State private var goToAvailable = false
+    
+    var body: some View {
+            VStack(spacing: 10) {
+                VStack{
+                    DatePicker("Date", selection: $date, in: Date()..., displayedComponents: .date)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Passengers")
+                        Spacer()
+                        Text("\(passengers)")
+                            .frame(width: 30, alignment: .center)
+                        Stepper("", value: $passengers, in: 1...7)
+                            .labelsHidden()
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                
+                NavigationLink(
+                    destination: AvailableDriversView(date: DateHelper.toBackendFormat(date), passengers: passengers),
+                    isActive: $goToAvailable) {
+                        EmptyView()
+                    }
+
+                Button(action: {
+                    goToAvailable = true
+                }) {
+                    Text("Browse Drivers")
+                        .font(.headline.bold())
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .cornerRadius(8)
+                
+//                Text("Schedule")
+//                    .font(.headline)
+//                    .padding(.horizontal)
+//
+//                List(rooms) { room in
+//                    HStack {
+//                        VStack(alignment: .leading, spacing: 4) {
+//                            Text(room.name)
+//                                .font(.body)
+//                                .bold()
+//                            Text("Capacity: \(room.capacity)")
+//                                .font(.subheadline)
+//                                .foregroundColor(.gray)
+//                        }
+//                        Spacer()
+//                        Image(systemName: "chevron.right")
+//                            .foregroundColor(.gray)
+//                    }
+//                    .padding(.vertical, 4)
+//                }
+//                .listStyle(PlainListStyle())
+            }
+            .padding()
+            .background(Color(.systemGray6))
+    }
+}
+
+struct AvailableDriversView: View {
+    @State private var showSheet = true
+    @StateObject private var vm = BookingSearchViewModel()
+    var date: String
+    var passengers: Int
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                
+                Text(DateHelper.toDisplayFormat(date))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                ForEach(vm.availableDrivers) { driverAvail in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(driverAvail.driver.driver_name)
+                                .font(.headline)
+                        }
+                        
+//                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: driverAvail.bookings)
+                        
+                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
+                        
+                        if availableSlots.isEmpty {
+                            Text("No available time slots")
+                                .foregroundColor(.secondary)
+                                .padding(.vertical, 8)
+                        } else {
+                            // Horizontal scroll of slots
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(availableSlots, id: \.self) { start in
+                                        NavigationLink(
+                                            destination: CarDetailView(
+                                                driver: driverAvail.driver,
+                                                slot: TimeSlot(start: start, end: ""),
+                                                date: date,
+                                                passengers: passengers,
+                                                bookings: driverAvail.bookings
+                                            )
+                                        ) {
+                                            Text(start)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 12)
+                                                .background(Color.blue)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                }
+            }
+            .padding()
+        }
+        .background(Color(.systemGray6))
+        .navigationTitle("Available Drivers")
+        .task {
+            await vm.searchDriver(date: date)
+        }
+        .alert(item: Binding(
+            get: { vm.errorMessage.map { ErrorWrapper(message: $0) } },
+            set: { _ in vm.errorMessage = nil }
+        )) { wrapper in
+            Alert(title: Text("Info"), message: Text(wrapper.message), dismissButton: .default(Text("OK")))
+        }
+    }
+}
+
+struct CarDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    
+    var driver: Driver
+    var slot: TimeSlot
+    var date: String
+    var passengers: Int
+    var bookings: [BookingCar]
+    
+    @State private var startTime: String = ""
+    @State private var endTime: String = ""
+//    @State private var goToSchedule = false
+    @State private var outingDesc = ""
+    
+    @State private var from: String = ""
+    @State private var destinations: [String] = [""]
+    @State private var showSuccess = false
+    @State private var goHome = false
+    
+    private var isFormValid: Bool {
+        !from.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !startTime.isEmpty &&
+        !endTime.isEmpty &&
+        destinations.contains { !$0.trimmingCharacters(in: .whitespaces).isEmpty } &&
+        !outingDesc.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+    
+    private var availableTimeOptions: [String] {
+        BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: bookings)
+    }
+    
+    private var validEndOptions: [String] {
+        BookingTimeHelper.validEndTimesIgnoringCancelled(startTime: startTime, bookings: bookings)
+    }
+    
+    var body: some View {
+        Form {
+            Section(header: Text("Driver & Passenger Info")) {
+                Text(driver.driver_name)
+                Text("\(passengers) passengers")
+            }
+            
+            Section(header: Text("Booking")) {
+                HStack {
+                    Text("Date")
+                    Spacer()
+                    Text(DateHelper.toDisplayFormat(date))
+                }.frame(maxWidth: .infinity)
+                
+                Picker("Departure", selection: $startTime) {
+                    ForEach(availableTimeOptions, id: \.self) { time in
+                        Text(time).tag(time)
+                    }
+                }
+                
+                Picker("Arrival", selection: $endTime) {
+                    ForEach(validEndOptions, id: \.self) { time in
+                        Text(time).tag(time)
+                    }
+                }.disabled(startTime.isEmpty)
+            }
+            
+            Section(header: Text("From")) {
+                TextField("From", text: $from)
+            }
+            
+            Section(header: Text("Destinations")) {
+                ForEach(Array(destinations.enumerated()), id: \.offset) { index, dest in
+                    HStack {
+                        TextField("Destination \(index + 1)", text: $destinations[index])
+                        if destinations.count > 1 {
+                            Button(action: {
+                                destinations.remove(at: index)
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                }
+                
+                Button(action: {
+                    destinations.append("")
+                }) {
+                    Label("Add Destination", systemImage: "plus.circle.fill")
+                }
+            }
+            
+            Section {
+                TextField("Description", text: $outingDesc)
+            }
+            
+            Section {
+                Button(action: {
+                    Task {
+                        await addBooking()
+                    }
+                }) {
+                        Text("Booking")
+                            .font(.headline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 5)
+                }
+                .buttonStyle(.borderedProminent)
+                .cornerRadius(10)
+                .disabled(!isFormValid)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+        }
+        .navigationTitle("Booking Details")
+        .alert("Booking berhasil!", isPresented: $showSuccess) {
+            Button("OK") {
+                goHome = true
+            }
+        }
+        .onAppear {
+            if startTime.isEmpty {
+                startTime = slot.start
+            }
+            if endTime.isEmpty, let last = validEndOptions.last {
+                endTime = last
+            }
+        }
+        NavigationLink(
+            destination: ContentView().navigationBarBackButtonHidden(true),
+            isActive: $goHome
+        ) {
+            EmptyView()
+        }
+//        Button(action: {
+//            Task {
+//                await addBooking()
+//            }
+//        }) {
+//            Text("Booking")
+//                .font(.headline.bold())
+//                .frame(maxWidth: .infinity)
+//        }
+//        .buttonStyle(.borderedProminent)
+//        .cornerRadius(8)
+////        .padding(.horizontal)
+//        .disabled(!isFormValid)
+    }
+    
+    let bookingService = BookingService()
+
+    func addBooking() async {
+        let userId = loggedInUserId
+        do {
+            // 1. Insert Booking Car
+            let booking = BookingCarInsert(
+                user_id: userId,
+                driver_id: driver.driver_id,
+                bc_date: date,
+                bc_start: startTime,
+                bc_end: endTime,
+                bc_from: from,
+                bc_desc: outingDesc,
+                bc_people: passengers,
+                bc_status: "Pending",
+                carpool_req: false
+            )
+            
+            guard let created = try await BookingService.shared.createBookingCar(booking) else { return }
+            
+            // 2. Insert Destinations
+            let validDestinations = destinations
+                .filter { !$0.isEmpty }
+                .map { DestinationInsert(destination_name: $0, bc_id: created.bc_id) }
+            
+            if !validDestinations.isEmpty {
+                _ = try await BookingService.shared.addDestinations(validDestinations)
+            }
+            
+            try await BookingService.shared.addCarParticipants(
+                [ParticipantBc(user_id: userId, bc_id: created.bc_id, pic: true)]
+            )
+            
+            await MainActor.run {
+                showSuccess = true
+            }
+            
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+}
+
+//struct CarScheduleView: View {
+//    var room: Room
+//    var date: String
+//    var bookings: [BookingRoom]
+//    
+//    var body: some View {
+//        List {
+//            ForEach(bookings) { booking in
+//                VStack(alignment: .leading) {
+//                    Text(booking.br_event)
+//                        .font(.headline)
+//                    Text("\(booking.br_start) - \(booking.br_end)")
+//                        .foregroundColor(.secondary)
+//                }
+//            }
+//        }
+//        .navigationTitle("\(room.room_name) Schedule")
+//    }
+//}
+
+#Preview {
+    BookingCarView()
+}

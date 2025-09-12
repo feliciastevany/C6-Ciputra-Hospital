@@ -36,9 +36,17 @@ struct BookingCard: View {
                 .accessibilityLabel("From: \(startTime) to: \(endTime) WIB")
 
             HStack {
+                Image(systemName: "location")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(Color(.systemBlue))
+                    .frame(width: 13, height: 13)
+                    .accessibilityHidden(true)
+                
                 Text(event)
                     .font(.footnote)
                     .accessibilityLabel("Booking event: \(event)")
+                
                 Spacer()
                 
                 statusView(status: status)

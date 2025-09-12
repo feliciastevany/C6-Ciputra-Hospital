@@ -13,28 +13,47 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            if currentUser?.user_dept == "Human Capital" {
+            if currentUser?.user_dept == "Human Capital" || currentUser?.user_dept == "Human Capital Management" {
                 ApprovalsView()
                     .tabItem {
                         Image(systemName: "checkmark.square")
                         Text("Approvals")
                     }
+                MyBookings()
+                    .tabItem {
+                        Image(systemName: "text.page")
+                        Text("Bookings")
+                    }
+                MeetingRoomView()
+                    .tabItem {
+                        Image(systemName: "person.3")
+                        Text("Meeting Room")
+                    }
+                OperationalCarView()
+                    .tabItem {
+                        Image(systemName: "car")
+                        Text("Operational Car")
+                    }
             }
-            MyBookings()
-                .tabItem {
-                    Image(systemName: "text.page")
-                    Text("Bookings")
-                }
-            ApprovalsView()
-                .tabItem {
-                    Image(systemName: "person.3")
-                    Text("Meeting Room")
-                }
-            ApprovalsView()
-                .tabItem {
-                    Image(systemName: "car")
-                    Text("Operational Car")
-                }
+            
+            else{
+                MyBookings()
+                    .tabItem {
+                        Image(systemName: "text.page")
+                        Text("Bookings")
+                    }
+                StaffMeetingRoomView()
+                    .tabItem {
+                        Image(systemName: "person.3")
+                        Text("Meeting Room")
+                    }
+                StaffOperationalCarView()
+                    .tabItem {
+                        Image(systemName: "car")
+                        Text("Operational Car")
+                    }
+            }
+           
         }
         .task {
             do {
