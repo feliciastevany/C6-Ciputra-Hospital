@@ -143,7 +143,9 @@ struct BookingCarDetailView: View {
         }
     }
 }
-
+#Preview{
+    BookingCarDetailView(bcId: 4)
+}
 //extension String {
 //    var formattedHourMinute: String {
 //        let formatter = DateFormatter()

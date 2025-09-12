@@ -16,6 +16,8 @@ struct OperationalCarView: View {
     @State private var cars: [BookingCarJoined] = []
     @State private var events: [carEvent] = []
     @State private var selectedCar = "All"
+    @State private var selectedEvent: carEvent? = nil
+    @State private var showBookingDetail = false
     let hours = Array(8...22) // jam 08.00 - 22.00
     let hourHeight: CGFloat = 60 // tinggi tetap untuk setiap jam
     
@@ -104,6 +106,7 @@ struct OperationalCarView: View {
                                 // Events
                                 ForEach(events.filter { $0.driver == car }) { event in
                                     ScheduleBlockCar(
+                                        bc_id: event.bc_id,
                                         driver: event.driver,
                                         from: event.from,
                                         destination: event.destination,
@@ -118,6 +121,10 @@ struct OperationalCarView: View {
                                         hourHeight: hourHeight,
                                         carpoolStatus: event.carpoolStatus
                                     )
+                                    .onTapGesture {
+                                        selectedEvent = event
+                                        showBookingDetail = true
+                                    }
                                 }
                             }
                         }
@@ -138,6 +145,9 @@ struct OperationalCarView: View {
         }
         .task {
             await fetchBookCars(for: selectedDate) // pertama kali load
+        }
+        .sheet(item: $selectedEvent) { event in
+            BookingCarDetailView(bcId: event.bc_id)
         }
     }
     
@@ -207,6 +217,7 @@ struct OperationalCarView: View {
                 let destText = (booking.destination?.map { $0.destination_name }.joined(separator: ", ")) ?? "-"
                 
                 return carEvent(
+                    bc_id: booking.bc_id,
                     driver: String(driver.driver_id),        // ganti ke driver_name kalau ada
                     from: booking.bc_from,
                     destination: destText,
@@ -233,6 +244,7 @@ struct OperationalCarView: View {
 }
 
 struct ScheduleBlockCar: View {
+    var bc_id: Int
     var driver: String
     var from: String
     var destination: String
@@ -301,6 +313,7 @@ struct ScheduleBlockCar: View {
 
 struct carEvent: Identifiable {
     let id = UUID()
+    let bc_id: Int
     let driver: String
     let from: String
     let destination: String

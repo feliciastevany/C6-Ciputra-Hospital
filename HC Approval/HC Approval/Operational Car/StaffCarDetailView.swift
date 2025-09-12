@@ -25,6 +25,9 @@ struct StaffCarDetailView: View {
     @State private var events: [carEvent] = []
     @State private var cars: [BookingCarJoined] = []
     
+    @State private var selectedEvent: carEvent? = nil
+    @State private var showBookingDetail = false
+    
     @State private var goToBooking = false
 
     var body: some View {
@@ -96,6 +99,7 @@ struct StaffCarDetailView: View {
                         // Events
                         ForEach(events) { event in
                             ScheduleCarBlockSingle(
+                                bc_id: event.bc_id,
                                 driver: event.driver,
                                 from: event.from,
                                 destination: event.destination,
@@ -110,6 +114,10 @@ struct StaffCarDetailView: View {
                                 hourHeight: hourHeight,
                                 carpoolStatus: event.carpoolStatus
                             )
+                            .onTapGesture {
+                                selectedEvent = event
+                                showBookingDetail = true
+                            }
                         }
                     }
                 }
@@ -120,6 +128,9 @@ struct StaffCarDetailView: View {
         .task {
             await fetchDriverByName(name)
             await fetchBookCar(for: selectedDate, selectedCarName: name)
+        }
+        .sheet(item: $selectedEvent) { event in
+            BookingCarDetailView(bcId: event.bc_id)
         }
         .navigationDestination(isPresented: $goToBooking) {
             let bookingList = cars.map { $0.toBookingCar() }
@@ -216,6 +227,7 @@ struct StaffCarDetailView: View {
                 let destText = (booking.destination?.map { $0.destination_name }.joined(separator: ", ")) ?? "-"
 
                 return carEvent(
+                    bc_id: booking.bc_id,
                     driver: String(driver.driver_id),        // ganti ke driver_name kalau ada
                     from: booking.bc_from,
                     destination: destText,
@@ -251,6 +263,7 @@ struct StaffCarDetailView: View {
 }
 
 struct ScheduleCarBlockSingle: View {
+    var bc_id: Int
     var driver: String
     var from: String
     var destination: String
