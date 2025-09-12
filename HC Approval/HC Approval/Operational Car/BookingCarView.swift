@@ -244,14 +244,23 @@ struct CarDetailView: View {
                 TextField("Description", text: $outingDesc)
             }
             
-//            Button("Booking") {
-//                Task {
-//                    await addBooking()
-//                }
-//            }
-//            .buttonStyle(.borderedProminent)
-//            .frame(maxWidth: .infinity)
-//            .disabled(!isFormValid)
+            Section {
+                Button(action: {
+                    Task {
+                        await addBooking()
+                    }
+                }) {
+                        Text("Booking")
+                            .font(.headline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 5)
+                }
+                .buttonStyle(.borderedProminent)
+                .cornerRadius(10)
+                .disabled(!isFormValid)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
         }
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
@@ -273,19 +282,19 @@ struct CarDetailView: View {
         ) {
             EmptyView()
         }
-        Button(action: {
-            Task {
-                await addBooking()
-            }
-        }) {
-            Text("Booking")
-                .font(.headline.bold())
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.borderedProminent)
-        .cornerRadius(8)
-//        .padding(.horizontal)
-        .disabled(!isFormValid)
+//        Button(action: {
+//            Task {
+//                await addBooking()
+//            }
+//        }) {
+//            Text("Booking")
+//                .font(.headline.bold())
+//                .frame(maxWidth: .infinity)
+//        }
+//        .buttonStyle(.borderedProminent)
+//        .cornerRadius(8)
+////        .padding(.horizontal)
+//        .disabled(!isFormValid)
     }
     
     let bookingService = BookingService()

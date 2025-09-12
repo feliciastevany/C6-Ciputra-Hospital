@@ -49,7 +49,7 @@ struct SignUpView: View {
                         TextField("Name", text: $user.user_name)
                             .padding()
                             .background(Color(.systemBackground))
-                            .cornerRadius(25)
+                            .cornerRadius(10)
                             .shadow(radius: 1)
                         
                         ZStack(alignment: .leading) {
@@ -59,7 +59,7 @@ struct SignUpView: View {
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(Color(.systemBackground))
-                                .cornerRadius(25)
+                                .cornerRadius(10)
                                 .shadow(radius: 1)
                             
                          
@@ -87,7 +87,7 @@ struct SignUpView: View {
                             .keyboardType(.phonePad)
                             .padding()
                             .background(Color(.systemBackground))
-                            .cornerRadius(25)
+                            .cornerRadius(10)
                             .shadow(radius: 1)
                         
                         TextField("Email", text: $user.user_email)
@@ -95,7 +95,7 @@ struct SignUpView: View {
                             .autocapitalization(.none)
                             .padding()
                             .background(Color(.systemBackground))
-                            .cornerRadius(25)
+                            .cornerRadius(10)
                             .shadow(radius: 1)
                         
                         ZStack {
@@ -107,7 +107,7 @@ struct SignUpView: View {
                                     .disableAutocorrection(true)
                                     .padding(15)
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(25)
+                                    .cornerRadius(10)
                                     .shadow(radius: 1)
                             } else {
                                 SecureField("Password", text: $user.user_pass)
@@ -116,7 +116,7 @@ struct SignUpView: View {
                                     .disableAutocorrection(true)
                                     .padding(15)
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(25)
+                                    .cornerRadius(10)
                                     .shadow(radius: 1)
                             }
                            
@@ -140,7 +140,7 @@ struct SignUpView: View {
                                     .disableAutocorrection(true)
                                     .padding(15)
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(25)
+                                    .cornerRadius(10)
                                     .shadow(radius: 1)
                             } else {
                                 SecureField("Repeat Password", text: $confirm_pass)
@@ -149,7 +149,7 @@ struct SignUpView: View {
                                     .disableAutocorrection(true)
                                     .padding(15)
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(25)
+                                    .cornerRadius(10)
                                     .shadow(radius: 1)
                             }
                             
@@ -175,7 +175,7 @@ struct SignUpView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.gray)
-                                .cornerRadius(30)
+                                .cornerRadius(10)
                         } else {
                             Text("Sign Up")
                                 .fontWeight(.bold)
@@ -183,10 +183,9 @@ struct SignUpView: View {
                                 .padding()
                                 .background(.blue)
                                 .foregroundColor(.white)
-                                .cornerRadius(30)
+                                .cornerRadius(10)
                         }
                     }
-                    .padding(.horizontal)
                     
                     // Error / Success Message
                     if !errorMessage.isEmpty {

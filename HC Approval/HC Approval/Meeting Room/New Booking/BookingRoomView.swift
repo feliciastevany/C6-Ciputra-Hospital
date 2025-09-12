@@ -220,7 +220,6 @@ struct RoomDetailView: View {
     }
     
     var body: some View {
-        
         Form {
             Section(header: Text("Room Info")) {
                 Text(room.room_name)
@@ -329,15 +328,25 @@ struct RoomDetailView: View {
                     }
                 }
             }
-//            Button("Booking") {
-//                Task {
-//                    await addBooking()
-//                    goToMyBooking = true
-//                }
-//            }
-//            .buttonStyle(.borderedProminent)
-//            .frame(maxWidth: .infinity)
-//            .disabled(!isFormValid)
+            
+            Section {
+                Button(action: {
+                    Task {
+                        await addBooking()
+                        goToMyBooking = true
+                    }
+                }) {
+                        Text("Booking")
+                            .font(.headline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 5)
+                }
+                .buttonStyle(.borderedProminent)
+                .cornerRadius(10)
+                .disabled(!isFormValid)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
         }
         .navigationTitle("Booking Details")
         .alert("Booking berhasil!", isPresented: $showSuccess) {
@@ -362,19 +371,6 @@ struct RoomDetailView: View {
         NavigationLink(destination: ContentView().navigationBarBackButtonHidden(true), isActive: $goToMyBooking) {
             EmptyView()
         }
-        Button(action: {
-            Task {
-                await addBooking()
-                goToMyBooking = true
-            }
-        }) {
-            Text("Booking")
-                .font(.headline.bold())
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.borderedProminent)
-        .cornerRadius(8)
-        .disabled(!isFormValid)
         
     }
     
