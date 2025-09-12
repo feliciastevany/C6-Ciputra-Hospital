@@ -31,7 +31,7 @@ struct WeeklyCalendarView: View {
     var pickerMode: PickerMode
     var body: some View {
         GeometryReader { geo in
-            VStack(spacing: 12) {
+            VStack(spacing: 0) {
                 
                 HStack{
                     // 🔹 Month Picker
