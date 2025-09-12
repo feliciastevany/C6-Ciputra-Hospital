@@ -142,7 +142,8 @@ struct MyBookings : View {
                                             event: booking.br_event,
                                             startTime: toHourMinute(booking.br_start),
                                             endTime: toHourMinute(booking.br_end),
-                                            status: booking.br_status
+                                            status: booking.br_status,
+                                            bookings: booking
                                         ).onTapGesture {
                                             selectedSheet = .roombooking(booking)
                                         }
@@ -199,7 +200,8 @@ struct MyBookings : View {
                                                     event: booking.destination?.last?.destination_name ?? "Unknown",
                                                     startTime: toHourMinute(booking.bc_start),
                                                     endTime: toHourMinute(booking.bc_end),
-                                                    status: booking.bc_status
+                                                    status: booking.bc_status,
+                                                    bookings: booking
                                         ).onTapGesture {
                                             selectedSheet = .carbooking(booking)
                                         }

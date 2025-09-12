@@ -7,9 +7,21 @@
 
 import SwiftUI
 
+//fileprivate struct BookingDisplay {
+//    let title: String
+//    let event: String
+//    let date: Date
+//    let startTime: String
+//    let endTime: String
+//    let status: String
+//    let booking: any AnyBooking
+//}
+
 struct ApprovalsView: View {
     @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
     @State private var goToProfil = false
+    
+    @State private var UserName: String = ""
     
     @State private var showDeclineSheet = false
     @State private var declineReason = ""
@@ -168,9 +180,9 @@ struct ApprovalsView: View {
                         ForEach(searchedBookings, id: \.bookId) { booking in
                             bookingView(
                                 title: booking.title,
-                                event: booking.type == .rooms
-                                ? (booking as! BookingRoomJoined).br_event
-                                : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
+//                                event: booking.type == .rooms
+//                                ? (booking as! BookingRoomJoined).br_event
+//                                : "📍\((booking as! BookingCarJoined).destination?.last?.destination_name ?? "Unknown")",
                                 date: booking is BookingRoomJoined
                                 ? (booking as! BookingRoomJoined).br_date
                                 : (booking as! BookingCarJoined).bc_date,
@@ -189,16 +201,37 @@ struct ApprovalsView: View {
                                     selectedSheet = .carbooking(car)
                                 }
                             }
+                            
+                            // convert to a simple display model BEFORE building the view
+//                            let display = makeDisplay(from: booking)
+//                            bookingView(
+//                                title: display.title,
+//                                event: display.event,
+//                                date: display.date,
+//                                startTime: display.startTime,
+//                                endTime: display.endTime,
+//                                status: display.status,
+//                                bookings: display.booking
+//                            )
+//                            .onTapGesture {
+//                                if let room = booking as? BookingRoomJoined {
+//                                    selectedSheet = .roombooking(room)
+//                                } else if let car = booking as? BookingCarJoined {
+//                                    selectedSheet = .carbooking(car)
+//                                }
+//                            }
                         }
                     }
                     .padding(.horizontal)
                     .padding(.top, 10)
                     .task {
                         await fetchAllBookings()
+//                        await fetchLoggedInUserName()
                     }
                 }
                 .refreshable {
                     await fetchAllBookings()
+//                    await fetchLoggedInUserName()
                 }
             }
             .background(Color(.systemGray6))
@@ -269,6 +302,42 @@ struct ApprovalsView: View {
             }
         }
     }
+//    private func makeDisplay(from booking: any AnyBooking) -> BookingDisplay {
+//        if let room = booking as? BookingRoomJoined {
+//            return BookingDisplay(
+//                title: room.title,
+//                event: room.br_event,
+//                date: room.br_date,
+//                startTime: toHourMinute(room.br_start),
+//                endTime: toHourMinute(room.br_end),
+//                status: room.br_status,
+//                booking: room
+//            )
+//        } else if let car = booking as? BookingCarJoined {
+//            let eventText = car.destination?.last?.destination_name ?? "Unknown"
+//            return BookingDisplay(
+//                title: car.title,
+//                event: "📍\(eventText)",
+//                date: car.bc_date,
+//                startTime: toHourMinute(car.bc_start),
+//                endTime: toHourMinute(car.bc_end),
+//                status: car.bc_status,
+//                booking: car
+//            )
+//        } else {
+//            // fallback (shouldn't happen)
+//            return BookingDisplay(
+//                title: booking.title,
+//                event: "",
+//                date: Date(),
+//                startTime: "",
+//                endTime: "",
+//                status: booking.status,
+//                booking: booking
+//            )
+//        }
+//    }
+    
     func fetchAllBookings() async {
         do {
             let (rooms, cars) = try await SupabaseManager.shared.fetchBookings()
@@ -281,12 +350,59 @@ struct ApprovalsView: View {
             print("Error fetch my bookings:", error)
         }
     }
-    func bookingView(title: String, event: String, date: Date, startTime: String, endTime: String, status: String, bookings: any AnyBooking) -> some View {
+//    func fetchLoggedInUserName() async {
+//        do {
+//            let response: [User] = try await SupabaseManager.shared.client
+//                .from("users")
+//                .select("user_name")
+//                .eq("user_id", value: loggedInUserId)
+//                .execute()
+//                .value
+//            
+//            if let first = response.first {
+//                DispatchQueue.main.async {
+//                    self.UserName = first.user_name
+//                }
+//            }
+//        }
+//        catch {
+//            print("Error fetch username:", error)
+//        }
+//    }
+    func bookingView(title: String, date: Date, startTime: String, endTime: String, status: String, bookings: any AnyBooking) -> some View {
+        
+        let eventView: AnyView
+        
+        if let car = bookings as? BookingCarJoined {
+            eventView = AnyView(
+                HStack (spacing: 4){
+                    Image(systemName: "location")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(Color(.systemBlue))
+                        .frame(width: 13, height: 13)
+                        .accessibilityHidden(true)
+                    
+                    Text(car.destination?.last?.destination_name ?? "Unknown")
+                        .font(.footnote)
+                        .accessibilityLabel("Booking Event: \(car.destination?.last?.destination_name ?? "Unknown")")
+                }
+            )
+        } else if let room = bookings as? BookingRoomJoined {
+            eventView = AnyView(
+                Text(room.br_event)
+                    .font(.footnote)
+                    .accessibilityLabel("Booking Event: \(room.br_event)")
+            )
+        } else {
+            eventView = AnyView(Text("Unknown Event"))
+        }
+    
         if status == "Pending" {
             return AnyView(
                 PendingView(
                     title: title,
-                    event: event,
+                    eventView: eventView,
                     date: date,
                     startTime: startTime,
                     endTime: endTime,
@@ -306,7 +422,7 @@ struct ApprovalsView: View {
             return AnyView(
                 StatusView(
                     title: title,
-                    event: event,
+                    eventView: eventView,
                     date: date,
                     startTime: startTime,
                     endTime: endTime
@@ -330,27 +446,27 @@ func toHourMinute(_ timeString: String) -> String {
     return timeString
 }
     
-extension SupabaseManager {
-    func updateBookingStatus(booking: any AnyBooking, status: String, dec_reason: String) async throws {
-        if let roomBooking = booking as? BookingRoomJoined {
-            try await client
-                .from("bookings_room")
-                .update(["br_status": status, "br_decline_reason": dec_reason])
-                .eq("br_id", value: roomBooking.br_id)
-                .execute()
-            print(status, dec_reason)
-            
-        } else if let carBooking = booking as? BookingCarJoined {
-            try await client
-                .from("bookings_car")
-                .update(["bc_status": status, "bc_decline_reason": dec_reason])
-                .eq("bc_id", value: carBooking.bc_id)
-                .execute()
-            
-            print(status, dec_reason)
-        }
-    }
-}
+//extension SupabaseManager {
+//    func updateBookingStatus(booking: any AnyBooking, status: String, dec_reason: String, approvedby: String) async throws {
+//        if let roomBooking = booking as? BookingRoomJoined {
+//            try await client
+//                .from("bookings_room")
+//                .update(["br_status": status, "br_decline_reason": dec_reason, "approved_by": approvedby])
+//                .eq("br_id", value: roomBooking.br_id)
+//                .execute()
+//            print(status, dec_reason)
+//            
+//        } else if let carBooking = booking as? BookingCarJoined {
+//            try await client
+//                .from("bookings_car")
+//                .update(["bc_status": status, "bc_decline_reason": dec_reason, "approved_by": approvedby])
+//                .eq("bc_id", value: carBooking.bc_id)
+//                .execute()
+//            
+//            print(status, dec_reason)
+//        }
+//    }
+//}
 
 
 #Preview {

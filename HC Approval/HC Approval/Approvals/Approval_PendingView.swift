@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PendingView: View {
     var title: String
-    var event: String
+    var eventView: AnyView
     var date: Date
     var startTime: String
     var endTime: String
@@ -37,10 +37,10 @@ struct PendingView: View {
                 .font(.headline)
                 .accessibilityLabel("From: \(startTime), To: \(endTime) WIB")
             
-            Text(event)
-                .font(.footnote)
-                .accessibilityLabel("Booking Event: \(event)")
-
+//            Text(event)
+//                .font(.footnote)
+//                .accessibilityLabel("Booking Event: \(event)")
+            eventView
             
             HStack {
                 Button(action: {

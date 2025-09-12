@@ -15,6 +15,7 @@ struct BookingCard: View {
     let startTime: String
     let endTime: String
     let status: String
+    let bookings: Any
     
     var body: some View {
         VStack (alignment: .leading, spacing: 3){
@@ -35,23 +36,33 @@ struct BookingCard: View {
                 .font(.headline)
                 .accessibilityLabel("From: \(startTime) to: \(endTime) WIB")
 
-            HStack {
-                Image(systemName: "location")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundColor(Color(.systemBlue))
-                    .frame(width: 13, height: 13)
-                    .accessibilityHidden(true)
-                
-                Text(event)
-                    .font(.footnote)
-                    .accessibilityLabel("Booking event: \(event)")
-                
-                Spacer()
-                
-                statusView(status: status)
-                    .accessibilityLabel("Booking Status: \(status)")
-
+            HStack (spacing: 4){
+                if bookings is BookingCarJoined {
+                    Image(systemName: "location")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(Color(.systemBlue))
+                        .frame(width: 13, height: 13)
+                        .accessibilityHidden(true)
+                    
+                    Text(event)
+                        .font(.footnote)
+                        .accessibilityLabel("Booking event: \(event)")
+                    
+                    Spacer()
+                    
+                    statusView(status: status)
+                        .accessibilityLabel("Booking Status: \(status)")
+                } else {
+                    Text(event)
+                        .font(.footnote)
+                        .accessibilityLabel("Booking event: \(event)")
+                    
+                    Spacer()
+                    
+                    statusView(status: status)
+                        .accessibilityLabel("Booking Status: \(status)")
+                }
             }
         }
         .padding(14)
@@ -89,5 +100,5 @@ struct BookingCard: View {
 }
 
 #Preview {
-    BookingCard(title: "Meeting Room 1", joinName: "Diana",date: Date(), event: "Rapat Keuangan 1", startTime: "08.00", endTime: "10.00", status: "Approved")
+    BookingCard(title: "Meeting Room 1", joinName: "Diana",date: Date(), event: "Rapat Keuangan 1", startTime: "08.00", endTime: "10.00", status: "Approved", bookings: AnyView(EmptyView()))
 }
