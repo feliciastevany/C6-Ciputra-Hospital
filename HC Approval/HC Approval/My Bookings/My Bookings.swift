@@ -152,7 +152,7 @@ struct MyBookings : View {
                             }
                         }
                         if segmentedControl == 1 {
-                            ForEach(filteredCars.filter { $0.carpool_status == "Pending" }, id: \.bookId) { booking in
+                            ForEach(filteredCars.filter { $0.carpool_status == "Pending" && $0.user_id == loggedInUserId }, id: \.bookId) { booking in
                                 CarpoolCard(title: booking.title,
                                             date: booking.bc_date,
                                             event: booking.destination?.last?.destination_name ?? "Unknown",
@@ -247,21 +247,34 @@ struct MyBookings : View {
     }
         
     func joinLabel(for booking: BookingCarJoined, currentUserId: Int) -> String? {
-        guard booking.carpool_status == "Approved",
-              let participants = booking.participant else {
-            return nil
-        }
+//        guard booking.carpool_status == "Approved",
+//              let participants = booking.participant else {
+//            return nil
+//        }
         
-        if let me = participants.first(where: { $0.user_id == currentUserId }) {
-            if me.pic {
-                // saya PIC → tampilkan siapa yang join
-                if let joiner = participants.first(where: { !$0.pic }) {
-                    return "Joined by \(firstName(from:joiner.user?.user_name))"
-                }
-            } else {
-                // saya bukan PIC → cari siapa PIC nya
-                if let pic = participants.first(where: { $0.pic }) {
-                    return "Joined with \(firstName(from:pic.user?.user_name))"
+        guard let participants = booking.participant else {
+                return nil
+            }
+            
+            // kalau status masih pending
+            if booking.carpool_status == "Pending" {
+                return "Waiting for Approval"
+            }
+            
+            // kalau sudah approved
+        if booking.carpool_status == "Approved" {
+            
+            if let me = participants.first(where: { $0.user_id == currentUserId }) {
+                if me.pic {
+                    // saya PIC → tampilkan siapa yang join
+                    if let joiner = participants.first(where: { !$0.pic }) {
+                        return "Joined by \(firstName(from:joiner.user?.user_name))"
+                    }
+                } else {
+                    // saya bukan PIC → cari siapa PIC nya
+                    if let pic = participants.first(where: { $0.pic }) {
+                        return "Joined with \(firstName(from:pic.user?.user_name))"
+                    }
                 }
             }
         }

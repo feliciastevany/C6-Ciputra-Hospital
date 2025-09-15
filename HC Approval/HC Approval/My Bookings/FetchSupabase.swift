@@ -11,9 +11,11 @@ extension SupabaseManager {
     func fetchBookings(for userId: Int? = nil) async throws -> ([BookingRoomJoined], [BookingCarJoined]) {
         var roomQuery = client
             .from("bookings_room")
-            .select("*, room:rooms(*), user: users(*)")
+            .select("*, room:rooms(*), user: users(*), participant:participants_br(*, user:users(*))")
         if let userId {
-            roomQuery = roomQuery.eq("user_id", value: userId)
+//            roomQuery = roomQuery.or("user_id.eq.\(userId),participant.user_id.eq.\(userId)")
+            roomQuery = roomQuery.or("user_id.eq.\(userId),user_id.eq.\(userId)", referencedTable: "participants_br")
+
         }
         
         let responseRooms = try await roomQuery.execute()
