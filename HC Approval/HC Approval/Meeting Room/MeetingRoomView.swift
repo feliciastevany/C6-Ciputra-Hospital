@@ -144,9 +144,15 @@ struct MeetingRoomView: View {
             await fetchBookRooms(for: selectedDate) // pertama kali load
         }
         .sheet(item: $selectedEvent) { event in
-            BookingRoomDetailView(brId: event.br_id)
-        }
-    }
+            BookingRoomDetailView(
+                brId: event.br_id,
+                onDismiss: {
+                    Task {
+                        await fetchBookRooms(for: selectedDate)
+                    }
+                }
+            )
+        }    }
     private var filteredRooms: [String] {
         if selectedRoom == "All" {
             return ["Room 1", "Room 2", "Room 3", "Hall", "Auditorium"]

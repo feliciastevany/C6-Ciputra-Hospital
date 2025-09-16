@@ -10,7 +10,7 @@ import SwiftUI
 struct BookingCarDetailView: View {
     @Environment(\.dismiss) var dismiss
     var bcId: Int
-    
+    var onDismiss: (() -> Void)? = nil
     @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
     
     @State private var booking: BookingCar?
@@ -181,6 +181,7 @@ struct BookingCarDetailView: View {
                                 Button("Yes", role: .destructive) {
                                     Task {
                                         await cancelBookingCar()
+                                        onDismiss?()
                                     }
                                 }
                                 .foregroundColor(.primary)

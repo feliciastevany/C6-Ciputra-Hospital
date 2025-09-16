@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BookingRoomDetailView: View {
     var brId: Int
+    var onDismiss: (() -> Void)? = nil
     @State private var bookingDetail: BookingRoom?
     @State private var rooms: [Room] = []
     @State private var participants: [ParticipantBr] = []
@@ -160,6 +161,7 @@ struct BookingRoomDetailView: View {
                         if let id = bookingDetail?.br_id {
                             await cancelBooking(id: id)
 //                            goToMyBooking = true
+                            onDismiss?()
                             dismiss()
                         }
                     }

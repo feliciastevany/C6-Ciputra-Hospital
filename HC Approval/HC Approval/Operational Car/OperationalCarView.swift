@@ -145,7 +145,14 @@ struct OperationalCarView: View {
             await fetchBookCars(for: selectedDate) // pertama kali load
         }
         .sheet(item: $selectedEvent) { event in
-            BookingCarDetailView(bcId: event.bc_id)
+            BookingCarDetailView(
+                bcId: event.bc_id,
+                onDismiss: {
+                    Task {
+                        await fetchBookCars(for: selectedDate)
+                    }
+                }
+            )
         }
     }
     
