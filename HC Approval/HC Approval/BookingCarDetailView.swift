@@ -89,15 +89,28 @@ struct BookingCarDetailView: View {
                     
                     // tombol Request Carpool
                     if loggedInUserId != booking.user_id {
-                        Section {
+                        Section(header: Text("Carpool Request")) {
                             if booking.carpool_req && loggedInUserId == booking.carpool_req_id {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("You already requested carpool")
-                                    Text("Status: \(booking.carpool_status)")
+                                    HStack {
+                                        Text("Status:")
+                                        
+                                        if booking.carpool_status == "Pending" {
+                                            Text("\(booking.carpool_status)")
+                                                .foregroundColor(Color(.systemGray2))
+                                        } else if booking.carpool_status == "Approved" {
+                                            Text("\(booking.carpool_status)")
+                                                .foregroundColor(Color(.systemBlue))
+                                        } else if booking.carpool_status == "Declined" {
+                                            Text("\(booking.carpool_status)")
+                                                .foregroundColor(Color(.systemRed))
+                                        }
+                                    }
                                     
                                     if !booking.carpool_desc.isEmpty {
                                         Text("Desc: \(booking.carpool_desc)")
                                             .foregroundColor(.secondary)
+                                            .padding(.bottom, 10)
                                     }
                                     
                                     Button(role: .destructive) {                                        showCancelCarpoolAlert = true
@@ -219,33 +232,44 @@ struct BookingCarDetailView: View {
                 .navigationTitle("Booking Details")
                 .sheet(isPresented: $showCarpoolSheet) {
                     VStack(spacing: 20) {
-                        Text("Request Carpool")
-                            .font(.headline)
-                                    
-                        TextField("Enter description...", text: $carpoolDesc)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding()
-                                        
-                        if isSubmitting {
-                            ProgressView()
-                        }
-                                        
                         HStack {
-                            Button("Close") {
+                            Spacer()
+                        }
+                        .overlay(
+                            Text("Request Carpool")
+                                .font(.headline)
+                        )
+                        .overlay(
+                            Button(action: {
                                 print("close pressed")
                                 showCarpoolSheet = false
                                 carpoolDesc = ""
-                            }
-                                            
-                            Button("Submit") {
-                                print("pressed")
-                                Task {
-                                    await requestCarpool()
-                                }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(carpoolDesc.isEmpty || isSubmitting)
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .foregroundStyle(Color(.systemGray2))
+                                    .frame(width: 25, height: 25)
+                            },
+                            alignment: .trailing
+                        )
+                        
+                        TextField("Enter description...", text: $carpoolDesc)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                        
+                        if isSubmitting {
+                            ProgressView()
                         }
+                        
+                        Button("Submit") {
+                            print("pressed")
+                            Task {
+                                await requestCarpool()
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(carpoolDesc.isEmpty || isSubmitting)
                     }
                     .padding()
                     .presentationDetents([.height(220)])
@@ -391,7 +415,7 @@ struct BookingCarDetailView: View {
         do {
             try await SupabaseManager.shared.client
                 .from("bookings_car")
-                .update(["bc_status": "Cancelled"])
+                .update(["bc_status": "Cancelled", "carpool_status": "Cancelled"])
                 .eq("bc_id", value: booking.bc_id)
                 .execute()
             

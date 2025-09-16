@@ -4,6 +4,7 @@
 //
 //  Created by Euginia Gabrielle on 16/09/25.
 //
+import Foundation
 
 struct CarpoolUpdate: Encodable {
     let carpool_req: Bool
