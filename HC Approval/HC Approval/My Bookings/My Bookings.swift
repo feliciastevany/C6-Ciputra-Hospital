@@ -186,14 +186,15 @@ struct MyBookings : View {
                                 by: { $0.bc_date }
                             )
                             
-                            ForEach(nonPendingGroupedCars.keys.sorted(by: { $1 > $0 }), id: \.self) { date in
-                                
+//                            ForEach(nonPendingGroupedCars.keys.sorted(by: { $1 > $0 }), id: \.self) { date in
+                            ForEach(groupedCars, id: \.date) { group in
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("\(date.toEnglishFormat())")
+                                    Text("\(group.date.toEnglishFormat())")
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                     
-                                    ForEach(nonPendingGroupedCars[date] ?? [], id: \.bookId) { booking in
+//                                    ForEach(nonPendingGroupedCars[date] ?? [], id: \.bookId) { booking in
+                                    ForEach(group.bookings, id: \.bookId) { booking in
                                         BookingCard(title: booking.title,
                                                     joinName: joinLabel(for: booking, currentUserId: loggedInUserId) ?? "",
                                                     date: booking.bc_date,
@@ -247,23 +248,23 @@ struct MyBookings : View {
     }
         
     func joinLabel(for booking: BookingCarJoined, currentUserId: Int) -> String? {
-//        guard booking.carpool_status == "Approved",
-//              let participants = booking.participant else {
-//            return nil
-//        }
+        //        guard booking.carpool_status == "Approved",
+        //              let participants = booking.participant else {
+        //            return nil
+        //        }
         
         guard let participants = booking.participant else {
-                return nil
-            }
-            
-            // kalau status masih pending
-            if booking.carpool_status == "Pending" {
-                return "Waiting for Approval"
-            }
+            return nil
+        }
+        
+        // kalau status masih pending
+        if booking.carpool_status == "Pending" {
+            return "Waiting for Approval"
+        }
             
             // kalau sudah approved
         if booking.carpool_status == "Approved" {
-            
+            //
             if let me = participants.first(where: { $0.user_id == currentUserId }) {
                 if me.pic {
                     // saya PIC → tampilkan siapa yang join

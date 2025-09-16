@@ -13,8 +13,8 @@ extension SupabaseManager {
             .from("bookings_room")
             .select("*, room:rooms(*), user: users(*), participant:participants_br(*, user:users(*))")
         if let userId {
-//            roomQuery = roomQuery.or("user_id.eq.\(userId),participant.user_id.eq.\(userId)")
             roomQuery = roomQuery.or("user_id.eq.\(userId),user_id.eq.\(userId)", referencedTable: "participants_br")
+//            roomQuery = roomQuery.eq("user_id", value: userId)
 
         }
         
@@ -46,6 +46,8 @@ extension SupabaseManager {
         
         return (rooms, cars)
     }
+    
+    
     
     func updateBookingStatus(booking: any AnyBooking, status: String, dec_reason: String) async throws {
         if let roomBooking = booking as? BookingRoomJoined {
