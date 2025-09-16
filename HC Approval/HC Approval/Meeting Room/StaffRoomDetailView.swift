@@ -144,7 +144,14 @@ struct StaffRoomDetailView: View {
         }
 
         .sheet(item: $selectedBrId) { brId in
-            BookingRoomDetailView(brId: brId)
+            BookingRoomDetailView(
+                brId: brId,
+                onDismiss: {
+                    Task {
+                        await fetchBookRoom(for: selectedDate)
+                    }
+                }
+            )
         }
     }
     
