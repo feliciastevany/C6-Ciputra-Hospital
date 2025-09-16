@@ -54,20 +54,20 @@ struct BookingRoomDetailView: View {
                                 Text("Date")
                                 Spacer()
                                 Text(booking.br_date.formattedDateReadable)
-                                    .foregroundColor(.secondary)
-                            }
+                                    
+                            }.foregroundColor(.secondary)
                             HStack {
                                 Text("Start")
                                 Spacer()
                                 Text(booking.br_start.formattedHourMinute)
-                                    .foregroundColor(.secondary)
-                            }
+                                    
+                            }.foregroundColor(.secondary)
                             HStack {
                                 Text("End")
                                 Spacer()
                                 Text(booking.br_end.formattedHourMinute)
-                                    .foregroundColor(.secondary)
-                            }
+                                    
+                            }.foregroundColor(.secondary)
                         }
 
                         Section {
@@ -103,7 +103,7 @@ struct BookingRoomDetailView: View {
                             }
                         }
 
-                        if booking.br_status == "Approved" {
+                        if booking.br_status == "Approved" || booking.br_status == "Pending"{
                             Section {
                                 Button {
                                     showAlert = true
