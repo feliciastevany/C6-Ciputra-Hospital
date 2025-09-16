@@ -117,6 +117,7 @@ struct BookingCarDetailView: View {
                                       showCancelCarpoolAlert = true
                                     } label: {
                                         Text("Cancel Request")
+                                            .foregroundStyle(Color(.systemBackground))
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 5)
                                     }
@@ -147,6 +148,7 @@ struct BookingCarDetailView: View {
                                         }
                                     }) {
                                             Text("Request Carpool")
+                                                .foregroundStyle(Color(.systemBackground))
                                                 .font(.headline.bold())
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 5)
@@ -167,6 +169,7 @@ struct BookingCarDetailView: View {
 //                                showCancelBookingReasonSheet = true
                             } label: {
                                 Text("Cancel Booking")
+                                    .foregroundStyle(Color(.systemBackground))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 5)
                             }
