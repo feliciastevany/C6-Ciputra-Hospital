@@ -206,8 +206,8 @@ struct RoomDetailView: View {
         !eventName.trimmingCharacters(in: .whitespaces).isEmpty &&
         !eventDesc.trimmingCharacters(in: .whitespaces).isEmpty &&
         !startTime.isEmpty &&
-        !endTime.isEmpty &&
-        !selectedUsers.isEmpty
+        !endTime.isEmpty
+//        !selectedUsers.isEmpty
 //        !selectedProperties.isEmpty
     }
     

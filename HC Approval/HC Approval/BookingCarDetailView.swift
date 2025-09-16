@@ -38,7 +38,7 @@ struct BookingCarDetailView: View {
                 Form {
                     Section(header: Text("Status")) {
                         Text(booking.bc_status)
-                        if !booking.bc_decline_reason.isEmpty {
+                        if booking.bc_status == "Declined" {
                             Text("Reason: \(booking.bc_decline_reason)")
 //                                .foregroundColor(.red)
                         }
@@ -90,7 +90,7 @@ struct BookingCarDetailView: View {
                     // tombol Request Carpool
                     if loggedInUserId != booking.user_id {
                         Section(header: Text("Carpool Request")) {
-                            if booking.carpool_req && loggedInUserId == booking.carpool_req_id {
+                            if booking.carpool_req && loggedInUserId == booking.carpool_req_id && booking.carpool_status != "Cancelled" && booking.carpool_status != "Declined" {
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
                                         Text("Status:")
@@ -113,7 +113,8 @@ struct BookingCarDetailView: View {
                                             .padding(.bottom, 10)
                                     }
                                     
-                                    Button(role: .destructive) {                                        showCancelCarpoolAlert = true
+                                    Button(role: .destructive) {                                        
+                                      showCancelCarpoolAlert = true
                                     } label: {
                                         Text("Cancel Request")
                                             .frame(maxWidth: .infinity)
@@ -158,7 +159,7 @@ struct BookingCarDetailView: View {
                                 }
                             }
                         }
-                    } else if booking.bc_status != "Cancelled" && booking.user_id == loggedInUserId {
+                    } else if booking.bc_status != "Cancelled" && booking.bc_status != "Declined" && booking.user_id == loggedInUserId {
                         // cancel booking
                         Section {
                             Button(role: .destructive) {
@@ -173,38 +174,6 @@ struct BookingCarDetailView: View {
                             .cornerRadius(10)
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.clear)
-//                            .sheet(isPresented: $showCancelBookingReasonSheet) {
-//                                VStack(spacing: 20) {
-//                                    Text("Cancel Booking Car")
-//                                        .font(.headline)
-//                                                
-//                                    TextField("Enter reason...", text: $bcDeclineReason)
-//                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-//                                        .padding(.vertical, 5)
-//                                                    
-//                                    if isSubmitting {
-//                                        ProgressView()
-//                                    }
-//                                                    
-//                                    HStack {
-//                                        Button("Close") {
-//                                            showCancelBookingReasonSheet = false
-//                                            bcDeclineReason = ""
-//                                        }
-//                                                        
-//                                        Button("Submit") {
-//                                            print("pressed")
-//                                            Task {
-//                                                await cancelBookingCar()
-//                                            }
-//                                        }
-//                                        .buttonStyle(.borderedProminent)
-//                                        .disabled(bcDeclineReason.isEmpty || isSubmitting)
-//                                    }
-//                                }
-//                                .padding()
-//                                .presentationDetents([.height(220)])
-//                            }
                             .alert("Cancel Booking", isPresented: $showCancelBookingAlert) {
                                 Button("Yes", role: .destructive) {
                                     Task {
@@ -221,6 +190,7 @@ struct BookingCarDetailView: View {
                     }
                     
                 }
+                .foregroundColor(.secondary)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Back") {
