@@ -261,7 +261,7 @@ struct ScheduleBlock: View {
             Rectangle().fill(color).frame(width: 3)   // accent bar kiri
         }
         .offset(y: yOffset())
-        .padding(.leading, -4)
+        .padding(.leading, -3)
     }
     
     private func blockHeight() -> CGFloat {
