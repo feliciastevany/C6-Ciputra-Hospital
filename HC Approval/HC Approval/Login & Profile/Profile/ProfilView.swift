@@ -46,33 +46,48 @@ struct ProfilView: View {
                             
                             HStack {
                                 Text("Password")
-                                
                                 Button(action: {
                                     showPassword.toggle()
                                 }) {
                                     Image(systemName: showPassword ? "eye.fill" : "eye.slash.fill")
-                                        .foregroundColor(showPassword ? .blue : .gray)
-                                        .padding(.trailing, 15)
-                                }.accessibilityLabel("Hide")
-                                    .accessibilityHint("Tap to see the password")
-                                
-                                Spacer()
-                                
-                            
-                                ZStack(alignment: .trailing) {
-                                    if showPassword {
-                                        TextField("Password", text: .constant(user.user_pass ?? ""))
-                                            .multilineTextAlignment(.trailing)
-                                            .foregroundColor(.gray)
-                                            .textContentType(.password)
-                                    } else {
-                                        SecureField("Password", text: .constant(user.user_pass ?? ""))
-                                            .multilineTextAlignment(.trailing)
-                                            .foregroundColor(.gray)
-                                            .textContentType(.password)
-                                    }
+                                        .foregroundColor(.secondary)
                                 }
+                                Spacer()
+                                Text(showPassword ? (user.user_pass ?? "") : "•••••")
+                                    .foregroundColor(.gray)
+                                    .textSelection(.enabled) 
+                                
                             }
+
+//                            HStack {
+//                                Text("Password")
+//                                
+//                                Button(action: {
+//                                    showPassword.toggle()
+//                                }) {
+//                                    Image(systemName: showPassword ? "eye.fill" : "eye.slash.fill")
+//                                        .foregroundColor(showPassword ? .blue : .gray)
+//                                        .padding(.trailing, 15)
+//                                }.accessibilityLabel("Hide")
+//                                    .accessibilityHint("Tap to see the password")
+//                                
+//                                Spacer()
+//                                
+//                            
+//                                ZStack(alignment: .trailing) {
+//                                    if showPassword {
+//                                        Text("Password", text: .constant(user.user_pass ?? ""))
+//                                            .multilineTextAlignment(.trailing)
+//                                            .foregroundColor(.gray)
+//                                            .textContentType(.password)
+//                                    } else {
+//                                        Text("Password", text: .constant(user.user_pass ?? ""))
+//                                            .multilineTextAlignment(.trailing)
+//                                            .foregroundColor(.gray)
+//                                            .textContentType(.password)
+//                                    }
+//                                }
+//                            }
                         }
                         
                         Button(role: .destructive) {
