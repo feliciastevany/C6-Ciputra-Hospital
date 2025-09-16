@@ -13,10 +13,8 @@ extension SupabaseManager {
             .from("bookings_room")
             .select("*, room:rooms(*), user: users(*), participant:participants_br(*, user:users(*))")
         if let userId {
-//            roomQuery = roomQuery.or("user_id.eq.\(userId),user_id.eq.\(userId)", referencedTable: "participants_br")
             roomQuery = roomQuery.eq("user_id", value: userId)
-//            roomQuery = roomQuery.or("user_id.eq.\(userId),participants_br.user_id.eq.\(userId)")
-
+            
         }
         
         let responseRooms = try await roomQuery.execute()
@@ -28,13 +26,13 @@ extension SupabaseManager {
         var carQuery = client
             .from("bookings_car")
             .select("""
-                    *, 
-                    destination:destinations(*), 
-                    driver:drivers(*),
-                    user:users!bookings_car_user_id_fkey(*),
-                    carpool_user:users!bookings_car_carpool_req_id_fkey(*),
-                    participant:participants_bc(*, user:users(*))
-                """)
+                        *, 
+                        destination:destinations(*), 
+                        driver:drivers(*),
+                        user:users!bookings_car_user_id_fkey(*),
+                        carpool_user:users!bookings_car_carpool_req_id_fkey(*),
+                        participant:participants_bc(*, user:users(*))
+                    """)
         if let userId {
             carQuery = carQuery.or("user_id.eq.\(userId),carpool_req_id.eq.\(userId)")
         }
@@ -69,42 +67,97 @@ extension SupabaseManager {
             print(status, dec_reason)
         }
     }
-
-}
-
-
-//    func fetchAllBookings() async {
-//        do {
-//            let responseRooms = try await SupabaseManager.shared.client
-//                .from("bookings_room")
-//                .select("""
+    
+    
+//    func fetchAllBookings() async throws -> ([BookingRoomJoined], [BookingCarJoined]) {
+//        //        do {
+//        let responseRooms = try await SupabaseManager.shared.client
+//            .from("bookings_room")
+//            .select("""
 //                        *, room:rooms(*), user: users(*)
 //                        """)
-//                .execute()
-//
-//            let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
-//                [BookingRoomJoined].self,
-//                from: responseRooms.data
-//            )
-//
-//            let responseCars = try await SupabaseManager.shared.client
-//                .from("bookings_car")
-//                .select("""
+//            .execute()
+//        
+//        let rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+//            [BookingRoomJoined].self,
+//            from: responseRooms.data
+//        )
+//        
+//        let responseCars = try await SupabaseManager.shared.client
+//            .from("bookings_car")
+//            .select("""
 //                        *, destination:destinations(*), driver:drivers(*), user: users(*)
 //                        """)
-//                .execute()
-//
-//            let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
-//                [BookingCarJoined].self,
-//                from: responseCars.data
-//            )
-//
-//            DispatchQueue.main.async {
-//                self.bookingRoom = rooms
-//                self.bookingCar = cars
-//            }
-//            print("respones: ", rooms, cars)
-//        } catch {
-//            print("Error fetch bookings:", error)
-//        }
+//            .execute()
+//        
+//        let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+//            [BookingCarJoined].self,
+//            from: responseCars.data
+//        )
+//        
+//        return (rooms, cars)
+//        //            DispatchQueue.main.async {
+//        //                self.bookingRoom = rooms
+//        //                self.bookingCar = cars
+//        //            }
+//        //            print("respones: ", rooms, cars)
+//        //        } catch {
+//        //            print("Error fetch bookings:", error)
+//        //        }
 //    }
+    
+    func fetchMyBookings(userId: Int) async throws -> ([BookingRoomJoined], [BookingCarJoined]) {
+        // --- Rooms by owner ---
+        let responseRoomsOwner = try await SupabaseManager.shared.client
+            .from("bookings_room")
+            .select("*, room:rooms(*), user:users(*), participant:participants_br(*, user:users(*))")
+            .eq("user_id", value: userId)
+            .execute()
+        
+        var rooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+            [BookingRoomJoined].self,
+            from: responseRoomsOwner.data
+        )
+        
+        // --- Rooms by participant ---
+        let responseRoomsParticipant = try await SupabaseManager.shared.client
+            .from("bookings_room")
+            .select("""
+            *, room:rooms(*), user:users(*), participant:participants_br!inner(*, user:users(*))
+            """)
+            .eq("participants_br.user_id", value: userId)
+            .execute()
+        
+        let participantRooms: [BookingRoomJoined] = try JSONDecoder.bookingDecoder.decode(
+            [BookingRoomJoined].self,
+            from: responseRoomsParticipant.data
+        )
+        
+        // merge tanpa duplikat
+        rooms.append(contentsOf: participantRooms.filter { pr in
+            !rooms.contains(where: { $0.id == pr.id })
+        })
+        
+        // --- Cars (ini masih bisa pakai or biasa) ---
+        let responseCars = try await SupabaseManager.shared.client
+            .from("bookings_car")
+            .select("""
+                        *, 
+                        destination:destinations(*), 
+                        driver:drivers(*),
+                        user:users!bookings_car_user_id_fkey(*),
+                        carpool_user:users!bookings_car_carpool_req_id_fkey(*),
+                        participant:participants_bc(*, user:users(*))
+                    """)
+            .or("user_id.eq.\(userId),carpool_req_id.eq.\(userId)")
+            .execute()
+        
+        let cars: [BookingCarJoined] = try JSONDecoder.bookingDecoder.decode(
+            [BookingCarJoined].self,
+            from: responseCars.data
+        )
+        
+        return (rooms, cars)
+    }
+    
+}

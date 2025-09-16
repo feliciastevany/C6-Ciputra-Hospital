@@ -226,12 +226,10 @@ struct ApprovalsView: View {
                     .padding(.top, 10)
                     .task {
                         await fetchAllBookings()
-//                        await fetchLoggedInUserName()
                     }
                 }
                 .refreshable {
                     await fetchAllBookings()
-//                    await fetchLoggedInUserName()
                 }
             }
             .background(Color(.systemGray6))

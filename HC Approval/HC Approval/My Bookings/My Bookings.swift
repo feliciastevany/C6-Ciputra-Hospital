@@ -240,7 +240,7 @@ struct MyBookings : View {
     }
     func fetchMyBookings() async {
         do {
-            let (rooms, cars) = try await SupabaseManager.shared.fetchBookings(for: loggedInUserId)
+            let (rooms, cars) = try await SupabaseManager.shared.fetchMyBookings(userId: loggedInUserId)
             DispatchQueue.main.async {
                 self.bookingRoom = rooms
                 self.bookingCar = cars

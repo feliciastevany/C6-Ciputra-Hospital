@@ -110,7 +110,7 @@ struct BookingRoomDetailView: View {
                                     showAlert = true
                                 } label: {
                                     Text("Cancel Booking")
-                                        .foregroundStyle(Color(.systemBackground))
+//                                        .foregroundStyle(Color(.systemBackground))
                                         .frame(maxWidth: .infinity)
                                         .padding()
                                         .foregroundColor(.white)
