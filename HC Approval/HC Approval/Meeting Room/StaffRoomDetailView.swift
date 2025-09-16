@@ -276,18 +276,11 @@ struct ScheduleBlockSingle: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(room)
-                .font(.caption).bold()
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
             Text(name.components(separatedBy: " ").first ?? name)
-                .font(.caption2)
+                .font(.subheadline)
                 .lineLimit(1)
-            Text(dept.replacingOccurrences(of: " ", with: "\n",
-                                           options: .literal,
-                                           range: dept.range(of: " ")))
-            .font(.caption2)
-            .multilineTextAlignment(.leading)
+            Text(dept)
+            .font(.subheadline)
         }
         .padding(6)
         .frame(maxWidth: .infinity, alignment: .topLeading)
