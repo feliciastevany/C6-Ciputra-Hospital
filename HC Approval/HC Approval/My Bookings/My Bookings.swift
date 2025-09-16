@@ -221,7 +221,11 @@ struct MyBookings : View {
             }
             .padding(.horizontal)
             .background(Color(.systemGray6))
-            .sheet(item: $selectedSheet) { sheet in
+            .sheet(item: $selectedSheet, onDismiss: {
+                Task {
+                    await fetchMyBookings()
+                }
+            }) { sheet in
                 switch sheet {
                 case .carbooking(let car):
                     BookingCarDetailView(bcId: car.bc_id)
