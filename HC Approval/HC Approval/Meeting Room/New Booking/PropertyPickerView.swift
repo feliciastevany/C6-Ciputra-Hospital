@@ -25,10 +25,16 @@ struct PropertyPickerView: View {
                         
                         // cari apakah property sudah dipilih
                         if let index = tempSelected.firstIndex(where: { $0.property.id == property.id }) {
-                            Stepper(value: $tempSelected[index].quantity, in: 1...99) {
+//                            Stepper(value: $tempSelected[index].quantity, in: 1...99) {
+//                                Text("\(tempSelected[index].quantity)")
+//                            }
+//                            .frame(width: 120)
+                            HStack {
                                 Text("\(tempSelected[index].quantity)")
+                                Stepper("", value: $tempSelected[index].quantity, in: 1...99)
+                                    .labelsHidden()
                             }
-                            .frame(width: 120)
+
                         } else {
                             Button("Add") {
                                 tempSelected.append(SelectedProperty(property: property, quantity: 1))
