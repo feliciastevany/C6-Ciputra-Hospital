@@ -130,7 +130,14 @@ struct StaffCarDetailView: View {
             await fetchBookCar(for: selectedDate, selectedCarName: name)
         }
         .sheet(item: $selectedEvent) { event in
-            BookingCarDetailView(bcId: event.bc_id)
+            BookingCarDetailView(
+                bcId: event.bc_id,
+                onDismiss: {
+                    Task {
+                        await fetchBookCar(for: selectedDate)
+                    }
+                }
+            )
         }
         .navigationDestination(isPresented: $goToBooking) {
             let bookingList = cars.map { $0.toBookingCar() }
