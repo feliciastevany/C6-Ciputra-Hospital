@@ -98,7 +98,12 @@ struct AvailableDriversView: View {
                         
 //                        let availableSlots = BookingTimeHelper.availableStartTimes(bookings: driverAvail.bookings)
                         
-                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
+//                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
+                        
+                        let isToday = DateHelper.isToday(date)
+                        let availableSlots = isToday
+                            ? BookingTimeHelper.availableTodayStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
+                            : BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: driverAvail.bookings)
                         
                         if availableSlots.isEmpty {
                             Text("No available time slots")

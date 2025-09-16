@@ -127,7 +127,12 @@ struct AvailableRoomsView: View {
                                 .font(.subheadline)
                         }
                         
-                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: roomAvail.bookings)
+                        let isToday = DateHelper.isToday(date)
+                        let availableSlots = isToday
+                            ? BookingTimeHelper.availableTodayStartTimesIgnoringCancelled(bookings: roomAvail.bookings)
+                            : BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: roomAvail.bookings)
+
+//                        let availableSlots = BookingTimeHelper.availableStartTimesIgnoringCancelled(bookings: roomAvail.bookings)
                         
                         if availableSlots.isEmpty {
                             Text("No available time slots")
