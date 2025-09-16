@@ -288,7 +288,7 @@ struct ScheduleBlockCar: View {
             Rectangle().fill(color).frame(width: 3)   // accent bar kiri
         }
         .offset(y: yOffset())
-        .padding(.leading, -4)
+        .padding(.leading, -8)
     }
     
     private func blockHeight() -> CGFloat {
