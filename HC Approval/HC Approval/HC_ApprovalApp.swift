@@ -11,7 +11,7 @@ import SwiftUI
 struct HC_ApprovalApp: App {
     var body: some Scene {
         WindowGroup {
-//            BookingRoomDetailView(brId: 69)
+//            BookingRoomDetailView(brId: 75)
          LoginView()
         }
     }
