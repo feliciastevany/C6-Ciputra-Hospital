@@ -207,8 +207,8 @@ struct RoomDetailView: View {
         !eventDesc.trimmingCharacters(in: .whitespaces).isEmpty &&
         !startTime.isEmpty &&
         !endTime.isEmpty &&
-        !selectedUsers.isEmpty &&
-        !selectedProperties.isEmpty
+        !selectedUsers.isEmpty
+//        !selectedProperties.isEmpty
     }
     
     private var availableTimeOptions: [String] {

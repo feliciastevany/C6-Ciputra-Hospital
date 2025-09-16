@@ -22,6 +22,7 @@ struct BookingCar: Codable, Identifiable {
     var carpool_req: Bool
     var carpool_desc: String
     var carpool_status: String
+    var carpool_req_id: Int?
     var created_at: Date
     
     var id: Int{bc_id}

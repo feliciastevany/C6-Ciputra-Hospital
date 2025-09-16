@@ -11,11 +11,24 @@ struct BookingCarDetailView: View {
     @Environment(\.dismiss) var dismiss
     var bcId: Int
     
+    @AppStorage("loggedInUserId") var loggedInUserId: Int = 0
+    
     @State private var booking: BookingCar?
     @State private var driver: Driver?
     @State private var destination: [Destination] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    
+    // Buat request carpool
+    @State private var showCarpoolSheet = false
+    @State private var carpoolDesc: String = ""
+    @State private var isSubmitting = false
+    @State private var showCancelCarpoolAlert = false
+    
+    // Cancel booking
+    @State private var showCancelBookingAlert = false
+//    @State private var showCancelBookingReasonSheet = false
+//    @State private var bcDeclineReason: String = ""
     
     var body: some View {
         NavigationView {
@@ -74,6 +87,126 @@ struct BookingCarDetailView: View {
                         Text(booking.bc_desc.isEmpty ? "-" : booking.bc_desc)
                     }
                     
+                    // tombol Request Carpool
+                    if loggedInUserId != booking.user_id {
+                        Section {
+                            if booking.carpool_req && loggedInUserId == booking.carpool_req_id {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("You already requested carpool")
+                                    Text("Status: \(booking.carpool_status)")
+                                    
+                                    if !booking.carpool_desc.isEmpty {
+                                        Text("Desc: \(booking.carpool_desc)")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Button(role: .destructive) {                                        showCancelCarpoolAlert = true
+                                    } label: {
+                                        Text("Cancel Request")
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 5)
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .alert("Cancel Carpool", isPresented: $showCancelCarpoolAlert) {
+                                        Button("Yes", role: .destructive) {
+                                            Task {
+                                                await cancelCarpool()
+                                            }
+                                        }
+                                        .foregroundColor(.primary)
+                                        Button("No", role: .cancel) { }
+                                            .foregroundColor(.red)
+                                    } message: {
+                                        Text("Are you sure you want to cancel this carpool request?")
+                                    }
+                                }
+                            } else {
+                                Section {
+                                    if booking.carpool_req && loggedInUserId != booking.carpool_req_id {
+                                        Text("Someone has already requested a carpool for this booking")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Button(action: {
+                                        Task {
+                                            showCarpoolSheet = true
+                                        }
+                                    }) {
+                                            Text("Request Carpool")
+                                                .font(.headline.bold())
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, 5)
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .cornerRadius(10)
+                                    .listRowInsets(EdgeInsets())
+                                    .listRowBackground(Color.clear)
+                                    .disabled(booking.carpool_req && booking.carpool_req_id != loggedInUserId)
+                                }
+                            }
+                        }
+                    } else if booking.bc_status != "Cancelled" && booking.user_id == loggedInUserId {
+                        // cancel booking
+                        Section {
+                            Button(role: .destructive) {
+                                showCancelBookingAlert = true
+//                                showCancelBookingReasonSheet = true
+                            } label: {
+                                Text("Cancel Booking")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 5)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .cornerRadius(10)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+//                            .sheet(isPresented: $showCancelBookingReasonSheet) {
+//                                VStack(spacing: 20) {
+//                                    Text("Cancel Booking Car")
+//                                        .font(.headline)
+//                                                
+//                                    TextField("Enter reason...", text: $bcDeclineReason)
+//                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+//                                        .padding(.vertical, 5)
+//                                                    
+//                                    if isSubmitting {
+//                                        ProgressView()
+//                                    }
+//                                                    
+//                                    HStack {
+//                                        Button("Close") {
+//                                            showCancelBookingReasonSheet = false
+//                                            bcDeclineReason = ""
+//                                        }
+//                                                        
+//                                        Button("Submit") {
+//                                            print("pressed")
+//                                            Task {
+//                                                await cancelBookingCar()
+//                                            }
+//                                        }
+//                                        .buttonStyle(.borderedProminent)
+//                                        .disabled(bcDeclineReason.isEmpty || isSubmitting)
+//                                    }
+//                                }
+//                                .padding()
+//                                .presentationDetents([.height(220)])
+//                            }
+                            .alert("Cancel Booking", isPresented: $showCancelBookingAlert) {
+                                Button("Yes", role: .destructive) {
+                                    Task {
+                                        await cancelBookingCar()
+                                    }
+                                }
+                                .foregroundColor(.primary)
+                                Button("No", role: .cancel) { }
+                                    .foregroundColor(.red)
+                            } message: {
+                                Text("Are you sure you want to cancel this booking request?")
+                            }
+                        }
+                    }
+                    
                 }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -84,6 +217,39 @@ struct BookingCarDetailView: View {
                     }
                 }
                 .navigationTitle("Booking Details")
+                .sheet(isPresented: $showCarpoolSheet) {
+                    VStack(spacing: 20) {
+                        Text("Request Carpool")
+                            .font(.headline)
+                                    
+                        TextField("Enter description...", text: $carpoolDesc)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                                        
+                        if isSubmitting {
+                            ProgressView()
+                        }
+                                        
+                        HStack {
+                            Button("Close") {
+                                print("close pressed")
+                                showCarpoolSheet = false
+                                carpoolDesc = ""
+                            }
+                                            
+                            Button("Submit") {
+                                print("pressed")
+                                Task {
+                                    await requestCarpool()
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(carpoolDesc.isEmpty || isSubmitting)
+                        }
+                    }
+                    .padding()
+                    .presentationDetents([.height(220)])
+                }
             } else if let errorMessage = errorMessage {
                 Text("Error: \(errorMessage)")
                     .foregroundColor(.red)
@@ -97,6 +263,7 @@ struct BookingCarDetailView: View {
         }
     }
     
+    // MARK: Fetch booking
     func fetchBookingCar() {
         isLoading = true
         Task {
@@ -143,9 +310,109 @@ struct BookingCarDetailView: View {
             }
         }
     }
+    
+    // MARK: Request Carpool
+    func requestCarpool() async {
+        guard let booking = booking else { return }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        
+        let updatePayload = CarpoolUpdate(
+            carpool_req: true,
+            carpool_desc: carpoolDesc,
+            carpool_status: "Pending",
+            carpool_req_id: loggedInUserId
+        )
+        
+        do {
+            let response = try await SupabaseManager.shared.client
+                .from("bookings_car")
+                .update(updatePayload)
+                .eq("bc_id", value: booking.bc_id)
+                .select() // penting untuk ambil hasil update
+                .execute()
+            
+//            let updated: Void = response.value
+//            print("Updated rows: \(updated)") // cek di Xcode console
+            
+            // Refresh booking
+            fetchBookingCar()
+            
+            DispatchQueue.main.async {
+                showCarpoolSheet = false
+                carpoolDesc = ""
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    // MARK: Cancel Carpool
+    func cancelCarpool() async {
+        guard let booking = booking else { return }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        
+        let updatePayload = CarpoolUpdate(
+            carpool_req: false,
+            carpool_desc: "",
+            carpool_status: "", // atau "none"
+            carpool_req_id: loggedInUserId
+        )
+        
+        do {
+            try await SupabaseManager.shared.client
+                .from("bookings_car")
+                .update(updatePayload)
+                .eq("bc_id", value: booking.bc_id)
+                .execute()
+            
+            // Refresh data setelah cancel
+            fetchBookingCar()
+            
+            DispatchQueue.main.async {
+                dismiss()
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = error.localizedDescription
+            }
+        }
+    }
+    
+    // MARK: Cancel Booking
+    func cancelBookingCar() async {
+        guard let booking = booking else { return }
+        isSubmitting = true
+        defer { isSubmitting = false }
+        
+        do {
+            try await SupabaseManager.shared.client
+                .from("bookings_car")
+                .update(["bc_status": "Cancelled"])
+                .eq("bc_id", value: booking.bc_id)
+                .execute()
+            
+            print("Booking car cancelled")
+            
+            fetchBookingCar()
+            
+            DispatchQueue.main.async {
+                dismiss()
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
 }
+
 #Preview{
-    BookingCarDetailView(bcId: 4)
+    BookingCarDetailView(bcId: 8)
 }
 //extension String {
 //    var formattedHourMinute: String {

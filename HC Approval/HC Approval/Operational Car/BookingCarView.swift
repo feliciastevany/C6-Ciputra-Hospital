@@ -103,6 +103,7 @@ struct AvailableDriversView: View {
                         if availableSlots.isEmpty {
                             Text("No available time slots")
                                 .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity)
                                 .padding(.vertical, 8)
                         } else {
                             // Horizontal scroll of slots
