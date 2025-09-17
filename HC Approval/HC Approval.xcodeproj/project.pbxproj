@@ -14,7 +14,6 @@
 		2A85FB152E68268400A63BC4 /* ParticipantBc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A85FB142E68268400A63BC4 /* ParticipantBc.swift */; };
 		BAE5B12D2E71627700DA301C /* ParticipantResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12C2E71627700DA301C /* ParticipantResponse.swift */; };
 		BAE5B1302E7162BB00DA301C /* UserInsert.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B12F2E7162BB00DA301C /* UserInsert.swift */; };
-		BAE5B4AA2E7956F400DA301C /* CarpoolUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE5B4A92E7956F400DA301C /* CarpoolUpdate.swift */; };
 		BEC249B12E5F605000F92305 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC249B02E5F604D00F92305 /* SupabaseManager.swift */; };
 		BEC249C32E5F614C00F92305 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C22E5F614C00F92305 /* Auth */; };
 		BEC249C52E5F614C00F92305 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = BEC249C42E5F614C00F92305 /* Functions */; };
@@ -503,8 +502,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HRLF6YB843;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 69Y258ZWMH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HC-Approval-Info.plist";
@@ -533,8 +532,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HRLF6YB843;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 69Y258ZWMH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HC-Approval-Info.plist";
