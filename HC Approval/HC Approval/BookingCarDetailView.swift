@@ -157,7 +157,7 @@ struct BookingCarDetailView: View {
                                     .cornerRadius(10)
                                     .listRowInsets(EdgeInsets())
                                     .listRowBackground(Color.clear)
-                                    .disabled(booking.carpool_req && booking.carpool_req_id != loggedInUserId)
+                                    .disabled(booking.carpool_req && booking.carpool_req_id != loggedInUserId && booking.carpool_status != "Approved")
                                 }
                             }
                         }
