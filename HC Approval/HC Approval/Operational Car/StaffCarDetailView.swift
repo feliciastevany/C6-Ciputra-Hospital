@@ -106,7 +106,9 @@ struct StaffCarDetailView: View {
                                 participant: event.participant,
                                 name: event.name,
                                 dept: event.dept,
-                                color: colorForCar(event.driver),
+                                color: event.bc_status == "Approved"
+                                        ? colorForCar(event.driver)
+                                        : .gray,
                                 startHour: event.startHour,
                                 startMinute: event.startMinute,
                                 endHour: event.endHour,
@@ -203,7 +205,7 @@ struct StaffCarDetailView: View {
                     destination:destinations!destinations_bc_id_fkey(*)
                 """)
                 .eq("bc_date", value: dateOnly)
-                .eq("bc_status", value: "Approved")
+                .or("bc_status.eq.Approved,bc_status.eq.Pending")
                 .eq("driver.driver_name", value: selectedCarName)
                 .order("bc_start", ascending: true)
                 .execute()
@@ -245,7 +247,8 @@ struct StaffCarDetailView: View {
                     startMinute: s.m,
                     endHour: e.h,
                     endMinute: e.m,
-                    carpoolStatus: booking.carpool_status
+                    carpoolStatus: booking.carpool_status,
+                    bc_status: booking.bc_status
                 )
             }
 

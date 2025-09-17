@@ -203,7 +203,7 @@ struct StaffRoomDetailView: View {
                     user:user_id(*)
                 """)
                 .eq("br_date", value: dateOnly)
-                .eq("br_status", value: "Approved")
+                .or("br_status.eq.Approved,br_status.eq.Pending")
                 .eq("room.room_name", value: selectedRoomName)
                 .order("br_start", ascending: true)
             
@@ -246,7 +246,9 @@ struct StaffRoomDetailView: View {
                     room: room.room_name,
                     name: user.user_name,
                     dept: user.user_dept,
-                    color: colorForRoom(room.room_name),
+                    color: b.br_status == "Approved"
+                            ? colorForRoom(room.room_name)
+                            : .gray,
                     startHour: s.h,
                     startMinute: s.m,
                     endHour: e.h,

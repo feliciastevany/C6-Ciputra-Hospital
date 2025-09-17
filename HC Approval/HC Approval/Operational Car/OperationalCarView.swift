@@ -111,7 +111,9 @@ struct OperationalCarView: View {
                                         participant: event.participant,
                                         name: event.name,
                                         dept: event.dept,
-                                        color: colorForCar(event.driver),
+                                        color: event.bc_status == "Approved"
+                                                ? colorForCar(event.driver)
+                                                : .gray,
                                         startHour: event.startHour,
                                         startMinute: event.startMinute,
                                         endHour: event.endHour,
@@ -192,7 +194,7 @@ struct OperationalCarView: View {
                     destination:destinations!destinations_bc_id_fkey(*)
                 """)
                 .eq("bc_date", value: dateOnly)
-                .eq("bc_status", value: "Approved")
+                .or("bc_status.eq.Approved,bc_status.eq.Pending")
                 .order("bc_start", ascending: true)
                 .execute()
             
@@ -233,7 +235,8 @@ struct OperationalCarView: View {
                     startMinute: s.m,
                     endHour: e.h,
                     endMinute: e.m,
-                    carpoolStatus: booking.carpool_status
+                    carpoolStatus: booking.carpool_status,
+                    bc_status: booking.bc_status
                 )
             }
             
@@ -331,6 +334,7 @@ struct carEvent: Identifiable {
     let endHour: Int
     let endMinute: Int
     let carpoolStatus: String
+    let bc_status: String
 }
 func colorForCar(_ driver: String) -> Color {
     switch driver {
