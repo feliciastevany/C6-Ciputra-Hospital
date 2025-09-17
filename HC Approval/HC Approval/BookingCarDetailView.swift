@@ -141,6 +141,11 @@ struct BookingCarDetailView: View {
                                         Text("Someone has already requested a carpool for this booking")
                                             .foregroundColor(.secondary)
                                     }
+                                    else if booking.bc_status != "Approved" {
+                                        Text("You can't request any carpool")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
                                     
                                     Button(action: {
                                         Task {
@@ -156,8 +161,8 @@ struct BookingCarDetailView: View {
                                     .buttonStyle(.borderedProminent)
                                     .cornerRadius(10)
                                     .listRowInsets(EdgeInsets())
-                                    .listRowBackground(Color.clear)
-                                    .disabled(booking.carpool_req && booking.carpool_req_id != loggedInUserId && booking.carpool_status != "Approved")
+//                                    .listRowBackground(Color.clear)
+                                    .disabled(booking.carpool_req && booking.carpool_req_id != loggedInUserId || booking.bc_status == "Pending")
                                 }
                             }
                         }
