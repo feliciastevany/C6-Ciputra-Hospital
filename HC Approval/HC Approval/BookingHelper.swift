@@ -93,30 +93,63 @@ struct BookingTimeHelper {
         return cal.date(from: comps)! // Date dengan jam & menit hari ini
     }
     
-    static func availableStartTimes<T: Bookable>(bookings: [T]) -> [String] {
+    // Dipake waktu selected date = hari ini
+    static func availableTodayStartTimes<T: Bookable>(bookings: [T]) -> [String] {
         let all = generateHalfHourTimes(start: "07:30", end: "20:30")
-        
+            
         let now = DateHelper.currentHourMinute()
-        
+            
         return all.filter { timeStr in
             guard let slot = DateHelper.timeStringToHourMinute(timeStr) else { return false }
-            
+                
             // cek apakah slot >= jam sekarang
             if slot.hour < now.hour || (slot.hour == now.hour && slot.minute < now.minute) {
                 return false
             }
-            
+                
             return !isBooked(time: timeStr, bookings: bookings, forStart: true)
         }
     }
-    
+        
+    static func availableTodayStartTimesIgnoringCancelled<T: Bookable & HasStatus>(bookings: [T]) -> [String] {
+        let activeBookings = bookings.filter {
+            let status = $0.status.lowercased()
+            return status != "cancel" && status != "cancelled" && status != "declined"
+        }
+            
+        return availableTodayStartTimes(bookings: activeBookings)
+    }
+
+
+    // Dipake waktu selected date != hari ini
+//    static func availableStartTimes<T: Bookable>(bookings: [T]) -> [String] {
+//        let all = generateHalfHourTimes(start: "07:30", end: "20:30")
+//        let now = currentTimeOfDay() // pakai jam & menit sekarang
+//            
+//        return all.filter { timeStr in
+//            guard let t = timeToDate(timeStr) else { return false }
+//                
+//            // Cek slot >= waktu sekarang
+//            guard t >= now else { return false }
+//                
+//            return !isBooked(time: timeStr, bookings: bookings, forStart: true)
+//        }
+//    }
+        
     static func availableStartTimesIgnoringCancelled<T: Bookable & HasStatus>(bookings: [T]) -> [String] {
         let activeBookings = bookings.filter {
             let status = $0.status.lowercased()
             return status != "cancel" && status != "cancelled" && status != "declined"
         }
-        
-        return availableStartTimes(bookings: activeBookings)
+            
+        let all = generateHalfHourTimes(start: "07:30", end: "20:30")
+        let now = currentTimeOfDay()
+            
+        return all.filter { timeStr in
+            guard let t = timeToDate(timeStr) else { return false }
+            guard t >= now else { return false }
+            return !isBooked(time: timeStr, bookings: activeBookings, forStart: true)
+        }
     }
     
     static func validEndTimes<T: Bookable>(startTime: String, bookings: [T]) -> [String] {
@@ -151,6 +184,14 @@ struct BookingTimeHelper {
 
 
 struct DateHelper {
+    static func isToday(_ dateString: String) -> Bool {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        guard let date = formatter.date(from: dateString) else { return false }
+        return Calendar.current.isDateInToday(date)
+    }
+
     /// Format Date → "yyyy-MM-dd" (buat backend)
     static func toBackendFormat(_ date: Date) -> String {
         let formatter = DateFormatter()
